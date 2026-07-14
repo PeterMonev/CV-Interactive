@@ -1,5 +1,7 @@
 # Peter Monev — Interactive 3D CV 🎸
 
+## Live: https://peter-monev-cv-interactive.vercel.app/
+
 A highly interactive, animated, and performant personal portfolio and resume built with **React** and **Three.js**. 
 
 This project goes beyond a standard static CV by incorporating 3D scenes, a functional terminal simulator, and interactive UI elements, all while maintaining high performance through strategic WebGL context management.
@@ -35,3 +37,4 @@ To get a local copy up and running, follow these simple steps:
 3. **Install the dependencies:**
    ```bash
    npm install
+   npm run dev
