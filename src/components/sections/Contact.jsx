@@ -1,11 +1,12 @@
 import { useState, useCallback } from "react";
-import { Mail, Linkedin, Github, MapPin, Music2 } from "lucide-react";
+import { Mail, Linkedin, Github, MapPin, Music2, FileDown } from "lucide-react";
 import { Reveal } from "../ui/Reveal.jsx";
 import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
 import { Equalizer } from "../ui/Equalizer.jsx";
 import { ContactOrb3D } from "./ContactOrb3D.jsx";
 import { ContactCopyCard } from "./ContactCopyCard.jsx";
 import { PhoneRevealCard } from "./PhoneRevealCard.jsx";
+import { CV_URL, CV_FILENAME } from "../../data/cv.js";
 
 export function Contact() {
   const [copied, setCopied] = useState(null);
@@ -71,6 +72,17 @@ export function Contact() {
               <div className="contact-body">
                 <span className="contact-label">GitHub</span>
                 <span className="contact-value">PeterMonev</span>
+              </div>
+            </a>
+            <a
+              className="contact-card contact-card-cv"
+              href={CV_URL}
+              download={CV_FILENAME}
+            >
+              <FileDown size={18} />
+              <div className="contact-body">
+                <span className="contact-label">Résumé</span>
+                <span className="contact-value">Download PDF · 2 pages</span>
               </div>
             </a>
             <div className="contact-card contact-static">

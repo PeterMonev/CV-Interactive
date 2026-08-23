@@ -1,5 +1,6 @@
-import { Github, ArrowUpRight } from "lucide-react";
+import { Github, ArrowUpRight, Download } from "lucide-react";
 import { magneticMove, magneticLeave } from "../../utils/motion.js";
+import { CV_URL, CV_FILENAME, CV_LABEL } from "../../data/cv.js";
 import { Equalizer } from "../ui/Equalizer.jsx";
 import { Hero3D } from "./Hero3D.jsx";
 import { HeroTerminal } from "./HeroTerminal.jsx";
@@ -32,6 +33,15 @@ export function Hero({ scrollTo }) {
             >
               Get in touch <ArrowUpRight size={16} />
             </button>
+            <a
+              className="btn btn-ghost"
+              href={CV_URL}
+              download={CV_FILENAME}
+              onMouseMove={magneticMove}
+              onMouseLeave={magneticLeave}
+            >
+              <Download size={16} /> {CV_LABEL}
+            </a>
             <a
               className="btn btn-ghost"
               href="https://github.com/PeterMonev"

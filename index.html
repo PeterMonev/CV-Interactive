@@ -3,11 +3,113 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Peter Monev — Full-Stack Web Developer</title>
+    <title>Peter Monev — Junior Full-Stack Web Developer</title>
     <meta
       name="description"
-      content="Peter Monev — Junior Full-Stack Web Developer. Interactive resume built with React and Three.js."
+      content="Peter Monev — Junior Full-Stack Web Developer based in Sofia, Bulgaria. Commercial experience in PHP (Laravel) and JavaScript, now building with C# and ASP.NET Core. Interactive resume built with React and Three.js."
     />
+    <link rel="canonical" href="https://peter-monev-cv-interactive.vercel.app/" />
+    <meta name="author" content="Peter Monev" />
+    <meta name="theme-color" content="#0a0e1a" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="/favicon-192.png" sizes="192x192" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Link previews. og:image must be absolute — LinkedIn, Slack and the rest
+         fetch it from their own servers, where a root-relative path resolves to
+         nothing. Keep the domain here in sync with the canonical URL above. -->
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content="Peter Monev" />
+    <meta property="og:title" content="Peter Monev — Junior Full-Stack Web Developer" />
+    <meta
+      property="og:description"
+      content="Sofia-based full-stack developer. C#, ASP.NET Core, React, JavaScript, PHP. 16 SoftUni credentials, production experience, open to junior roles."
+    />
+    <meta property="og:url" content="https://peter-monev-cv-interactive.vercel.app/" />
+    <meta property="og:image" content="https://peter-monev-cv-interactive.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Peter Monev, Junior Full-Stack Web Developer — C#, ASP.NET Core, React, JavaScript, PHP, SQL."
+    />
+    <meta property="profile:first_name" content="Peter" />
+    <meta property="profile:last_name" content="Monev" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Peter Monev — Junior Full-Stack Web Developer" />
+    <meta
+      name="twitter:description"
+      content="Sofia-based full-stack developer. C#, ASP.NET Core, React, JavaScript, PHP. 16 SoftUni credentials, production experience, open to junior roles."
+    />
+    <meta name="twitter:image" content="https://peter-monev-cv-interactive.vercel.app/og-image.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Peter Monev",
+        "jobTitle": "Junior Full-Stack Web Developer",
+        "url": "https://peter-monev-cv-interactive.vercel.app/",
+        "image": "https://peter-monev-cv-interactive.vercel.app/og-image.png",
+        "email": "mailto:monevpeter@gmail.com",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Sofia",
+          "addressCountry": "BG"
+        },
+        "sameAs": [
+          "https://github.com/PeterMonev",
+          "https://www.linkedin.com/in/peter-monev-22582b248/"
+        ],
+        "knowsLanguage": ["bg", "en"],
+        "knowsAbout": [
+          "C#",
+          "ASP.NET Core",
+          "Entity Framework Core",
+          "JavaScript",
+          "React",
+          "Node.js",
+          "PHP",
+          "Laravel",
+          "MSSQL",
+          "MySQL",
+          "MongoDB",
+          "PostgreSQL",
+          "Git"
+        ],
+        "alumniOf": [
+          {
+            "@type": "EducationalOrganization",
+            "name": "Software University (SoftUni)",
+            "url": "https://softuni.bg/"
+          },
+          {
+            "@type": "EducationalOrganization",
+            "name": "University of National and World Economy"
+          }
+        ],
+        "hasCredential": [
+          {
+            "@type": "EducationalOccupationalCredential",
+            "name": "Diploma — Back-End Software Engineer with C#",
+            "credentialCategory": "diploma",
+            "recognizedBy": { "@type": "EducationalOrganization", "name": "Software University (SoftUni)" },
+            "url": "https://softuni.bg/certificates/details/264915/b96c2ed6"
+          },
+          {
+            "@type": "EducationalOccupationalCredential",
+            "name": "Diploma — Front-End Developer JavaScript",
+            "credentialCategory": "diploma",
+            "recognizedBy": { "@type": "EducationalOrganization", "name": "Software University (SoftUni)" },
+            "url": "https://softuni.bg/certificates/details/256059/34aac0f8"
+          }
+        ]
+      }
+    </script>
+
     <style>
       html, body { margin: 0; padding: 0; background: #0a0e1a; overflow-x: hidden; }
       * { box-sizing: border-box; }
@@ -15,6 +117,20 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="max-width:720px;margin:12vh auto;padding:0 24px;color:#eef1fb;font-family:system-ui,sans-serif;line-height:1.7">
+        <h1 style="color:#00e5ff">Peter Monev — Junior Full-Stack Web Developer</h1>
+        <p>
+          This interactive resume needs JavaScript to run. The full CV is available as a
+          PDF: <a href="/Peter_Monev_CV.pdf" download style="color:#5eead4">download it here</a>.
+        </p>
+        <p>
+          Sofia, Bulgaria · <a href="mailto:monevpeter@gmail.com" style="color:#5eead4">monevpeter@gmail.com</a>
+          · <a href="https://github.com/PeterMonev" style="color:#5eead4">GitHub</a>
+          · <a href="https://www.linkedin.com/in/peter-monev-22582b248/" style="color:#5eead4">LinkedIn</a>
+        </p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

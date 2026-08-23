@@ -34,6 +34,10 @@
 
       .cv-root * { box-sizing: border-box; }
       .cv-root a { color: inherit; text-decoration: none; }
+      .sr-only {
+        position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+        overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+      }
       .cv-root button { font-family: inherit; cursor: pointer; }
       body.cursor3d-active, body.cursor3d-active * { cursor: none !important; }
 
@@ -125,6 +129,29 @@
       .nav-link-active { color: var(--bg); }
       .nav-toggle { display: none; background: none; border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 10px; }
       .nav-mobile { display: none; }
+
+      /* CV download — the one thing a recruiter has to be able to take away */
+      .nav-right { display: flex; align-items: center; gap: 14px; }
+      .nav-cv {
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 8px 15px; border-radius: 999px;
+        border: 1px solid rgba(0,229,255,0.35);
+        background: rgba(0,229,255,0.07);
+        color: var(--cyan);
+        font-size: 13px; font-weight: 600; white-space: nowrap;
+        transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+      }
+      .nav-cv:hover {
+        background: rgba(0,229,255,0.14); border-color: var(--cyan);
+        box-shadow: 0 6px 20px rgba(0,229,255,0.18); transform: translateY(-1px);
+      }
+      .nav-cv-short { display: none; }
+      .nav-mobile-cv {
+        display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
+        margin-top: 6px; padding: 9px 16px; border-radius: 999px;
+        border: 1px solid rgba(0,229,255,0.35); background: rgba(0,229,255,0.07);
+        color: var(--cyan); font-size: 15px; font-weight: 600;
+      }
 
       /* sections */
       .section { position: relative; z-index: 2; padding: 64px 6vw; max-width: 1400px; margin: 0 auto; }
@@ -262,6 +289,35 @@
       .cert-3d { position: relative; width: 100%; height: 480px; border-radius: 14px; overflow: hidden; touch-action: none; }
       .cert-3d canvas { display: block; width: 100% !important; height: 100% !important; }
 
+      /* list view — the text-and-links counterpart to the canvas badges */
+      .cert-grid {
+        list-style: none; margin: 30px 0 0; padding: 0;
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;
+      }
+      .cert-card {
+        position: relative; display: flex; flex-direction: column; gap: 10px; height: 100%;
+        background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+        padding: 18px 20px; overflow: hidden;
+        transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .cert-card::before {
+        content: ""; position: absolute; inset: 0 auto 0 0; width: 3px;
+        background: var(--cert-accent); opacity: 0.55; transition: opacity 0.3s ease;
+      }
+      .cert-card:hover {
+        border-color: var(--cert-accent); transform: translateY(-3px);
+        box-shadow: 0 14px 34px -18px var(--cert-accent);
+      }
+      .cert-card:hover::before { opacity: 1; }
+      .cert-card-icon { color: var(--cert-accent); flex-shrink: 0; }
+      .cert-card-name { font-size: 14.5px; font-weight: 600; line-height: 1.4; flex: 1; }
+      .cert-card-link {
+        display: inline-flex; align-items: center; gap: 5px;
+        font-family: 'JetBrains Mono', monospace; font-size: 11px;
+        color: var(--muted); transition: color 0.25s ease;
+      }
+      .cert-card:hover .cert-card-link { color: var(--cert-accent); }
+
       .hologram-wrap {
         margin-top: 30px; border: 1px solid var(--border); border-radius: 18px; padding: 14px;
         background: radial-gradient(ellipse at center, rgba(0,229,255,0.09), transparent 65%), var(--panel);
@@ -392,6 +448,7 @@
       .contact-label { display: block; font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
       .contact-value { display: block; font-size: 14px; font-weight: 600; margin-top: 2px; word-break: break-word; transition: color 0.25s ease; }
       .contact-value-copied { color: var(--mint); }
+      .contact-card-cv { border-color: rgba(0,229,255,0.3); background: rgba(0,229,255,0.05); }
       .contact-value-muted { color: var(--muted); font-style: italic; font-weight: 500; }
       .contact-static { cursor: default; }
       .contact-actions { display: flex; gap: 6px; flex-shrink: 0; }
@@ -448,6 +505,10 @@
         .hologram-viewer { height: 340px; }
         .nav-links { display: none; }
         .nav-toggle { display: inline-flex; }
+        .nav-right { gap: 10px; }
+        .nav-cv { padding: 7px 13px; font-size: 12.5px; }
+        .nav-cv-full { display: none; }
+        .nav-cv-short { display: inline; }
         .nav-mobile {
           display: flex; flex-direction: column; position: sticky; top: 61px; z-index: 49;
           background: rgba(10,14,26,0.96); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border);
