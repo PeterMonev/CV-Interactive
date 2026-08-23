@@ -14,9 +14,9 @@
 // mail client instead, so it is never a dead end.
 export const CONTACT_FORM = {
   endpoint: "https://api.web3forms.com/submit",
-  accessKey: import.meta.env.VITE_WEB3FORMS_KEY || "",
+  accessKey: (import.meta.env.VITE_WEB3FORMS_KEY || "").trim(),
   toEmail: "monevpeter@gmail.com",
   subject: "New message from peter-monev-cv-interactive.vercel.app",
 };
 
-export const isFormConfigured = () => CONTACT_FORM.accessKey.trim().length > 0;
+export const isFormConfigured = () => CONTACT_FORM.accessKey.length > 0;
