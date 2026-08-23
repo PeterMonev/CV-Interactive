@@ -6,11 +6,19 @@ import { SCRAMBLE_CHARS } from "../../data/misc.js";
 export function ScrambleHeading({ text, className = "" }) {
   const [ref, visible] = useReveal(0.4);
   const [display, setDisplay] = useState(text);
-  const startedRef = useRef(false);
+  // Remembers which text was animated, not merely that something was. A plain
+  // boolean latch meant the heading scrambled once and then ignored every later
+  // change — so switching language left every heading in the old one.
+  const animatedForRef = useRef(null);
 
   useEffect(() => {
-    if (!visible || startedRef.current) return;
-    startedRef.current = true;
+    if (animatedForRef.current === text) return;
+    if (!visible) {
+      // Off screen: swap silently, and let it animate if it scrolls into view.
+      setDisplay(text);
+      return;
+    }
+    animatedForRef.current = text;
     if (prefersReducedMotion()) {
       setDisplay(text);
       return;

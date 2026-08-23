@@ -163,7 +163,8 @@ export function HeroTerminal({ onHireMe, scrollTo }) {
       if (word === "about") {
         printLines([
           "Junior full-stack developer based in Sofia.",
-          "JS + PHP (Laravel) in production, now leveling up in C#/ASP.NET Core.",
+          "SoftUni diplomas in front-end JavaScript and back-end C#.",
+          "A year and a half of production PHP (Laravel) and JavaScript.",
         ]);
         return;
       }
