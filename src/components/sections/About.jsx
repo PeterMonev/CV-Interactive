@@ -49,7 +49,7 @@ export function About() {
               { to: 4, label: "Projects shipped" },
               { to: 3, label: "Core languages" },
               { to: 5, label: "Databases used" },
-              { to: 14, label: "Certificates earned" },
+              { to: 16, label: "Certificates earned" },
             ].map((s, i) => (
               <Reveal delay={i * 80} key={s.label}>
                 <div className="stat">

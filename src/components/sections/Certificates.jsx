@@ -11,7 +11,7 @@ export function Certificates() {
         <p className="section-eyebrow">
           <Award size={14} /> Certificates
         </p>
-        <ScrambleHeading text="Fourteen credentials, one orbit." className="h2" />
+        <ScrambleHeading text="Sixteen credentials, one orbit." className="h2" />
         <p className="lead">
           Drag to spin the cluster, click or tap a badge to open its
           SoftUni credential.

@@ -1,13 +1,14 @@
-// url: null until real SoftUni verification links (softuni.bg/certificates/details/<id>/<hash>,
-// copied from the SoftUni profile "certificates" tab) are supplied — falls back to the
-// general certificates page so nothing links out broken in the meantime.
-// Matched against the 13 softuni.bg links by ID chronology (higher id = more
-// recent) against the order courses are listed in the resume. The 6 newer
-// C#/.NET-track ids line up 1:1 with the 6 named certs from that track, and
-// the 7 older ids line up with the 7 individual JS-track course certs — the
-// "Diploma" is a track-completion document, likely a different link format,
-// so it's the one left without a url until it's supplied.
+// url: SoftUni verification links (softuni.bg/certificates/details/<id>/<hash>),
+// copied from the SoftUni profile "certificates" tab. Ordered newest first by
+// certificate id (higher id = more recent), so the C#/.NET track sits above the
+// older JavaScript track. CERT_FALLBACK_URL is the safety net the 3D cloud uses
+// if an entry ever ships without a url.
 export const CERT_DATA = [
+  {
+    name: "Back-End Software Engineer with C# — Diploma",
+    url: "https://softuni.bg/certificates/details/264915/b96c2ed6",
+  },
+  { name: "Entity Framework Core", url: "https://softuni.bg/certificates/details/263700/d05ef7b2" },
   { name: "MS SQL", url: "https://softuni.bg/certificates/details/262200/0a61a833" },
   { name: "ASP.NET Advanced", url: "https://softuni.bg/certificates/details/260014/2f9b0b10" },
   { name: "ASP.NET Fundamentals", url: "https://softuni.bg/certificates/details/257928/42d7cd68" },

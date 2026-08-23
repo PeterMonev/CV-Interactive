@@ -13,6 +13,13 @@ export function MatrixRain() {
     const glyphs =
       "01アイウエオカキクケコサシスセソ{}<>/*+=;:PMFCJS#";
     const fontSize = 15;
+    // Fall speed in rows per frame. TRAIL_FADE is the per-frame alpha of the
+    // backdrop wipe, so it must move with FALL_SPEED: a glyph stays visible for
+    // a fixed number of *frames*, and the trail length is however far the head
+    // travels in that time. Halve the speed alone and the trails halve too —
+    // keep the ratio roughly constant to change pace without changing the look.
+    const FALL_SPEED = 0.22;
+    const TRAIL_FADE = 0.1;
     let columns = 0;
     let drops = [];
 
@@ -26,7 +33,7 @@ export function MatrixRain() {
     window.addEventListener("resize", resize);
 
     function draw() {
-      ctx.fillStyle = "rgba(6,8,16,0.14)";
+      ctx.fillStyle = `rgba(6,8,16,${TRAIL_FADE})`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.font = `${fontSize}px 'JetBrains Mono', monospace`;
       for (let i = 0; i < columns; i++) {
@@ -37,7 +44,7 @@ export function MatrixRain() {
         if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
           drops[i] = 0;
         }
-        drops[i] += 0.32;
+        drops[i] += FALL_SPEED;
       }
     }
 

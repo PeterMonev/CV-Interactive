@@ -1,9 +1,15 @@
 export const EDUCATION = [
   {
-    title: "C# Full-Stack Web Developer",
+    title: "Back-End Software Engineer with C#",
     school: "Software University (SoftUni)",
-    period: "Sep 2025 — Present",
-    tags: ["MS SQL", "C# ASP.NET", "C# OOP", "C# Advanced"],
+    period: "Sep 2025 — Aug 2026",
+    tags: [
+      "MS SQL",
+      "C# ASP.NET",
+      "C# OOP",
+      "C# Advanced",
+      "Entity Framework Core",
+    ],
   },
   {
     title: "JavaScript Web Developer",
