@@ -3,7 +3,7 @@ import { Layers, ArrowUpRight } from "lucide-react";
 import { magneticMove, magneticLeave } from "../../utils/motion.js";
 import { Reveal } from "../ui/Reveal.jsx";
 import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
-import { HologramViewer } from "./HologramViewer.jsx";
+import { HologramViewer } from "../ui/lazy3d.js";
 import { PROJECTS } from "../../data/projects.js";
 
 export function Hologram() {

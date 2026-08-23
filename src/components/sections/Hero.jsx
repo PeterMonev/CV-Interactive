@@ -1,8 +1,9 @@
 import { Github, ArrowUpRight, Download } from "lucide-react";
 import { magneticMove, magneticLeave } from "../../utils/motion.js";
 import { CV_URL, CV_FILENAME, CV_LABEL } from "../../data/cv.js";
+import { track, EVENTS } from "../../utils/analytics.js";
 import { Equalizer } from "../ui/Equalizer.jsx";
-import { Hero3D } from "./Hero3D.jsx";
+import { Hero3D } from "../ui/lazy3d.js";
 import { HeroTerminal } from "./HeroTerminal.jsx";
 
 export function Hero({ scrollTo }) {
@@ -37,6 +38,7 @@ export function Hero({ scrollTo }) {
               className="btn btn-ghost"
               href={CV_URL}
               download={CV_FILENAME}
+              onClick={() => track(EVENTS.CV_DOWNLOAD, { from: "hero" })}
               onMouseMove={magneticMove}
               onMouseLeave={magneticLeave}
             >
@@ -55,7 +57,7 @@ export function Hero({ scrollTo }) {
           </div>
         </div>
 
-        <HeroTerminal onHireMe={() => scrollTo("contact")} />
+        <HeroTerminal onHireMe={() => scrollTo("contact")} scrollTo={scrollTo} />
       </div>
       <span className="drag-hint">drag the shapes to spin them</span>
 

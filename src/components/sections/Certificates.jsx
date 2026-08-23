@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Award, BadgeCheck, ExternalLink } from "lucide-react";
 import { Reveal } from "../ui/Reveal.jsx";
 import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
-import { CertificateCloud3D } from "./CertificateCloud3D.jsx";
+import { CertificateCloud3D } from "../ui/lazy3d.js";
 import {
   CERT_DATA,
   CERT_FALLBACK_URL,
   CERT_PALETTE,
 } from "../../data/certificates.js";
+import { track, EVENTS } from "../../utils/analytics.js";
 
 // The 3D cloud paints every badge name into a canvas texture, so those names
 // exist as pixels and nothing else — invisible to Ctrl+F, to screen readers and
@@ -26,6 +27,7 @@ function CertificateList({ srOnly = false }) {
               href={cert.url || CERT_FALLBACK_URL}
               target="_blank"
               rel="noreferrer"
+              onClick={() => track(EVENTS.CERT_OPEN, { name: cert.name, view: "list" })}
               style={srOnly ? undefined : { "--cert-accent": accent }}
             >
               {!srOnly && <BadgeCheck size={18} className="cert-card-icon" />}

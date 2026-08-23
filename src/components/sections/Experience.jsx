@@ -1,7 +1,7 @@
 import { Briefcase } from "lucide-react";
 import { Reveal } from "../ui/Reveal.jsx";
 import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
-import { Timeline3D } from "./Timeline3D.jsx";
+import { Timeline3D } from "../ui/lazy3d.js";
 import { EXPERIENCE } from "../../data/experience.js";
 
 export function Experience() {

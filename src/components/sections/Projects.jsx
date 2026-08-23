@@ -3,6 +3,7 @@ import { Database } from "lucide-react";
 import { Reveal } from "../ui/Reveal.jsx";
 import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
 import { ProjectFlipCard } from "./ProjectFlipCard.jsx";
+import { CaseStudy } from "./CaseStudy.jsx";
 import { PROJECTS, FILTERS } from "../../data/projects.js";
 
 export function Projects() {
@@ -41,6 +42,10 @@ export function Projects() {
           </Reveal>
         ))}
       </div>
+
+      <Reveal delay={120}>
+        <CaseStudy />
+      </Reveal>
     </section>
   );
 }

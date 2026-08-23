@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeCertBadgeTexture } from "../../utils/canvasTextures.js";
 import { CERT_FALLBACK_URL, CERT_PALETTE } from "../../data/certificates.js";
+import { track, EVENTS } from "../../utils/analytics.js";
 
 export function CertificateCloud3D({ certs }) {
   const mountRef = useRef(null);
@@ -229,6 +230,7 @@ export function CertificateCloud3D({ certs }) {
         const hit = pickSprite(e);
         if (hit) {
           const cert = hit.userData.cert;
+          track(EVENTS.CERT_OPEN, { name: cert.name, view: "3d" });
           window.open(cert.url || CERT_FALLBACK_URL, "_blank", "noopener,noreferrer");
         }
       }

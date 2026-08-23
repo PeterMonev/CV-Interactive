@@ -153,6 +153,78 @@
         color: var(--cyan); font-size: 15px; font-weight: 600;
       }
 
+      /* case study — collapsed by default; depth for whoever opens it */
+      .cs-wrap { margin-top: 34px; border: 1px solid var(--border); border-radius: 16px; background: var(--panel); overflow: hidden; }
+      .cs-wrap.cs-open { border-color: rgba(0,229,255,0.28); }
+      .cs-toggle {
+        display: grid; grid-template-columns: 1fr auto; align-items: center;
+        width: 100%; gap: 2px 16px; padding: 20px 24px; text-align: left;
+        background: none; border: none; color: var(--text);
+        transition: background 0.25s ease;
+      }
+      .cs-toggle:hover { background: rgba(255,255,255,0.03); }
+      .cs-toggle-label { font-size: 16px; font-weight: 600; }
+      .cs-toggle-sub { grid-column: 1; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--muted); }
+      .cs-chevron { grid-column: 2; grid-row: 1 / span 2; color: var(--cyan); transition: transform 0.3s ease; }
+      .cs-open .cs-chevron { transform: rotate(180deg); }
+      .cs-panel { padding: 4px 24px 26px; border-top: 1px solid var(--border); }
+      .cs-problem { color: var(--muted); font-size: 15px; line-height: 1.75; margin: 22px 0 30px; max-width: 70ch; }
+
+      .cs-arch { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 22px; align-items: start; margin-bottom: 32px; }
+      .cs-arch-core { display: flex; flex-direction: column; }
+      .cs-layer-row { display: flex; flex-direction: column; align-items: stretch; }
+      .cs-layer {
+        border: 1px solid var(--border); border-left: 3px solid var(--layer-accent);
+        border-radius: 0; background: rgba(255,255,255,0.025); padding: 13px 16px;
+      }
+      .cs-layer-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+      .cs-layer-name { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--layer-accent); }
+      .cs-layer-role { font-size: 12px; color: var(--text); font-weight: 600; }
+      .cs-layer-detail { font-size: 12.5px; color: var(--muted); margin: 5px 0 0; line-height: 1.5; }
+      .cs-arrow { display: flex; justify-content: center; color: var(--muted); padding: 4px 0; }
+      .cs-arch-caption { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--muted); text-align: center; margin: 12px 0 0; }
+      .cs-arch-side { display: flex; flex-direction: column; gap: 10px; }
+      .cs-side { border: 1px dashed var(--border); border-radius: 10px; padding: 12px 14px; }
+      .cs-side-name { display: block; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text); }
+      .cs-side-detail { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+      .cs-decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-bottom: 30px; }
+      .cs-decision-title { font-size: 14.5px; font-weight: 600; margin: 0 0 7px; }
+      .cs-decision-body { font-size: 13.5px; color: var(--muted); line-height: 1.7; margin: 0; }
+      .cs-tests { border-top: 1px solid var(--border); padding-top: 22px; margin-bottom: 26px; }
+      .cs-tests-head { display: flex; align-items: center; gap: 7px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mint); margin: 0 0 12px; }
+      .cs-tests .chip-row { margin-bottom: 12px; }
+      .cs-next { border-top: 1px solid var(--border); padding-top: 22px; margin-bottom: 26px; }
+      .cs-next .cs-decision-body { max-width: 75ch; }
+      .cs-links { display: flex; gap: 12px; flex-wrap: wrap; }
+
+      /* contact form */
+      .cform { margin-top: 22px; border: 1px solid var(--border); border-radius: 16px; background: var(--panel); padding: 24px; }
+      .cform-head { font-size: 13.5px; color: var(--muted); margin: 0 0 18px; }
+      .cform-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+      .cform-field { display: block; margin-bottom: 16px; }
+      .cform-label { display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 7px; }
+      .cform input, .cform textarea {
+        width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+        border-radius: 10px; padding: 11px 14px; color: var(--text);
+        font-family: inherit; font-size: 14px; resize: vertical;
+        transition: border-color 0.25s ease, background 0.25s ease;
+      }
+      .cform input:focus, .cform textarea:focus { outline: none; border-color: var(--cyan); background: rgba(0,229,255,0.05); }
+      .cform .cform-invalid { border-color: #ff6b6b; }
+      .cform-error { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #ff8585; margin-top: 6px; }
+      .cform-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+      .cform-error-send { margin-top: 0; }
+      .cform button[disabled] { opacity: 0.7; cursor: default; }
+      .cform-spin { animation: cformSpin 0.9s linear infinite; }
+      @keyframes cformSpin { to { transform: rotate(360deg); } }
+      /* honeypot: off-screen rather than display:none, which some bots skip */
+      .cform-bot { position: absolute !important; left: -9999px !important; width: 1px !important; height: 1px !important; opacity: 0; }
+      .cform-done { display: flex; align-items: center; gap: 14px; margin-top: 22px; border: 1px solid rgba(94,234,212,0.35); background: rgba(94,234,212,0.06); border-radius: 16px; padding: 22px 24px; }
+      .cform-done > svg { color: var(--mint); flex-shrink: 0; }
+      .cform-done-title { font-size: 15px; font-weight: 600; margin: 0; }
+      .cform-done-sub { font-size: 13px; color: var(--muted); margin: 4px 0 0; }
+
       /* sections */
       .section { position: relative; z-index: 2; padding: 64px 6vw; max-width: 1400px; margin: 0 auto; }
       .section-eyebrow {
@@ -502,6 +574,9 @@
         .galaxy-wrap { grid-template-columns: 1fr; }
         .galaxy-3d { height: 320px; }
         .cert-3d { height: 360px; }
+        .cs-arch { grid-template-columns: 1fr; }
+        .cs-panel { padding: 4px 18px 22px; }
+        .cs-toggle { padding: 18px; }
         .hologram-viewer { height: 340px; }
         .nav-links { display: none; }
         .nav-toggle { display: inline-flex; }

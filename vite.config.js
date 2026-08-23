@@ -8,4 +8,18 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        // three.js is roughly half the shipped JavaScript and changes only
+        // when the dependency is upgraded — keeping it in its own chunk means
+        // an edit to the CV content invalidates a few KB of app code instead
+        // of forcing every returning visitor to re-download the whole engine.
+        manualChunks: {
+          three: ["three"],
+          react: ["react", "react-dom"],
+        },
+      },
+    },
+  },
 });

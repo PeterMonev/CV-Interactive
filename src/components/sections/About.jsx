@@ -3,7 +3,7 @@ import { Reveal } from "../ui/Reveal.jsx";
 import { CountUp } from "../ui/CountUp.jsx";
 import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
 import { MatrixRain } from "../chrome/MatrixRain.jsx";
-import { StatsField3D } from "./StatsField3D.jsx";
+import { StatsField3D } from "../ui/lazy3d.js";
 import { PHOTO_SRC } from "../../data/photo.js";
 import { STATS_3D_DATA } from "../../data/stats3d.js";
 

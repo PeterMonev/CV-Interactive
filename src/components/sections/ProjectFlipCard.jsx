@@ -63,14 +63,24 @@ export function ProjectFlipCard({ project, index }) {
               <div className="flip-card-stack">
                 {project.images.slice(0, 3).map((src, i) => (
                   <div className={`flip-card-photo flip-card-photo-${i}`} key={i}>
-                    <img src={src} alt={`${project.name} screenshot ${i + 1}`} />
+                    <img
+                      src={src}
+                      alt={`${project.name} screenshot ${i + 1}`}
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </div>
                 ))}
               </div>
             ) : project.images && project.images[0] ? (
               <div className="flip-card-stack">
                 <div className="flip-card-photo flip-card-photo-single">
-                  <img src={project.images[0]} alt={`${project.name} screenshot`} />
+                  <img
+                    src={project.images[0]}
+                    alt={`${project.name} screenshot`}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </div>
               </div>
             ) : (

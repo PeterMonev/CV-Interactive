@@ -2,8 +2,32 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { CODE_TOKENS } from "../../data/hero.js";
 import { SKILLS } from "../../data/skills.js";
 import { PROJECTS } from "../../data/projects.js";
+import { CERT_DATA } from "../../data/certificates.js";
+import { EDUCATION } from "../../data/education.js";
+import { EXPERIENCE } from "../../data/experience.js";
+import { NAV_LINKS } from "../../data/nav.js";
+import { CV_URL, CV_FILENAME } from "../../data/cv.js";
 
-export function HeroTerminal({ onHireMe }) {
+// Single source of truth for what the terminal knows, so Tab-completion and
+// 'help' can never drift apart from what runCommand actually handles.
+const COMMANDS = [
+  "about",
+  "certs",
+  "clear",
+  "contact",
+  "cv",
+  "education",
+  "experience",
+  "goto",
+  "grep",
+  "help",
+  "open",
+  "projects",
+  "skills",
+  "whoami",
+];
+
+export function HeroTerminal({ onHireMe, scrollTo }) {
   const total = useMemo(
     () => CODE_TOKENS.reduce((sum, tok) => sum + tok.t.length, 0),
     []
@@ -14,6 +38,9 @@ export function HeroTerminal({ onHireMe }) {
   const [input, setInput] = useState("");
   const bodyRef = useRef(null);
   const inputRef = useRef(null);
+  // recall of previously entered commands; index -1 means "editing a fresh line"
+  const [cmdHistory, setCmdHistory] = useState([]);
+  const [histIndex, setHistIndex] = useState(-1);
 
   useEffect(() => {
     if (count >= total) {
@@ -37,6 +64,7 @@ export function HeroTerminal({ onHireMe }) {
       const cmd = raw.trim();
       setHistory((h) => [...h, { type: "in", text: cmd }]);
       if (!cmd) return;
+      setCmdHistory((h) => (h[h.length - 1] === cmd ? h : [...h, cmd]));
       const [word, ...rest] = cmd.toLowerCase().split(" ");
 
       if (word === "clear") {
@@ -46,9 +74,85 @@ export function HeroTerminal({ onHireMe }) {
       if (word === "help") {
         printLines([
           "available commands:",
-          "about · experience · skills · projects · contact",
-          "open <project>  ·  whoami  ·  clear",
+          "about · whoami · experience · education · skills · certs",
+          "projects · contact · cv",
+          "open <project> · goto <section> · grep <term> · clear",
+          "tab completes, up/down recalls history",
         ]);
+        return;
+      }
+      if (word === "cv") {
+        printLines([`downloading ${CV_FILENAME} — 2 pages`]);
+        const a = document.createElement("a");
+        a.href = CV_URL;
+        a.download = CV_FILENAME;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        return;
+      }
+      if (word === "certs") {
+        printLines([
+          `${CERT_DATA.length} SoftUni credentials:`,
+          ...CERT_DATA.map((c) => `  ${c.name}`),
+        ]);
+        return;
+      }
+      if (word === "education") {
+        printLines(
+          EDUCATION.map((e) => `${e.period} — ${e.title}, ${e.school}`)
+        );
+        return;
+      }
+      if (word === "goto") {
+        const target = rest.join("-");
+        const link = NAV_LINKS.find((l) => l.id === target);
+        if (link && scrollTo) {
+          printLines([`jumping to ${link.label.toLowerCase()}...`]);
+          setTimeout(() => scrollTo(link.id), 300);
+        } else {
+          printLines([
+            `no section "${target || "?"}". try: ${NAV_LINKS.map((l) => l.id).join(", ")}`,
+          ]);
+        }
+        return;
+      }
+      // honest search: says plainly when something is not in the stack, rather
+      // than quietly returning nothing and letting it read as a match
+      if (word === "grep") {
+        const term = rest.join(" ").trim();
+        if (!term) {
+          printLines(["usage: grep <term>   e.g. grep signalr"]);
+          return;
+        }
+        const hits = [];
+        EXPERIENCE.forEach((job) => {
+          const matched = job.bullets.filter((b) => b.toLowerCase().includes(term));
+          if (matched.length || job.role.toLowerCase().includes(term)) {
+            hits.push(`  ${job.company} (${job.period}) — production work`);
+            matched.slice(0, 2).forEach((b) =>
+              hits.push(`    ${b.length > 92 ? b.slice(0, 92) + "..." : b}`)
+            );
+          }
+        });
+        SKILLS.forEach((g) =>
+          g.items
+            .filter((i) => i.toLowerCase().includes(term))
+            .forEach((i) => hits.push(`  ${i} — listed under ${g.group}`))
+        );
+        PROJECTS.forEach((pr) => {
+          if (pr.stack.some((s) => s.toLowerCase().includes(term))) {
+            hits.push(`  ${pr.name} — ${pr.stack.join(", ")}`);
+          }
+        });
+        CERT_DATA.filter((c) => c.name.toLowerCase().includes(term)).forEach(
+          (c) => hits.push(`  ${c.name} — SoftUni certificate`)
+        );
+        printLines(
+          hits.length
+            ? [`${hits.length} match${hits.length > 1 ? "es" : ""} for "${term}":`, ...hits]
+            : [`no match for "${term}" — not something I have shipped yet`]
+        );
         return;
       }
       if (word === "about") {
@@ -106,13 +210,71 @@ export function HeroTerminal({ onHireMe }) {
       }
       printLines([`command not found: ${word} — type 'help'`]);
     },
-    [onHireMe, printLines]
+    [onHireMe, printLines, scrollTo]
+  );
+
+  // Tab completes the command word, or the argument once a command that takes
+  // one has been typed. A unique match fills itself in; several matches print
+  // the candidates rather than guessing.
+  const complete = useCallback(
+    (value) => {
+      const parts = value.split(" ");
+      if (parts.length <= 1) {
+        const stem = (parts[0] || "").toLowerCase();
+        const hits = COMMANDS.filter((c) => c.startsWith(stem));
+        if (hits.length === 1) return hits[0] + " ";
+        if (hits.length > 1) printLines([hits.join("  ")]);
+        return value;
+      }
+      const [word, ...rest] = parts;
+      const stem = rest.join(" ").toLowerCase();
+      let pool = null;
+      if (word.toLowerCase() === "open") {
+        pool = PROJECTS.map((pr) => pr.name);
+      } else if (word.toLowerCase() === "goto") {
+        pool = NAV_LINKS.map((l) => l.id);
+      }
+      if (!pool) return value;
+      const hits = pool.filter((n) => n.toLowerCase().startsWith(stem));
+      if (hits.length === 1) return `${word} ${hits[0]}`;
+      if (hits.length > 1) printLines([hits.join("  ")]);
+      return value;
+    },
+    [printLines]
   );
 
   function handleKeyDown(e) {
     if (e.key === "Enter") {
       runCommand(input);
       setInput("");
+      setHistIndex(-1);
+      return;
+    }
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const completed = complete(input);
+      if (completed !== input) setInput(completed);
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!cmdHistory.length) return;
+      const next = histIndex < 0 ? cmdHistory.length - 1 : Math.max(0, histIndex - 1);
+      setHistIndex(next);
+      setInput(cmdHistory[next]);
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (histIndex < 0) return;
+      const next = histIndex + 1;
+      if (next >= cmdHistory.length) {
+        setHistIndex(-1);
+        setInput("");
+      } else {
+        setHistIndex(next);
+        setInput(cmdHistory[next]);
+      }
     }
   }
 
@@ -137,7 +299,7 @@ export function HeroTerminal({ onHireMe }) {
     >
       <div className="term-bar">
         <span className="term-path">~/peter-monev.dev</span>
-        {ready && <span className="term-hint">type 'help'</span>}
+        {ready && <span className="term-hint">type 'help' · tab completes</span>}
       </div>
       <div className="term-body" ref={bodyRef}>
         <pre className="intro-pre">

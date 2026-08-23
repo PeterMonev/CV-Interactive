@@ -15,10 +15,13 @@ export const PROJECTS = [
   {
     name: "RehearsalHub",
     tag: "Capstone Build",
-    period: "2025",
+    period: "2026",
+    // Counts and technologies here are read off the repository itself, not the
+    // original course brief: the solution holds seven projects, and the live
+    // deployment on Render runs EF Core against Npgsql rather than SQL Server.
     description:
-      "Full-stack platform for bands and musicians to manage rehearsal scheduling, setlists, band membership, and song libraries. Architected with Clean Architecture and strict SOLID compliance across six separate projects.",
-    stack: ["C#", "ASP.NET Core 8", "MSSQL", "Entity Framework"],
+      "Full-stack platform for bands and musicians to manage rehearsal scheduling, setlists, band membership, and song libraries. Clean Architecture across seven projects, real-time notifications over SignalR, and a service-layer test suite.",
+    stack: ["C#", "ASP.NET Core 8", "EF Core 8", "PostgreSQL", "SignalR", "xUnit"],
     live: "https://rehearsalshub.onrender.com",
     featured: true,
     images: [PROJECT_IMG_REHEARSALHUB, PROJECT_IMG_REHEARSAL_SONGS, PROJECT_IMG_REHEARSAL_BAND],

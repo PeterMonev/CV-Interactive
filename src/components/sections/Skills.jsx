@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Code2 } from "lucide-react";
 import { Reveal } from "../ui/Reveal.jsx";
 import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
-import { SkillsGalaxy3D } from "./SkillsGalaxy3D.jsx";
+import { SkillsGalaxy3D } from "../ui/lazy3d.js";
 import { SKILLS } from "../../data/skills.js";
 
 export function Skills() {

@@ -3,10 +3,12 @@ import { Mail, Linkedin, Github, MapPin, Music2, FileDown } from "lucide-react";
 import { Reveal } from "../ui/Reveal.jsx";
 import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
 import { Equalizer } from "../ui/Equalizer.jsx";
-import { ContactOrb3D } from "./ContactOrb3D.jsx";
+import { ContactOrb3D } from "../ui/lazy3d.js";
 import { ContactCopyCard } from "./ContactCopyCard.jsx";
 import { PhoneRevealCard } from "./PhoneRevealCard.jsx";
 import { CV_URL, CV_FILENAME } from "../../data/cv.js";
+import { track, EVENTS } from "../../utils/analytics.js";
+import { ContactForm } from "./ContactForm.jsx";
 
 export function Contact() {
   const [copied, setCopied] = useState(null);
@@ -78,6 +80,7 @@ export function Contact() {
               className="contact-card contact-card-cv"
               href={CV_URL}
               download={CV_FILENAME}
+              onClick={() => track(EVENTS.CV_DOWNLOAD, { from: "contact" })}
             >
               <FileDown size={18} />
               <div className="contact-body">
@@ -93,6 +96,10 @@ export function Contact() {
               </div>
             </div>
           </div>
+        </Reveal>
+
+        <Reveal delay={160}>
+          <ContactForm />
         </Reveal>
       </div>
     </section>

@@ -1,6 +1,7 @@
 import { Terminal, Menu, X, Download } from "lucide-react";
 import { NAV_LINKS } from "../../data/nav.js";
 import { CV_URL, CV_FILENAME, CV_LABEL } from "../../data/cv.js";
+import { track, EVENTS } from "../../utils/analytics.js";
 
 export function Nav({
   navLinksRef,
@@ -45,6 +46,7 @@ export function Nav({
             className="nav-cv"
             href={CV_URL}
             download={CV_FILENAME}
+            onClick={() => track(EVENTS.CV_DOWNLOAD, { from: "nav" })}
             aria-label={`${CV_LABEL} (PDF)`}
           >
             <Download size={15} />
@@ -73,7 +75,10 @@ export function Nav({
             className="nav-mobile-cv"
             href={CV_URL}
             download={CV_FILENAME}
-            onClick={() => setMenuOpen(false)}
+            onClick={() => {
+              track(EVENTS.CV_DOWNLOAD, { from: "mobile-menu" });
+              setMenuOpen(false);
+            }}
           >
             <Download size={15} /> {CV_LABEL}
           </a>

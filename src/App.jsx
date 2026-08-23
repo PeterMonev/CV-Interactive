@@ -5,16 +5,19 @@ import {
   useRef,
   useCallback,
 } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import "./styles/global.css";
 
 import { prefersReducedMotion } from "./utils/motion.js";
 import { NAV_LINKS } from "./data/nav.js";
 
 import { BootLoader } from "./components/chrome/BootLoader.jsx";
-import { ScrollStarfield } from "./components/chrome/ScrollStarfield.jsx";
+import {
+  ScrollStarfield,
+  Cursor3D,
+  ScrollToTopButton,
+} from "./components/ui/lazy3d.js";
 import { CursorSpotlight } from "./components/chrome/CursorSpotlight.jsx";
-import { Cursor3D } from "./components/chrome/Cursor3D.jsx";
-import { ScrollToTopButton } from "./components/chrome/ScrollToTopButton.jsx";
 import { Nav } from "./components/chrome/Nav.jsx";
 import { Footer } from "./components/chrome/Footer.jsx";
 
@@ -132,6 +135,7 @@ export default function App() {
       <Hologram />
       <Contact />
       <Footer />
+      <Analytics />
     </div>
   );
 }
