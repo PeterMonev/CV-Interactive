@@ -2,19 +2,20 @@ import { useState } from "react";
 import { Send, Check, AlertCircle, Loader2 } from "lucide-react";
 import { CONTACT_FORM, isFormConfigured } from "../../data/contactForm.js";
 import { track, EVENTS } from "../../utils/analytics.js";
+import { useLang } from "../../i18n/index.jsx";
 
 const EMPTY = { name: "", email: "", message: "" };
 
-function validate(values) {
+function validate(values, t) {
   const errors = {};
-  if (!values.name.trim()) errors.name = "Tell me who you are.";
-  if (!values.email.trim()) errors.email = "I need somewhere to reply.";
+  if (!values.name.trim()) errors.name = t("contact.form.errName");
+  if (!values.email.trim()) errors.email = t("contact.form.errEmailEmpty");
   // deliberately loose: one @, something either side, a dot in the domain.
   // Anything stricter rejects valid addresses more often than it catches typos.
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim()))
-    errors.email = "That address doesn't look right.";
+    errors.email = t("contact.form.errEmailShape");
   if (values.message.trim().length < 10)
-    errors.message = "A sentence or two, so I know what it's about.";
+    errors.message = t("contact.form.errMessage");
   return errors;
 }
 
@@ -23,6 +24,7 @@ export function ContactForm() {
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
   const [botField, setBotField] = useState("");
+  const { t } = useLang();
 
   const set = (field) => (e) => {
     const v = e.target.value;
@@ -43,7 +45,7 @@ export function ContactForm() {
   async function handleSubmit(e) {
     e.preventDefault();
     if (botField) return; // honeypot filled — a human never sees this field
-    const found = validate(values);
+    const found = validate(values, t);
     setErrors(found);
     if (Object.keys(found).length) return;
 
@@ -84,10 +86,8 @@ export function ContactForm() {
       <div className="cform cform-done">
         <Check size={20} />
         <div>
-          <p className="cform-done-title">Message on its way.</p>
-          <p className="cform-done-sub">
-            I read everything and reply from {CONTACT_FORM.toEmail}.
-          </p>
+          <p className="cform-done-title">{t("contact.form.sentTitle")}</p>
+          <p className="cform-done-sub">{t("contact.form.sentSub")}</p>
         </div>
       </div>
     );
@@ -95,11 +95,11 @@ export function ContactForm() {
 
   return (
     <form className="cform" onSubmit={handleSubmit} noValidate>
-      <p className="cform-head">Or just write here — no mail client needed.</p>
+      <p className="cform-head">{t("contact.form.head")}</p>
 
       <div className="cform-row">
         <label className="cform-field">
-          <span className="cform-label">Name</span>
+          <span className="cform-label">{t("contact.form.name")}</span>
           <input
             type="text"
             value={values.name}
@@ -111,7 +111,7 @@ export function ContactForm() {
         </label>
 
         <label className="cform-field">
-          <span className="cform-label">Email</span>
+          <span className="cform-label">{t("contact.form.email")}</span>
           <input
             type="email"
             value={values.email}
@@ -124,7 +124,7 @@ export function ContactForm() {
       </div>
 
       <label className="cform-field">
-        <span className="cform-label">Message</span>
+        <span className="cform-label">{t("contact.form.message")}</span>
         <textarea
           rows={4}
           value={values.message}
@@ -148,18 +148,17 @@ export function ContactForm() {
         <button type="submit" className="btn btn-primary" disabled={status === "sending"}>
           {status === "sending" ? (
             <>
-              <Loader2 size={16} className="cform-spin" /> Sending
+              <Loader2 size={16} className="cform-spin" /> {t("contact.form.sending")}
             </>
           ) : (
             <>
-              <Send size={16} /> Send message
+              <Send size={16} /> {t("contact.form.send")}
             </>
           )}
         </button>
         {status === "error" && (
           <span className="cform-error cform-error-send">
-            <AlertCircle size={14} /> That didn't go through — email{" "}
-            {CONTACT_FORM.toEmail} directly.
+            <AlertCircle size={14} /> {t("contact.form.errSend")}
           </span>
         )}
       </div>

@@ -5,9 +5,11 @@ import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
 import { ProjectFlipCard } from "./ProjectFlipCard.jsx";
 import { CaseStudy } from "./CaseStudy.jsx";
 import { PROJECTS, FILTERS } from "../../data/projects.js";
+import { useLang } from "../../i18n/index.jsx";
 
 export function Projects() {
   const [projectFilter, setProjectFilter] = useState("all");
+  const { t } = useLang();
 
   const activeFilter = FILTERS.find((f) => f.id === projectFilter) || FILTERS[0];
   const filteredProjects = PROJECTS.filter(activeFilter.test);
@@ -16,9 +18,9 @@ export function Projects() {
     <section id="projects" className="section">
       <Reveal>
         <p className="section-eyebrow">
-          <Database size={14} /> Projects
+          <Database size={14} /> {t("projects.eyebrow")}
         </p>
-        <ScrambleHeading text="Things I built end to end." className="h2" />
+        <ScrambleHeading text={t("projects.heading")} className="h2" />
       </Reveal>
 
       <div className="filter-row">
@@ -28,12 +30,12 @@ export function Projects() {
             className={`filter-btn ${projectFilter === f.id ? "filter-btn-active" : ""}`}
             onClick={() => setProjectFilter(f.id)}
           >
-            {f.label}
+            {t(`projects.filters.${f.labelKey}`)}
           </button>
         ))}
       </div>
 
-      <p className="filter-hint">Hover or tap a card to flip it.</p>
+      <p className="filter-hint">{t("projects.flipHint")}</p>
 
       <div className="flip-grid" key={projectFilter}>
         {filteredProjects.map((p, i) => (

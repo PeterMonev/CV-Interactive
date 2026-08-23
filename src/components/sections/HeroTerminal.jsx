@@ -7,6 +7,9 @@ import { EDUCATION } from "../../data/education.js";
 import { EXPERIENCE } from "../../data/experience.js";
 import { NAV_LINKS } from "../../data/nav.js";
 import { CV_URL, CV_FILENAME } from "../../data/cv.js";
+import { tx } from "../../i18n/index.jsx";
+
+const en = (v) => tx(v, "en");
 
 // Single source of truth for what the terminal knows, so Tab-completion and
 // 'help' can never drift apart from what runCommand actually handles.
@@ -100,7 +103,7 @@ export function HeroTerminal({ onHireMe, scrollTo }) {
       }
       if (word === "education") {
         printLines(
-          EDUCATION.map((e) => `${e.period} — ${e.title}, ${e.school}`)
+          EDUCATION.map((e) => `${en(e.period)} — ${en(e.title)}, ${en(e.school)}`)
         );
         return;
       }
@@ -127,14 +130,16 @@ export function HeroTerminal({ onHireMe, scrollTo }) {
         }
         const hits = [];
         EXPERIENCE.forEach((job) => {
-          const matched = job.bullets.filter((b) => b.toLowerCase().includes(term));
-          if (matched.length || job.role.toLowerCase().includes(term)) {
-            hits.push(`  ${job.company} (${job.period}) — production work`);
+          const bullets = job.bullets.map(en);
+          const matched = bullets.filter((b) => b.toLowerCase().includes(term));
+          if (matched.length || en(job.role).toLowerCase().includes(term)) {
+            hits.push(`  ${en(job.company)} (${en(job.period)}) — production work`);
             matched.slice(0, 2).forEach((b) =>
               hits.push(`    ${b.length > 92 ? b.slice(0, 92) + "..." : b}`)
             );
           }
         });
+
         SKILLS.forEach((g) =>
           g.items
             .filter((i) => i.toLowerCase().includes(term))

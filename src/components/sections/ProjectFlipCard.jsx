@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { projectIcon } from "../../utils/projectIcon.js";
 import { magneticMove, magneticLeave } from "../../utils/motion.js";
+import { useLang, useTx } from "../../i18n/index.jsx";
 
 const PROJECT_TINTS = [
   ["rgba(0,229,255,0.2)", "rgba(139,92,246,0.14)"],
@@ -13,6 +14,8 @@ const PROJECT_TINTS = [
 
 export function ProjectFlipCard({ project, index }) {
   const [flipped, setFlipped] = useState(false);
+  const { t } = useLang();
+  const tx = useTx();
   const finePointerRef = useRef(true);
   const Icon = projectIcon(project.name);
   const [tint1, tint2] = PROJECT_TINTS[index % PROJECT_TINTS.length];
@@ -90,18 +93,18 @@ export function ProjectFlipCard({ project, index }) {
               <Icon size={16} />
             </span>
             {project.featured && (
-              <span className="flip-card-flagship">★ Flagship</span>
+              <span className="flip-card-flagship">★ {t("projects.flagship")}</span>
             )}
           </div>
           <div className="flip-card-front-footer">
-            <span className="chip chip-tag">{project.tag}</span>
+            <span className="chip chip-tag">{tx(project.tag)}</span>
             <h3 className="flip-card-name">{project.name}</h3>
           </div>
         </div>
 
         <div className="flip-card-face flip-card-back">
           <h3 className="flip-card-name">{project.name}</h3>
-          <p className="flip-card-desc">{project.description}</p>
+          <p className="flip-card-desc">{tx(project.description)}</p>
           <div className="chip-row">
             {project.stack.map((s) => (
               <span className="chip chip-mono chip-sm" key={s}>
@@ -118,7 +121,7 @@ export function ProjectFlipCard({ project, index }) {
             onMouseMove={magneticMove}
             onMouseLeave={magneticLeave}
           >
-            View live <ArrowUpRight size={14} />
+            {t("projects.viewLive")} <ArrowUpRight size={14} />
           </a>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { ExternalLink, Copy, Check } from "lucide-react";
+import { useLang } from "../../i18n/index.jsx";
 
 export function ContactCopyCard({
   icon,
@@ -11,6 +12,7 @@ export function ContactCopyCard({
   copied,
   onCopy,
 }) {
+  const { t } = useLang();
   const external = actionHref.startsWith("http");
   return (
     <div className="contact-card">
@@ -18,7 +20,7 @@ export function ContactCopyCard({
       <div className="contact-body">
         <span className="contact-label">{label}</span>
         <span className={`contact-value ${copied ? "contact-value-copied" : ""}`}>
-          {copied ? "Copied to clipboard" : value}
+          {copied ? t("contact.copied") : value}
         </span>
       </div>
       <div className="contact-actions">
@@ -35,7 +37,7 @@ export function ContactCopyCard({
           type="button"
           className="icon-btn"
           onClick={() => onCopy(copyValue, fieldKey)}
-          aria-label={`Copy ${label}`}
+          aria-label={`${t("contact.copyAria")} ${label}`}
         >
           {copied ? <Check size={14} /> : <Copy size={14} />}
         </button>

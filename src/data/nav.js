@@ -1,12 +1,14 @@
+// Labels live in src/i18n/ui.js under nav.<id>; the id doubles as the section
+// anchor and the translation key, so the two can never drift apart.
 export const NAV_LINKS = [
-  { id: "home", label: "Home" },
-  { id: "about", label: "About" },
-  { id: "experience", label: "Experience" },
-  { id: "education", label: "Education" },
-  { id: "certificates", label: "Certificates" },
-  { id: "skills", label: "Skills" },
-  { id: "projects", label: "Projects" },
-  { id: "hologram", label: "Hologram" },
-  { id: "contact", label: "Contact" },
+  { id: "home" },
+  { id: "about" },
+  { id: "experience" },
+  { id: "education" },
+  { id: "certificates" },
+  { id: "skills" },
+  { id: "projects" },
+  { id: "hologram" },
+  { id: "contact" },
 ];
 

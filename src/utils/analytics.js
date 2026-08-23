@@ -12,6 +12,7 @@ export const EVENTS = {
   PROJECT_OPEN: "project_open",
   TERMINAL_COMMAND: "terminal_command",
   CONTACT_SENT: "contact_sent",
+  CV_PRINT: "cv_print",
 };
 
 export function track(event, props) {

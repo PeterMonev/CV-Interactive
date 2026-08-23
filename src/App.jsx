@@ -6,6 +6,7 @@ import {
   useCallback,
 } from "react";
 import { Analytics } from "@vercel/analytics/react";
+import { LanguageProvider } from "./i18n/index.jsx";
 import "./styles/global.css";
 
 import { prefersReducedMotion } from "./utils/motion.js";
@@ -19,6 +20,8 @@ import {
 } from "./components/ui/lazy3d.js";
 import { CursorSpotlight } from "./components/chrome/CursorSpotlight.jsx";
 import { Nav } from "./components/chrome/Nav.jsx";
+import { CommandPalette } from "./components/chrome/CommandPalette.jsx";
+import { PrintCV } from "./components/chrome/PrintCV.jsx";
 import { Footer } from "./components/chrome/Footer.jsx";
 
 import { Hero } from "./components/sections/Hero.jsx";
@@ -32,6 +35,14 @@ import { Hologram } from "./components/sections/Hologram.jsx";
 import { Contact } from "./components/sections/Contact.jsx";
 
 export default function App() {
+  return (
+    <LanguageProvider>
+      <AppShell />
+    </LanguageProvider>
+  );
+}
+
+function AppShell() {
   const [booted, setBooted] = useState(() => prefersReducedMotion());
   const [active, setActive] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -114,6 +125,8 @@ export default function App() {
       <CursorSpotlight />
       <Cursor3D />
       <ScrollToTopButton />
+      <CommandPalette scrollTo={scrollTo} />
+      <PrintCV />
 
       <Nav
         navLinksRef={navLinksRef}

@@ -3,34 +3,38 @@ import { Reveal } from "../ui/Reveal.jsx";
 import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
 import { Timeline3D } from "../ui/lazy3d.js";
 import { EXPERIENCE } from "../../data/experience.js";
+import { useLang, useTx } from "../../i18n/index.jsx";
 
 export function Experience() {
+  const { t } = useLang();
+  const tx = useTx();
+
   return (
     <section id="experience" className="section">
       <Reveal>
         <p className="section-eyebrow">
-          <Briefcase size={14} /> Work Experience
+          <Briefcase size={14} /> {t("experience.eyebrow")}
         </p>
-        <ScrambleHeading text="Where the code met customers." className="h2" />
+        <ScrambleHeading text={t("experience.heading")} className="h2" />
       </Reveal>
 
       <div className="timeline">
                   <Timeline3D count={EXPERIENCE.length} />
         {EXPERIENCE.map((job, i) => (
-          <Reveal delay={i * 100} key={job.role} className="timeline-item">
+          <Reveal delay={i * 100} key={job.company} className="timeline-item">
             <div className="timeline-card">
               <div className="timeline-head">
                 <div>
-                  <h3 className="timeline-role">{job.role}</h3>
+                  <h3 className="timeline-role">{tx(job.role)}</h3>
                   <p className="timeline-company">
-                    {job.company} · {job.location}
+                    {tx(job.company)} · {tx(job.location)}
                   </p>
                 </div>
-                <span className="timeline-period">{job.period}</span>
+                <span className="timeline-period">{tx(job.period)}</span>
               </div>
               <ul className="timeline-bullets">
-                {job.bullets.map((b) => (
-                  <li key={b}>{b}</li>
+                {job.bullets.map((b, bi) => (
+                  <li key={bi}>{tx(b)}</li>
                 ))}
               </ul>
             </div>

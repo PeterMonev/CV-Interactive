@@ -2,29 +2,28 @@ import { Github, ArrowUpRight, Download } from "lucide-react";
 import { magneticMove, magneticLeave } from "../../utils/motion.js";
 import { CV_URL, CV_FILENAME, CV_LABEL } from "../../data/cv.js";
 import { track, EVENTS } from "../../utils/analytics.js";
+import { useLang } from "../../i18n/index.jsx";
 import { Equalizer } from "../ui/Equalizer.jsx";
 import { Hero3D } from "../ui/lazy3d.js";
 import { HeroTerminal } from "./HeroTerminal.jsx";
 
 export function Hero({ scrollTo }) {
+  const { t } = useLang();
+
   return (
     <section id="home" className="section hero">
       <Hero3D />
       <div className="hero-grid">
         <div className="hero-copy">
           <p className="eyebrow">
-            <span className="dot-live" /> Junior Full-Stack Web Developer
+            <span className="dot-live" /> {t("hero.eyebrow")}
           </p>
           <h1 className="h1">
-            Building{" "}
-            <span className="grad-text">clean, working software</span> — one
-            deploy at a time.
+            {t("hero.titleLead")}{" "}
+            <span className="grad-text">{t("hero.titleAccent")}</span>{" "}
+            {t("hero.titleTail")}
           </h1>
-          <p className="hero-sub">
-            Commercial experience in PHP (Laravel) and JavaScript, now
-            advancing into C# and ASP.NET Core. I care about architecture
-            that stays readable six months later.
-          </p>
+          <p className="hero-sub">{t("hero.sub")}</p>
           <div className="hero-actions">
             <button
               className="btn btn-primary"
@@ -32,7 +31,7 @@ export function Hero({ scrollTo }) {
               onMouseMove={magneticMove}
               onMouseLeave={magneticLeave}
             >
-              Get in touch <ArrowUpRight size={16} />
+              {t("hero.cta")} <ArrowUpRight size={16} />
             </button>
             <a
               className="btn btn-ghost"
@@ -42,7 +41,7 @@ export function Hero({ scrollTo }) {
               onMouseMove={magneticMove}
               onMouseLeave={magneticLeave}
             >
-              <Download size={16} /> {CV_LABEL}
+              <Download size={16} /> {t("nav.cv")}
             </a>
             <a
               className="btn btn-ghost"
@@ -52,14 +51,14 @@ export function Hero({ scrollTo }) {
               onMouseMove={magneticMove}
               onMouseLeave={magneticLeave}
             >
-              <Github size={16} /> View GitHub
+              <Github size={16} /> {t("hero.github")}
             </a>
           </div>
         </div>
 
         <HeroTerminal onHireMe={() => scrollTo("contact")} scrollTo={scrollTo} />
       </div>
-      <span className="drag-hint">drag the shapes to spin them</span>
+      <span className="drag-hint">{t("hero.dragHint")}</span>
 
       <Equalizer bars={40} className="eq-divider" />
     </section>

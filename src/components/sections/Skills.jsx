@@ -4,18 +4,20 @@ import { Reveal } from "../ui/Reveal.jsx";
 import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
 import { SkillsGalaxy3D } from "../ui/lazy3d.js";
 import { SKILLS } from "../../data/skills.js";
+import { useLang } from "../../i18n/index.jsx";
 
 export function Skills() {
   const [skillsView, setSkillsView] = useState("3d");
   const [selectedDomain, setSelectedDomain] = useState(null);
+  const { t } = useLang();
 
   return (
     <section id="skills" className="section">
       <Reveal>
         <p className="section-eyebrow">
-          <Code2 size={14} /> Tech Skills
+          <Code2 size={14} /> {t("skills.eyebrow")}
         </p>
-        <ScrambleHeading text="The stack, honestly labeled." className="h2" />
+        <ScrambleHeading text={t("skills.heading")} className="h2" />
       </Reveal>
 
       <div className="filter-row">
@@ -23,13 +25,13 @@ export function Skills() {
           className={`filter-btn ${skillsView === "chips" ? "filter-btn-active" : ""}`}
           onClick={() => setSkillsView("chips")}
         >
-          Chips
+          {t("skills.chips")}
         </button>
         <button
           className={`filter-btn ${skillsView === "3d" ? "filter-btn-active" : ""}`}
           onClick={() => setSkillsView("3d")}
         >
-          3D Galaxy
+          {t("skills.galaxy")}
         </button>
       </div>
 
@@ -38,7 +40,7 @@ export function Skills() {
           {SKILLS.map((group, i) => (
             <Reveal delay={i * 70} key={group.group}>
               <div className="skill-card">
-                <h3 className="skill-group">{group.group}</h3>
+                <h3 className="skill-group">{t(`skills.groups.${group.group}`)}</h3>
                 <div className="chip-row">
                   {group.items.map((item) => (
                     <span className="chip chip-mono" key={item}>
@@ -57,7 +59,7 @@ export function Skills() {
             <div className="galaxy-info">
               {selectedDomain ? (
                 <>
-                  <p className="galaxy-info-title">{selectedDomain.category}</p>
+                  <p className="galaxy-info-title">{t(`skills.groups.${selectedDomain.category}`)}</p>
                   <div className="chip-row">
                     {selectedDomain.items.map((item) => (
                       <span className="chip chip-mono" key={item}>
@@ -67,13 +69,7 @@ export function Skills() {
                   </div>
                 </>
               ) : (
-                <p className="galaxy-info-hint">
-                  Backend and languages carry real weight here — Laravel,
-                  ASP.NET Core, Node.js and Express orbit as "Backend",
-                  separate from the frontend-facing tools. Drag to rotate
-                  the system, click or tap a sphere to see what's inside
-                  it.
-                </p>
+                <p className="galaxy-info-hint">{t("skills.hint")}</p>
               )}
             </div>
           </div>

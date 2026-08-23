@@ -130,6 +130,19 @@
       .nav-toggle { display: none; background: none; border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 10px; }
       .nav-mobile { display: none; }
 
+      /* language switch */
+      .lang-switch {
+        display: inline-flex; align-items: center; gap: 2px;
+        border: 1px solid var(--border); border-radius: 999px; padding: 2px;
+      }
+      .lang-btn {
+        background: none; border: none; color: var(--muted);
+        font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600;
+        letter-spacing: 0.04em; padding: 5px 10px; border-radius: 999px;
+        transition: color 0.2s ease, background 0.2s ease;
+      }
+      .lang-btn:hover { color: var(--text); }
+      .lang-btn-active { background: rgba(0,229,255,0.14); color: var(--cyan); }
       /* CV download — the one thing a recruiter has to be able to take away */
       .nav-right { display: flex; align-items: center; gap: 14px; }
       .nav-cv {
@@ -224,6 +237,58 @@
       .cform-done > svg { color: var(--mint); flex-shrink: 0; }
       .cform-done-title { font-size: 15px; font-weight: 600; margin: 0; }
       .cform-done-sub { font-size: 13px; color: var(--muted); margin: 4px 0 0; }
+
+      /* command palette */
+      .cmdk-backdrop {
+        position: fixed; inset: 0; z-index: 200;
+        background: rgba(4,6,12,0.72); backdrop-filter: blur(6px);
+        display: flex; align-items: flex-start; justify-content: center;
+        padding: 12vh 20px 20px; animation: cmdkFade 0.16s ease;
+      }
+      @keyframes cmdkFade { from { opacity: 0; } to { opacity: 1; } }
+      .cmdk {
+        width: 100%; max-width: 620px; max-height: 70vh; display: flex; flex-direction: column;
+        background: #0d1120; border: 1px solid rgba(255,255,255,0.12); border-radius: 16px;
+        box-shadow: 0 40px 90px -20px rgba(0,0,0,0.8); overflow: hidden;
+        animation: cmdkRise 0.18s cubic-bezier(.22,1,.36,1);
+      }
+      @keyframes cmdkRise { from { transform: translateY(-10px); opacity: 0; } to { transform: none; opacity: 1; } }
+      .cmdk-input-row { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+      .cmdk-input-row > svg { color: var(--muted); flex-shrink: 0; }
+      .cmdk-input {
+        flex: 1; min-width: 0; background: none; border: none; outline: none;
+        color: var(--text); font-family: inherit; font-size: 15px;
+      }
+      .cmdk-input::placeholder { color: var(--muted); }
+      .cmdk-kbd {
+        font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--muted);
+        border: 1px solid var(--border); border-radius: 6px; padding: 3px 7px; flex-shrink: 0;
+      }
+      .cmdk-list { overflow-y: auto; padding: 8px; }
+      .cmdk-group {
+        font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.09em;
+        color: var(--muted); margin: 12px 0 5px; padding: 0 10px;
+      }
+      .cmdk-item {
+        display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+        background: none; border: none; border-radius: 10px; padding: 10px;
+        color: var(--text); font-size: 14px;
+      }
+      .cmdk-item-active { background: rgba(0,229,255,0.1); }
+      .cmdk-item-icon { display: flex; color: var(--muted); flex-shrink: 0; }
+      .cmdk-item-active .cmdk-item-icon { color: var(--cyan); }
+      .cmdk-item-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .cmdk-item-hint {
+        font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted);
+        flex-shrink: 0; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .cmdk-enter { color: var(--cyan); flex-shrink: 0; }
+      .cmdk-empty { color: var(--muted); font-size: 14px; text-align: center; padding: 28px 0; margin: 0; }
+      .cmdk-hint {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted);
+      }
+      .cmdk-hint kbd { border: 1px solid var(--border); border-radius: 5px; padding: 2px 6px; font-family: inherit; }
 
       /* sections */
       .section { position: relative; z-index: 2; padding: 64px 6vw; max-width: 1400px; margin: 0 auto; }
@@ -574,6 +639,8 @@
         .galaxy-wrap { grid-template-columns: 1fr; }
         .galaxy-3d { height: 320px; }
         .cert-3d { height: 360px; }
+        .cmdk-backdrop { padding: 8vh 14px 14px; }
+        .cmdk-item-hint { display: none; }
         .cs-arch { grid-template-columns: 1fr; }
         .cs-panel { padding: 4px 18px 22px; }
         .cs-toggle { padding: 18px; }
@@ -582,6 +649,7 @@
         .nav-toggle { display: inline-flex; }
         .nav-right { gap: 10px; }
         .nav-cv { padding: 7px 13px; font-size: 12.5px; }
+        .lang-btn { padding: 5px 8px; font-size: 11px; }
         .nav-cv-full { display: none; }
         .nav-cv-short { display: inline; }
         .nav-mobile {
@@ -599,6 +667,30 @@
         .section { padding: 72px 6vw; }
         .scroll-starfield { opacity: 0.5; }
         .cursor-3d-wrap { display: none; }
+      }
+
+      /* print
+
+         Ctrl+P is intercepted and prints the real CV PDF instead (see
+         PrintCV.jsx), so these rules only ever apply when someone prints from
+         the browser menu, which no shortcut can catch. Rather than reformat an
+         interactive page into a poor imitation of a résumé, that case gets a
+         short card pointing at the actual document. */
+      .print-fallback { display: none; }
+
+      @media print {
+        @page { margin: 20mm; }
+        html, body { background: #fff !important; }
+        .cv-root { display: none !important; }
+        .print-fallback {
+          display: block; color: #111; background: #fff;
+          font-family: 'Manrope', system-ui, sans-serif; line-height: 1.7;
+          max-width: 150mm; margin: 0 auto; padding-top: 20mm;
+        }
+        .print-fallback h1 { font-size: 26pt; margin: 0 0 2mm; letter-spacing: -0.02em; }
+        .print-fallback-role { font-size: 13pt; color: #444; margin: 0 0 10mm; }
+        .print-fallback p { font-size: 11pt; margin: 0 0 5mm; }
+        .print-fallback-url { font-family: 'JetBrains Mono', monospace; font-size: 11pt; word-break: break-all; }
       }
 
       @media (prefers-reduced-motion: reduce) {

@@ -9,6 +9,7 @@ import {
   CERT_PALETTE,
 } from "../../data/certificates.js";
 import { track, EVENTS } from "../../utils/analytics.js";
+import { useLang } from "../../i18n/index.jsx";
 
 // The 3D cloud paints every badge name into a canvas texture, so those names
 // exist as pixels and nothing else — invisible to Ctrl+F, to screen readers and
@@ -16,6 +17,8 @@ import { track, EVENTS } from "../../utils/analytics.js";
 // while the cloud is showing, CertificateList doubles as the canvas's text
 // alternative behind .sr-only so the credentials are never unreachable.
 function CertificateList({ srOnly = false }) {
+  const { t } = useLang();
+
   return (
     <ul className={srOnly ? "sr-only" : "cert-grid"}>
       {CERT_DATA.map((cert, i) => {
@@ -34,7 +37,7 @@ function CertificateList({ srOnly = false }) {
               <span className="cert-card-name">{cert.name}</span>
               {!srOnly && (
                 <span className="cert-card-link">
-                  SoftUni · view credential <ExternalLink size={12} />
+                  {t("certificates.viewCredential")} <ExternalLink size={12} />
                 </span>
               )}
             </a>
@@ -47,18 +50,17 @@ function CertificateList({ srOnly = false }) {
 
 export function Certificates() {
   const [certView, setCertView] = useState("3d");
+  const { t } = useLang();
 
   return (
     <section id="certificates" className="section">
       <Reveal>
         <p className="section-eyebrow">
-          <Award size={14} /> Certificates
+          <Award size={14} /> {t("certificates.eyebrow")}
         </p>
-        <ScrambleHeading text="Sixteen credentials, one orbit." className="h2" />
+        <ScrambleHeading text={t("certificates.heading")} className="h2" />
         <p className="lead">
-          {certView === "3d"
-            ? "Drag to spin the cluster, click or tap a badge to open its SoftUni credential."
-            : "Every credential, verifiable at the source — each card links to its SoftUni page."}
+          {certView === "3d" ? t("certificates.lead3d") : t("certificates.leadList")}
         </p>
       </Reveal>
 
@@ -67,13 +69,13 @@ export function Certificates() {
           className={`filter-btn ${certView === "3d" ? "filter-btn-active" : ""}`}
           onClick={() => setCertView("3d")}
         >
-          3D Orbit
+          {t("certificates.view3d")}
         </button>
         <button
           className={`filter-btn ${certView === "list" ? "filter-btn-active" : ""}`}
           onClick={() => setCertView("list")}
         >
-          List
+          {t("certificates.viewList")}
         </button>
       </div>
 

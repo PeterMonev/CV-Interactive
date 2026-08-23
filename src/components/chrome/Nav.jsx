@@ -2,6 +2,7 @@ import { Terminal, Menu, X, Download } from "lucide-react";
 import { NAV_LINKS } from "../../data/nav.js";
 import { CV_URL, CV_FILENAME, CV_LABEL } from "../../data/cv.js";
 import { track, EVENTS } from "../../utils/analytics.js";
+import { useLang, LANGS } from "../../i18n/index.jsx";
 
 export function Nav({
   navLinksRef,
@@ -12,6 +13,27 @@ export function Nav({
   menuOpen,
   setMenuOpen,
 }) {
+  const { t, lang, setLang } = useLang();
+
+  // Two segments rather than a single toggle: a recruiter should see that a
+  // Bulgarian version exists without having to click to find out.
+  const langSwitch = (
+    <div className="lang-switch" role="group" aria-label={t("nav.language")}>
+      {LANGS.map((l) => (
+        <button
+          key={l.code}
+          className={`lang-btn ${lang === l.code ? "lang-btn-active" : ""}`}
+          onClick={() => setLang(l.code)}
+          aria-pressed={lang === l.code}
+          lang={l.code}
+          title={l.name}
+        >
+          {l.label}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <>
       <header className="nav">
@@ -37,10 +59,12 @@ export function Nav({
                 className={`nav-link ${active === link.id ? "nav-link-active" : ""}`}
                 onClick={() => scrollTo(link.id)}
               >
-                {link.label}
+                {t(`nav.${link.id}`)}
               </button>
             ))}
           </nav>
+
+          {langSwitch}
 
           <a
             className="nav-cv"
@@ -50,7 +74,7 @@ export function Nav({
             aria-label={`${CV_LABEL} (PDF)`}
           >
             <Download size={15} />
-            <span className="nav-cv-full">{CV_LABEL}</span>
+            <span className="nav-cv-full">{t("nav.cv")}</span>
             <span className="nav-cv-short">CV</span>
           </a>
 
@@ -68,7 +92,7 @@ export function Nav({
         <div className="nav-mobile">
           {NAV_LINKS.map((link) => (
             <button key={link.id} onClick={() => scrollTo(link.id)}>
-              {link.label}
+              {t(`nav.${link.id}`)}
             </button>
           ))}
           <a
@@ -80,7 +104,7 @@ export function Nav({
               setMenuOpen(false);
             }}
           >
-            <Download size={15} /> {CV_LABEL}
+            <Download size={15} /> {t("nav.cv")}
           </a>
         </div>
       )}

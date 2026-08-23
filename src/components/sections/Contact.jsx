@@ -9,9 +9,11 @@ import { PhoneRevealCard } from "./PhoneRevealCard.jsx";
 import { CV_URL, CV_FILENAME } from "../../data/cv.js";
 import { track, EVENTS } from "../../utils/analytics.js";
 import { ContactForm } from "./ContactForm.jsx";
+import { useLang } from "../../i18n/index.jsx";
 
 export function Contact() {
   const [copied, setCopied] = useState(null);
+  const { t } = useLang();
 
   const copyToClipboard = useCallback((text, field) => {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -28,26 +30,22 @@ export function Contact() {
         <Equalizer bars={40} className="eq-divider" />
         <Reveal>
           <p className="section-eyebrow">
-            <Music2 size={14} /> Let's talk
+            <Music2 size={14} /> {t("contact.eyebrow")}
           </p>
-          <ScrambleHeading text="Open to junior full-stack roles." className="h2" />
-          <p className="lead">
-            Sofia-based, comfortable remote. If there's a team that needs
-            someone who ships, learns fast, and sweats the details, I'd like
-            to hear from you.
-          </p>
+          <ScrambleHeading text={t("contact.heading")} className="h2" />
+          <p className="lead">{t("contact.lead")}</p>
         </Reveal>
 
         <Reveal delay={100}>
           <div className="contact-grid">
             <ContactCopyCard
               icon={<Mail size={18} />}
-              label="Email"
+              label={t("contact.email")}
               value="monevpeter@gmail.com"
               copyValue="monevpeter@gmail.com"
               fieldKey="email"
               actionHref="mailto:monevpeter@gmail.com"
-              actionLabel="Open email client"
+              actionLabel={t("contact.openMail")}
               copied={copied === "email"}
               onCopy={copyToClipboard}
             />
@@ -84,15 +82,15 @@ export function Contact() {
             >
               <FileDown size={18} />
               <div className="contact-body">
-                <span className="contact-label">Résumé</span>
-                <span className="contact-value">Download PDF · 2 pages</span>
+                <span className="contact-label">{t("contact.resume")}</span>
+                <span className="contact-value">{t("contact.resumeValue")}</span>
               </div>
             </a>
             <div className="contact-card contact-static">
               <MapPin size={18} />
               <div className="contact-body">
-                <span className="contact-label">Based in</span>
-                <span className="contact-value">Sofia, Bulgaria</span>
+                <span className="contact-label">{t("contact.basedIn")}</span>
+                <span className="contact-value">{t("contact.basedInValue")}</span>
               </div>
             </div>
           </div>
