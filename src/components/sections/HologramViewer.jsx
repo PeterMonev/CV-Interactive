@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { tuneRenderer, tuneTexture } from "../../utils/gfx.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 
 export function HologramViewer({ projects, activeIndex }) {
@@ -30,7 +31,7 @@ export function HologramViewer({ projects, activeIndex }) {
     camera.position.set(0, 0.1, 6.2);
     camera.lookAt(0, 0.1, 0);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
       container.removeChild(container.firstChild);
@@ -87,7 +88,7 @@ export function HologramViewer({ projects, activeIndex }) {
     sctx.clearRect(0, 0, 4, 64);
     sctx.fillStyle = "rgba(255,255,255,0.4)";
     for (let y = 0; y < 64; y += 4) sctx.fillRect(0, y, 4, 1.5);
-    const scanTex = new THREE.CanvasTexture(scanCanvas);
+    const scanTex = tuneTexture(new THREE.CanvasTexture(scanCanvas));
     scanTex.wrapS = THREE.RepeatWrapping;
     scanTex.wrapT = THREE.RepeatWrapping;
     scanTex.repeat.set(1, 14);
@@ -107,6 +108,7 @@ export function HologramViewer({ projects, activeIndex }) {
     projects.forEach((p, i) => {
       if (!p.images || !p.images[0]) return;
       loader.load(p.images[0], (tex) => {
+        tuneTexture(tex, { srgb: true });
         texturesRef.current[p.name] = tex;
         if (i === activeIndexRef.current) {
           planeMat.map = tex;

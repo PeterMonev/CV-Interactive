@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { createBloomComposer } from "../../utils/bloom.js";
+import { tuneRenderer, tuneTexture } from "../../utils/gfx.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeCertBadgeTexture } from "../../utils/canvasTextures.js";
 import { CERT_FALLBACK_URL, CERT_PALETTE } from "../../data/certificates.js";
@@ -15,10 +17,11 @@ export function CertificateCloud3D({ certs }) {
     const reduced = prefersReducedMotion();
 
     const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x0a0e1a, 0.03);
     const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 100);
     camera.position.z = 11;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
       container.removeChild(container.firstChild);
@@ -52,7 +55,7 @@ export function CertificateCloud3D({ certs }) {
           grad.addColorStop(1, "rgba(238,241,251,0)");
           gctx.fillStyle = grad;
           gctx.fillRect(0, 0, 128, 128);
-          return new THREE.CanvasTexture(c);
+          return tuneTexture(new THREE.CanvasTexture(c));
         })(),
         transparent: true,
         depthWrite: false,
@@ -152,6 +155,10 @@ export function CertificateCloud3D({ certs }) {
     const dust = new THREE.Points(dustGeo, dustMat);
     scene.add(dust);
 
+    // Returns null on phones and for reduced-motion visitors, in which case the
+    // scene falls back to a plain render below.
+    const post = createBloomComposer(renderer, scene, camera, { strength: 0.45, radius: 0.45, threshold: 0.68 });
+
     function resize() {
       const w = container.clientWidth;
       const h = container.clientHeight;
@@ -159,6 +166,7 @@ export function CertificateCloud3D({ certs }) {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      if (post) post.setSize(w, h);
     }
     resize();
     window.addEventListener("resize", resize);
@@ -191,6 +199,14 @@ export function CertificateCloud3D({ certs }) {
     let startY = 0;
     let lastX = 0;
     let lastY = 0;
+    // Angular velocity carried over from the last drag frame. Releasing a
+    // pointer used to stop the cluster dead, which reads like a picture being
+    // let go rather than an object being thrown; friction lets it coast.
+    let spinY = 0;
+    let spinX = 0;
+    const DRAG_SENSITIVITY = 0.006;
+    const FRICTION = 0.94;
+    const MAX_SPIN = 0.09; // a violent flick should not turn into a blur
 
     function onPointerDown(e) {
       pointerDown = true;
@@ -215,8 +231,10 @@ export function CertificateCloud3D({ certs }) {
         if (dragging) {
           const dx = e.clientX - lastX;
           const dy = e.clientY - lastY;
-          group.rotation.y += dx * 0.006;
-          group.rotation.x += dy * 0.006;
+          spinY = Math.max(-MAX_SPIN, Math.min(MAX_SPIN, dx * DRAG_SENSITIVITY));
+          spinX = Math.max(-MAX_SPIN, Math.min(MAX_SPIN, dy * DRAG_SENSITIVITY));
+          group.rotation.y += spinY;
+          group.rotation.x += spinX;
           lastX = e.clientX;
           lastY = e.clientY;
         }
@@ -260,7 +278,18 @@ export function CertificateCloud3D({ certs }) {
       }
       if (!reduced) {
         const t = performance.now() * 0.001;
-        group.rotation.y += 0.0012;
+        if (!pointerDown) {
+          group.rotation.y += spinY;
+          group.rotation.x += spinX;
+        }
+        spinY *= FRICTION;
+        spinX *= FRICTION;
+        // Idle drift fades in only as the throw dies out, so the two never fight.
+        const coasting = Math.min(
+          1,
+          Math.max(Math.abs(spinY), Math.abs(spinX)) / 0.01
+        );
+        group.rotation.y += 0.0012 * (1 - coasting);
         core.rotation.y += 0.006;
         core.rotation.x += 0.003;
         const pulse = 1 + Math.sin(t * 2) * 0.12;
@@ -285,13 +314,15 @@ export function CertificateCloud3D({ certs }) {
           );
         });
       }
-      renderer.render(scene, camera);
+      if (post) post.render();
+      else renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
     }
 
     let io = null;
     if (reduced) {
-      renderer.render(scene, camera);
+      if (post) post.render();
+      else renderer.render(scene, camera);
     } else {
       io = new IntersectionObserver(
         (entries) => {
@@ -330,6 +361,7 @@ export function CertificateCloud3D({ certs }) {
         sprite.material.map.dispose();
         sprite.material.dispose();
       });
+      if (post) post.dispose();
       renderer.dispose();
       if (renderer.domElement && renderer.domElement.parentNode) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);

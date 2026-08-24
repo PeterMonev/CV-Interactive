@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { tuneRenderer } from "../../utils/gfx.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 
 function makeStarField(count, spread, depth, size, colorFn) {
@@ -75,7 +76,7 @@ export function ScrollStarfield() {
     );
     camera.position.set(0, 0, 5.5);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     while (container.firstChild) {
       container.removeChild(container.firstChild);

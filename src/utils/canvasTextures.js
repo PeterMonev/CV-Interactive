@@ -1,17 +1,27 @@
 import * as THREE from "three";
+import { tuneTexture, texturePixelRatio } from "./gfx.js";
+
+// Back a canvas with more device pixels than CSS pixels and scale the context to
+// match, so every drawing call below keeps working in logical units while the
+// texture itself carries enough detail to stay sharp on a HiDPI screen.
+function hidpiCanvas(cssWidth, cssHeight) {
+  const dpr = texturePixelRatio();
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.ceil(cssWidth * dpr);
+  canvas.height = Math.ceil(cssHeight * dpr);
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+  return { canvas, ctx, width: cssWidth, height: cssHeight };
+}
 
 export function makeLabelSprite(text, colorHex) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 320;
-  canvas.height = 76;
-  const ctx = canvas.getContext("2d");
+  const { canvas, ctx, width, height } = hidpiCanvas(320, 76);
   ctx.font = "600 38px 'JetBrains Mono', monospace";
   ctx.fillStyle = colorHex;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.needsUpdate = true;
+  ctx.fillText(text, width / 2, height / 2);
+  const texture = tuneTexture(new THREE.CanvasTexture(canvas));
   const material = new THREE.SpriteMaterial({
     map: texture,
     transparent: true,
@@ -34,7 +44,7 @@ export function makeGlowSpriteTexture() {
   grad.addColorStop(1, "rgba(238,241,251,0)");
   gctx.fillStyle = grad;
   gctx.fillRect(0, 0, 128, 128);
-  return new THREE.CanvasTexture(c);
+  return tuneTexture(new THREE.CanvasTexture(c));
 }
 
 
@@ -46,25 +56,24 @@ export function makeStatLabelSprite(text, colorHex) {
   const textWidth = measure.measureText(text).width;
 
   const padX = 18;
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.ceil(textWidth + padX * 2);
-  canvas.height = 60;
-  const ctx = canvas.getContext("2d");
+  const { canvas, ctx, width, height } = hidpiCanvas(
+    Math.ceil(textWidth + padX * 2),
+    60
+  );
   ctx.font = font;
   ctx.fillStyle = colorHex;
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  ctx.fillText(text, padX, canvas.height / 2);
+  ctx.fillText(text, padX, height / 2);
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.needsUpdate = true;
+  const texture = tuneTexture(new THREE.CanvasTexture(canvas));
   const material = new THREE.SpriteMaterial({
     map: texture,
     transparent: true,
     depthWrite: false,
   });
   const sprite = new THREE.Sprite(material);
-  const aspect = canvas.width / canvas.height;
+  const aspect = width / height;
   const scaleY = 0.4;
   sprite.scale.set(scaleY * aspect, scaleY, 1);
   return sprite;
@@ -72,14 +81,16 @@ export function makeStatLabelSprite(text, colorHex) {
 
 
 export function makePlanetTexture(colorHex, seed) {
+  const width = 256;
+  const height = 128;
   const canvas = document.createElement("canvas");
-  canvas.width = 256;
-  canvas.height = 128;
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext("2d");
   const base = new THREE.Color(colorHex);
 
   ctx.fillStyle = colorHex;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, width, height);
 
   // pseudo-random but stable per planet
   let s = seed * 9301 + 49297;
@@ -90,7 +101,7 @@ export function makePlanetTexture(colorHex, seed) {
 
   const bandCount = 5 + Math.floor(rand() * 5);
   for (let i = 0; i < bandCount; i++) {
-    const y = rand() * canvas.height;
+    const y = rand() * height;
     const h = 4 + rand() * 16;
     const lighter = rand() > 0.5;
     const c = base.clone();
@@ -98,21 +109,19 @@ export function makePlanetTexture(colorHex, seed) {
     ctx.fillStyle = `rgba(${Math.round(c.r * 255)},${Math.round(c.g * 255)},${Math.round(
       c.b * 255
     )},${0.3 + rand() * 0.3})`;
-    ctx.fillRect(0, y, canvas.width, h);
+    ctx.fillRect(0, y, width, h);
   }
 
   for (let i = 0; i < 260; i++) {
-    const x = rand() * canvas.width;
-    const y = rand() * canvas.height;
+    const x = rand() * width;
+    const y = rand() * height;
     ctx.fillStyle = `rgba(255,255,255,${rand() * 0.1})`;
     ctx.beginPath();
     ctx.arc(x, y, rand() * 1.6, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.needsUpdate = true;
-  return texture;
+  return tuneTexture(new THREE.CanvasTexture(canvas));
 }
 
 
@@ -150,10 +159,7 @@ export function wrapCanvasText(ctx, text, cx, cy, maxWidth, lineHeight) {
 
 
 export function makeCertBadgeTexture(name, colorHex) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 512;
-  canvas.height = 260;
-  const ctx = canvas.getContext("2d");
+  const { canvas, ctx, width, height } = hidpiCanvas(512, 260);
 
   // soft glow halo behind the card
   ctx.save();
@@ -162,7 +168,7 @@ export function makeCertBadgeTexture(name, colorHex) {
   } catch (err) {
     /* canvas filter unsupported — skip the halo, card still renders fine */
   }
-  roundRectPath(ctx, 26, 26, canvas.width - 52, canvas.height - 52, 26);
+  roundRectPath(ctx, 26, 26, width - 52, height - 52, 26);
   ctx.fillStyle = colorHex;
   ctx.globalAlpha = 0.4;
   ctx.fill();
@@ -171,7 +177,7 @@ export function makeCertBadgeTexture(name, colorHex) {
 
   // card body
   const pad = 14;
-  roundRectPath(ctx, pad, pad, canvas.width - pad * 2, canvas.height - pad * 2, 24);
+  roundRectPath(ctx, pad, pad, width - pad * 2, height - pad * 2, 24);
   ctx.fillStyle = "rgba(8,11,22,0.95)";
   ctx.fill();
   ctx.lineWidth = 3;
@@ -179,7 +185,7 @@ export function makeCertBadgeTexture(name, colorHex) {
   ctx.stroke();
 
   // achievement glyph (checkmark in a ring), centered near the top
-  const cx = canvas.width / 2;
+  const cx = width / 2;
   const cy = 62;
   const r = 22;
   ctx.beginPath();
@@ -206,15 +212,13 @@ export function makeCertBadgeTexture(name, colorHex) {
   ctx.font = "600 30px 'Space Grotesk', sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  wrapCanvasText(ctx, name, cx, 150, canvas.width - 96, 36);
+  wrapCanvasText(ctx, name, cx, 150, width - 96, 36);
 
   // footer
   ctx.font = "500 19px 'JetBrains Mono', monospace";
   ctx.fillStyle = colorHex;
-  ctx.fillText("SoftUni · view credential ↗", cx, canvas.height - 30);
+  ctx.fillText("SoftUni · view credential ↗", cx, height - 30);
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.needsUpdate = true;
-  return texture;
+  return tuneTexture(new THREE.CanvasTexture(canvas));
 }
 

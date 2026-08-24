@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { tuneRenderer } from "../../utils/gfx.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 
 export function Timeline3D({ count }) {
@@ -16,7 +17,7 @@ export function Timeline3D({ count }) {
     camera.position.set(0.9, 0, 3.4);
     camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
       container.removeChild(container.firstChild);

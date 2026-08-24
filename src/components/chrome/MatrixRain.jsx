@@ -18,8 +18,8 @@ export function MatrixRain() {
     // a fixed number of *frames*, and the trail length is however far the head
     // travels in that time. Halve the speed alone and the trails halve too —
     // keep the ratio roughly constant to change pace without changing the look.
-    const FALL_SPEED = 0.22;
-    const TRAIL_FADE = 0.1;
+    const FALL_SPEED = 0.12;
+    const TRAIL_FADE = 0.055;
     let columns = 0;
     let drops = [];
 
@@ -31,6 +31,9 @@ export function MatrixRain() {
     }
     resize();
     window.addEventListener("resize", resize);
+    const ro =
+      typeof ResizeObserver !== "undefined" ? new ResizeObserver(resize) : null;
+    if (ro) ro.observe(canvas);
 
     function draw() {
       ctx.fillStyle = `rgba(6,8,16,${TRAIL_FADE})`;
@@ -89,6 +92,7 @@ export function MatrixRain() {
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();
       window.removeEventListener("resize", resize);
+      if (ro) ro.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);

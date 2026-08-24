@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { createBloomComposer } from "../../utils/bloom.js";
+import { tuneRenderer } from "../../utils/gfx.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 
 export function Hero3D() {
@@ -17,7 +19,7 @@ export function Hero3D() {
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
     camera.position.z = 11;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
       container.removeChild(container.firstChild);
@@ -85,6 +87,10 @@ export function Hero3D() {
     const stars = new THREE.Points(starGeo, starMat);
     scene.add(stars);
 
+    // Returns null on phones and for reduced-motion visitors, in which case the
+    // scene falls back to a plain render below.
+    const post = createBloomComposer(renderer, scene, camera, { strength: 0.62, radius: 0.55, threshold: 0.5 });
+
     function resize() {
       const w = container.clientWidth;
       const h = container.clientHeight;
@@ -92,6 +98,7 @@ export function Hero3D() {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      if (post) post.setSize(w, h);
     }
     resize();
 
@@ -165,13 +172,15 @@ export function Hero3D() {
       camera.position.x += (mouse.x * 1.1 - camera.position.x) * 0.02;
       camera.position.y += (-mouse.y * 0.8 - camera.position.y) * 0.02;
       camera.lookAt(scene.position);
-      renderer.render(scene, camera);
+      if (post) post.render();
+      else renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
     }
 
     let io = null;
     if (reduced) {
-      renderer.render(scene, camera);
+      if (post) post.render();
+      else renderer.render(scene, camera);
     } else {
       io = new IntersectionObserver(
         (entries) => {
@@ -206,6 +215,7 @@ export function Hero3D() {
       knotMat.dispose();
       starGeo.dispose();
       starMat.dispose();
+      if (post) post.dispose();
       renderer.dispose();
       if (renderer.domElement && renderer.domElement.parentNode) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);

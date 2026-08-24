@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import * as THREE from "three";
+import { tuneRenderer } from "../../utils/gfx.js";
 import { ArrowUp } from "lucide-react";
 import { prefersReducedMotion, magneticMove, magneticLeave } from "../../utils/motion.js";
 
@@ -24,7 +25,9 @@ function ScrollTop3D({ onFail }) {
       camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
       camera.position.z = 3;
 
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }), {
+      toneMap: false,
+    });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.setSize(42, 42);
       while (container.firstChild) {

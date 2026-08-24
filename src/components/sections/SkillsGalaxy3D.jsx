@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { tuneRenderer } from "../../utils/gfx.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeLabelSprite, makeGlowSpriteTexture, makePlanetTexture } from "../../utils/canvasTextures.js";
 import { RADAR_DOMAINS } from "../../data/skills.js";
@@ -23,7 +24,7 @@ export function SkillsGalaxy3D({ onSelect }) {
     camera.position.set(0, 2.6, 9.6);
     camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
       container.removeChild(container.firstChild);
@@ -227,6 +228,14 @@ export function SkillsGalaxy3D({ onSelect }) {
     let startY = 0;
     let lastX = 0;
     let lastY = 0;
+    // Angular velocity carried over from the last drag frame. Releasing a
+    // pointer used to stop the cluster dead, which reads like a picture being
+    // let go rather than an object being thrown; friction lets it coast.
+    let spinY = 0;
+    let spinX = 0;
+    const DRAG_SENSITIVITY = 0.006;
+    const FRICTION = 0.94;
+    const MAX_SPIN = 0.09; // a violent flick should not turn into a blur
 
     function onPointerDown(e) {
       pointerDown = true;
@@ -250,8 +259,10 @@ export function SkillsGalaxy3D({ onSelect }) {
         if (dragging) {
           const dx = e.clientX - lastX;
           const dy = e.clientY - lastY;
-          systemGroup.rotation.y += dx * 0.006;
-          systemGroup.rotation.x += dy * 0.006;
+          spinY = Math.max(-MAX_SPIN, Math.min(MAX_SPIN, dx * DRAG_SENSITIVITY));
+          spinX = Math.max(-MAX_SPIN, Math.min(MAX_SPIN, dy * DRAG_SENSITIVITY));
+          systemGroup.rotation.y += spinY;
+          systemGroup.rotation.x += spinX;
           lastX = e.clientX;
           lastY = e.clientY;
         }
@@ -296,7 +307,18 @@ export function SkillsGalaxy3D({ onSelect }) {
         const sunPulse = 1 + Math.sin(t * 2.2) * 0.08;
         sunCore.scale.set(sunPulse, sunPulse, sunPulse);
         coreGlow.scale.set(2.1 + Math.sin(t * 2.2) * 0.3, 2.1 + Math.sin(t * 2.2) * 0.3, 1);
-        systemGroup.rotation.y += 0.0009;
+        if (!pointerDown) {
+          systemGroup.rotation.y += spinY;
+          systemGroup.rotation.x += spinX;
+        }
+        spinY *= FRICTION;
+        spinX *= FRICTION;
+        // Idle drift fades in only as the throw dies out, so the two never fight.
+        const coasting = Math.min(
+          1,
+          Math.max(Math.abs(spinY), Math.abs(spinX)) / 0.01
+        );
+        systemGroup.rotation.y += 0.0009 * (1 - coasting);
         starField.rotation.y += 0.0002;
         pivots.forEach(({ pivot, speed }) => {
           pivot.rotation.y += 0.0026 * speed;

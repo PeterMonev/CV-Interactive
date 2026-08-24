@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { tuneRenderer } from "../../utils/gfx.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 
 export function Cursor3D() {
@@ -27,7 +28,9 @@ export function Cursor3D() {
       camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
       camera.position.z = 3;
 
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }), {
+      toneMap: false,
+    });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.setSize(size, size);
       while (container.firstChild) {
