@@ -166,6 +166,55 @@
         color: var(--cyan); font-size: 15px; font-weight: 600;
       }
 
+      /* live GitHub activity */
+      .gh {
+        margin-top: 34px; padding: 22px 26px 20px;
+        border: 1px solid var(--border); border-radius: 16px;
+        background: linear-gradient(160deg, rgba(0,229,255,0.045), rgba(255,255,255,0.015));
+      }
+      .gh-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+      .gh-head {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.09em;
+        color: var(--muted); transition: color 0.25s ease;
+      }
+      .gh-head:hover { color: var(--cyan); }
+      .gh-live {
+        display: inline-flex; align-items: center; gap: 7px;
+        font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--mint);
+      }
+
+      .gh-body { display: flex; align-items: flex-end; gap: 26px; margin-top: 18px; }
+      .gh-count { display: flex; align-items: baseline; gap: 10px; flex-shrink: 0; }
+      .gh-count-num {
+        font-family: 'Space Grotesk', sans-serif; font-size: 44px; font-weight: 700; line-height: 1;
+        background: linear-gradient(90deg, var(--cyan), var(--mint));
+        -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      }
+      .gh-count-label { font-size: 12px; color: var(--muted); line-height: 1.45; }
+
+      .gh-chart { flex: 1; min-width: 0; }
+      .gh-strip { display: flex; align-items: flex-end; gap: 3px; height: 56px; }
+      .gh-bar {
+        flex: 1; min-width: 0; border-radius: 3px 3px 2px 2px;
+        height: 4px; align-self: flex-end;
+        background: rgba(255,255,255,0.06);
+        transition: height 0.55s cubic-bezier(.22,1,.36,1) var(--delay);
+      }
+      /* colour walks along the strip so the month reads left to right */
+      .gh-bar-on {
+        background: color-mix(in srgb, var(--cyan) calc((1 - var(--t)) * 100%), var(--mint));
+        box-shadow: 0 0 10px -2px color-mix(in srgb, var(--cyan) calc((1 - var(--t)) * 100%), var(--mint));
+      }
+      .gh-strip-grown .gh-bar { height: var(--h); }
+      .gh-axis {
+        display: flex; justify-content: space-between; margin-top: 8px;
+        font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--muted);
+      }
+
+      .gh-repos { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+      .gh-repos-label { font-size: 12px; color: var(--muted); }
+
       /* case study — collapsed by default; depth for whoever opens it */
       .cs-wrap { margin-top: 34px; border: 1px solid var(--border); border-radius: 16px; background: var(--panel); overflow: hidden; }
       .cs-wrap.cs-open { border-color: rgba(0,229,255,0.28); }
@@ -643,6 +692,8 @@
         .cmdk-backdrop { padding: 8vh 14px 14px; }
         .cmdk-item-hint { display: none; }
         .cs-arch { grid-template-columns: 1fr; }
+        .gh-body { flex-direction: column; align-items: stretch; gap: 16px; }
+        .gh-count-num { font-size: 36px; }
         .cs-panel { padding: 4px 18px 22px; }
         .cs-toggle { padding: 18px; }
         .hologram-viewer { height: 340px; }

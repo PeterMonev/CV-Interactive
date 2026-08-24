@@ -84,6 +84,15 @@ export const UI = {
       flagship: "Flagship",
       filters: { all: "All", react: "React", dotnet: "C# / .NET", frontend: "JavaScript" },
     },
+    github: {
+      title: "Recent GitHub activity",
+      pushes: "pushes",
+      inDays: "in the last {n} days",
+      last: "last push",
+      recently: "Recently:",
+      daysAgo: "{n} days ago",
+      today: "today",
+    },
     caseStudy: {
       toggle: "How RehearsalHub is put together",
       archCaption: "depends on ↓ — the domain at the bottom references nothing",
@@ -220,6 +229,15 @@ export const UI = {
       viewLive: "Виж на живо",
       flagship: "Водещ проект",
       filters: { all: "Всички", react: "React", dotnet: "C# / .NET", frontend: "JavaScript" },
+    },
+    github: {
+      title: "Скорошна активност в GitHub",
+      pushes: "качвания",
+      inDays: "за последните {n} дни",
+      last: "последно",
+      recently: "Наскоро:",
+      daysAgo: "преди {n} дни",
+      today: "днес",
     },
     caseStudy: {
       toggle: "Как е устроен RehearsalHub",

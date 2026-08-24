@@ -4,6 +4,7 @@ import { Reveal } from "../ui/Reveal.jsx";
 import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
 import { ProjectFlipCard } from "./ProjectFlipCard.jsx";
 import { CaseStudy } from "./CaseStudy.jsx";
+import { GitHubActivity } from "./GitHubActivity.jsx";
 import { PROJECTS, FILTERS } from "../../data/projects.js";
 import { useLang } from "../../i18n/index.jsx";
 
@@ -46,6 +47,10 @@ export function Projects() {
       </div>
 
       <Reveal delay={120}>
+        <GitHubActivity />
+      </Reveal>
+
+      <Reveal delay={140}>
         <CaseStudy />
       </Reveal>
     </section>

@@ -1,79 +1,58 @@
-import { useEffect, useRef } from "react";
-import { CV_URL, CV_FILENAME } from "../../data/cv.js";
+import { useEffect } from "react";
+import { CV_URL } from "../../data/cv.js";
 import { track, EVENTS } from "../../utils/analytics.js";
 
 // Ctrl/Cmd+P on an interactive, WebGL-heavy page produces something nobody
 // wants to hand to a hiring manager. The résumé already exists as a designed
-// two-page PDF, so the shortcut prints that instead: the PDF is loaded into a
-// hidden same-origin iframe and printed from there, which keeps it vector-sharp
-// and always identical to the downloadable file.
+// two-page PDF, so the shortcut opens that instead, in the browser's own PDF
+// viewer, where printing is one keystroke away and comes out vector-sharp.
 //
-// Rasterising the PDF into images was the other option and was rejected — it
-// costs bandwidth on every visit, and re-rendering the gradients faithfully is
-// not something a rasteriser can be trusted to do.
+// This used to print from a hidden iframe, which is neater when it works and
+// unreliable in practice: Chrome renders a PDF through an internal plugin, and
+// calling print() on that frame can quietly do nothing — no dialog, no error,
+// and therefore no way to fall back. Opening the file is less clever and always
+// does something the visitor can see.
+//
+// Rasterising the PDF into images was the other option and was rejected: it
+// costs bandwidth on every visit, and the gradients in the sidebar do not
+// survive a rasteriser.
 export function PrintCV() {
-  const frameRef = useRef(null);
-  const readyRef = useRef(false);
-
   useEffect(() => {
-    // Built only on first use, so a visitor who never prints never pays for it.
-    function ensureFrame() {
-      if (frameRef.current) return frameRef.current;
-      const frame = document.createElement("iframe");
-      frame.setAttribute("aria-hidden", "true");
-      frame.setAttribute("tabindex", "-1");
-      frame.title = CV_FILENAME;
-      frame.style.cssText =
-        "position:fixed;left:-10000px;top:0;width:1px;height:1px;border:0;opacity:0;";
-      frame.onload = () => {
-        readyRef.current = true;
-      };
-      frame.src = CV_URL;
-      document.body.appendChild(frame);
-      frameRef.current = frame;
-      return frame;
-    }
-
-    function printPdf() {
-      const frame = ensureFrame();
-      const attempt = (triesLeft) => {
-        try {
-          const win = frame.contentWindow;
-          if (!win) throw new Error("no content window");
-          win.focus();
-          win.print();
-          track(EVENTS.CV_PRINT, { via: "shortcut" });
-          return;
-        } catch (err) {
-          // Firefox in particular refuses to print a PDF from an iframe. Rather
-          // than leave the shortcut doing nothing, hand the file to the
-          // browser's own PDF viewer, where Ctrl+P works natively.
-          if (triesLeft > 0 && !readyRef.current) {
-            setTimeout(() => attempt(triesLeft - 1), 250);
-            return;
+    function openPdf() {
+      track(EVENTS.CV_PRINT, { via: "shortcut" });
+      // Called straight out of a keydown handler, so this counts as a user
+      // gesture and no popup blocker stops it.
+      const win = window.open(CV_URL, "_blank");
+      if (!win) {
+        // Blocked anyway — navigate instead of doing nothing at all.
+        window.location.href = CV_URL;
+        return;
+      }
+      // Best effort: some browsers will raise the print dialog on the viewer
+      // once it has loaded. If they do not, the file is open and one keystroke
+      // away, which is the point.
+      try {
+        win.addEventListener("load", () => {
+          try {
+            win.print();
+          } catch (err) {
+            /* the viewer is open; the visitor can print it themselves */
           }
-          track(EVENTS.CV_PRINT, { via: "fallback-tab" });
-          window.open(CV_URL, "_blank", "noopener,noreferrer");
-        }
-      };
-      attempt(readyRef.current ? 0 : 8);
+        });
+      } catch (err) {
+        /* cross-origin restrictions on the handle — nothing to do */
+      }
     }
 
     function onKeyDown(e) {
       const isPrint = (e.key === "p" || e.key === "P") && (e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey;
       if (!isPrint) return;
       e.preventDefault();
-      printPdf();
+      openPdf();
     }
 
     window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      if (frameRef.current && frameRef.current.parentNode) {
-        frameRef.current.parentNode.removeChild(frameRef.current);
-      }
-      frameRef.current = null;
-    };
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
   // Fallback for anyone who prints from the browser menu, which no shortcut can
