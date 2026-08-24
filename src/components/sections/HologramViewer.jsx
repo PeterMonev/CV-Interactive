@@ -1,6 +1,10 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
+import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
+import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { tuneRenderer, tuneTexture } from "../../utils/gfx.js";
+import { makeGlowSpriteTexture } from "../../utils/canvasTextures.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 
 export function HologramViewer({ projects, activeIndex }) {
@@ -41,33 +45,80 @@ export function HologramViewer({ projects, activeIndex }) {
     const group = new THREE.Group();
     scene.add(group);
 
-    const ringOuter = new THREE.Mesh(
-      new THREE.TorusGeometry(1.7, 0.025, 8, 72),
-      new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.6 })
-    );
-    ringOuter.rotation.x = Math.PI / 2;
-    ringOuter.position.y = -1.55;
-    group.add(ringOuter);
-
-    const ringInner = new THREE.Mesh(
-      new THREE.TorusGeometry(1.2, 0.018, 8, 64),
-      new THREE.MeshBasicMaterial({ color: 0x5eead4, transparent: true, opacity: 0.5 })
-    );
-    ringInner.rotation.x = Math.PI / 2;
-    ringInner.position.y = -1.55;
-    group.add(ringInner);
+    // Tube radii of 0.025 and 0.018 are thinner than a pixel at this distance,
+    // so the emitter rings shimmered and dropped out as the rig turned. Built
+    // as lines they hold a real width whatever the screen.
+    const lineMaterials = [];
+    function makeRing(radius, colorHex, width, opacity) {
+      const STEPS = 96;
+      const pts = [];
+      for (let i = 0; i < STEPS; i++) {
+        const a0 = (i / STEPS) * Math.PI * 2;
+        const a1 = ((i + 1) / STEPS) * Math.PI * 2;
+        pts.push(
+          Math.cos(a0) * radius, 0, Math.sin(a0) * radius,
+          Math.cos(a1) * radius, 0, Math.sin(a1) * radius
+        );
+      }
+      const geo = new LineSegmentsGeometry();
+      geo.setPositions(pts);
+      const mat = new LineMaterial({
+        color: colorHex,
+        transparent: true,
+        opacity,
+        linewidth: width,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      lineMaterials.push(mat);
+      const ring = new LineSegments2(geo, mat);
+      ring.position.y = -1.55;
+      group.add(ring);
+      return { ring, mat, geo };
+    }
+    const outer = makeRing(1.7, 0x00e5ff, 2.4, 0.85);
+    const inner = makeRing(1.2, 0x5eead4, 1.8, 0.7);
 
     const beamGeo = new THREE.CylinderGeometry(0.05, 1.3, 3.1, 24, 1, true);
     const beamMat = new THREE.MeshBasicMaterial({
       color: 0x00e5ff,
       transparent: true,
-      opacity: 0.05,
+      opacity: 0.16,
       side: THREE.DoubleSide,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
     const beam = new THREE.Mesh(beamGeo, beamMat);
     group.add(beam);
+
+    // Motes drifting up the cone. Without them the beam is an empty shape; with
+    // them it reads as air full of light, which is the whole idea of the room.
+    const MOTE_COUNT = 90;
+    const motePositions = new Float32Array(MOTE_COUNT * 3);
+    const moteSeed = [];
+    for (let i = 0; i < MOTE_COUNT; i++) {
+      moteSeed.push({
+        angle: Math.random() * Math.PI * 2,
+        radius: Math.random(),
+        y: Math.random(),
+        speed: 0.04 + Math.random() * 0.07,
+      });
+    }
+    const moteGeo = new THREE.BufferGeometry();
+    moteGeo.setAttribute("position", new THREE.BufferAttribute(motePositions, 3));
+    const moteTexture = makeGlowSpriteTexture();
+    const moteMat = new THREE.PointsMaterial({
+      color: 0x9beaff,
+      map: moteTexture,
+      size: 0.09,
+      transparent: true,
+      opacity: 0.55,
+      sizeAttenuation: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+    const motes = new THREE.Points(moteGeo, moteMat);
+    group.add(motes);
 
     const planeGeo = new THREE.PlaneGeometry(3.3, 1.72);
     const planeMat = new THREE.MeshBasicMaterial({
@@ -125,6 +176,7 @@ export function HologramViewer({ projects, activeIndex }) {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      lineMaterials.forEach((m) => m.resolution.set(w, h));
     }
     resize();
     window.addEventListener("resize", resize);
@@ -199,10 +251,34 @@ export function HologramViewer({ projects, activeIndex }) {
           group.rotation.y += 0.0018;
         }
         group.position.y = Math.sin(t * 0.7) * 0.06;
-        planeMat.opacity = Math.min(0.95, planeMat.map ? 0.86 + Math.sin(t * 6) * 0.06 : 0);
+
+        // A flat plane collapses to a hairline once the rig turns past ninety
+        // degrees, which reads as broken rather than as rotation. Fading it out
+        // as it turns away lets the rig keep spinning and the image bow out.
+        const facing = Math.abs(Math.cos(group.rotation.y));
+        const visible = Math.pow(facing, 0.6);
+        const flicker = 0.86 + Math.sin(t * 6) * 0.06;
+        planeMat.opacity = planeMat.map ? Math.min(0.95, flicker) * visible : 0;
+        scanMat.opacity = 0.4 * visible;
+
         scanTex.offset.y -= 0.006;
-        ringOuter.material.opacity = 0.5 + Math.sin(t * 2) * 0.1;
-        beamMat.opacity = 0.04 + Math.sin(t * 1.6) * 0.02;
+        // the two rings breathe out of step, so the base never looks like one part
+        outer.mat.opacity = 0.7 + Math.sin(t * 2) * 0.15;
+        inner.mat.opacity = 0.55 + Math.sin(t * 2 + 1.1) * 0.15;
+        beamMat.opacity = 0.14 + Math.sin(t * 1.6) * 0.05;
+
+        // motes ride up the cone, which narrows towards the top
+        const motePos = moteGeo.attributes.position;
+        for (let i = 0; i < MOTE_COUNT; i++) {
+          const m = moteSeed[i];
+          m.y = (m.y + m.speed * 0.016) % 1;
+          const radiusAtY = 1.3 - m.y * 1.25;
+          const r = m.radius * radiusAtY;
+          const a = m.angle + m.y * 0.8;
+          motePos.setXYZ(i, Math.cos(a) * r, -1.55 + m.y * 3.1, Math.sin(a) * r);
+        }
+        motePos.needsUpdate = true;
+        moteMat.opacity = 0.45 + Math.sin(t * 1.6) * 0.12;
       }
       renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
@@ -237,7 +313,8 @@ export function HologramViewer({ projects, activeIndex }) {
       container.removeEventListener("pointerup", onPointerUp);
       container.removeEventListener("pointercancel", onPointerUp);
       Object.values(texturesRef.current).forEach((tex) => tex.dispose());
-      scanTex.dispose();
+      scanTex.dispose();
+      moteTexture.dispose();
       scene.traverse((obj) => {
         if (obj.geometry) obj.geometry.dispose();
         if (obj.material) obj.material.dispose();
