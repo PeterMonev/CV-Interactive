@@ -672,7 +672,9 @@
       @keyframes spin { to { transform: rotate(360deg); } }
 
       /* hero 3d */
-      .hero-3d { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.9; }
+      .fx-layer { will-change: transform; }
+      .hero-3d-layer { position: absolute; inset: 0; z-index: 0; pointer-events: none; will-change: transform; }
+      .hero-3d { position: absolute; inset: 0; pointer-events: none; opacity: 0.9; }
       .hero-3d canvas { display: block; width: 100% !important; height: 100% !important; }
       .drag-hint {
         position: relative; z-index: 1; display: inline-block; margin-top: 18px;

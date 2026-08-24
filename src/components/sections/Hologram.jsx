@@ -6,11 +6,13 @@ import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
 import { HologramViewer } from "../ui/lazy3d.js";
 import { PROJECTS } from "../../data/projects.js";
 import { useLang, useTx } from "../../i18n/index.jsx";
+import { useParallax } from "../../hooks/useScrollFx.js";
 
 export function Hologram() {
   const [hologramIndex, setHologramIndex] = useState(0);
   const { t } = useLang();
   const tx = useTx();
+  const rigRef = useParallax({ from: 52, to: -52 });
 
   return (
     <section id="hologram" className="section">
@@ -36,7 +38,9 @@ export function Hologram() {
 
       <Reveal delay={80}>
         <div className="hologram-wrap">
-                      <HologramViewer projects={PROJECTS} activeIndex={hologramIndex} />
+          <div ref={rigRef} className="fx-layer">
+            <HologramViewer projects={PROJECTS} activeIndex={hologramIndex} />
+          </div>
         </div>
         <div className="hologram-info">
           <h3>{PROJECTS[hologramIndex].name}</h3>

@@ -3,18 +3,24 @@ import { magneticMove, magneticLeave } from "../../utils/motion.js";
 import { CV_URL, CV_FILENAME, CV_LABEL } from "../../data/cv.js";
 import { track, EVENTS } from "../../utils/analytics.js";
 import { useLang } from "../../i18n/index.jsx";
+import { useParallax } from "../../hooks/useScrollFx.js";
 import { Equalizer } from "../ui/Equalizer.jsx";
 import { Hero3D } from "../ui/lazy3d.js";
 import { HeroTerminal } from "./HeroTerminal.jsx";
 
 export function Hero({ scrollTo }) {
   const { t } = useLang();
+  // the shapes hang back, the words lead
+  const artRef = useParallax({ from: 0, to: 130 });
+  const copyRef = useParallax({ from: 0, to: -60 });
 
   return (
     <section id="home" className="section hero">
-      <Hero3D />
+      <div ref={artRef} className="hero-3d-layer">
+        <Hero3D />
+      </div>
       <div className="hero-grid">
-        <div className="hero-copy">
+        <div ref={copyRef} className="hero-copy">
           <p className="eyebrow">
             <span className="dot-live" /> {t("hero.eyebrow")}
           </p>

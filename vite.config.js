@@ -18,6 +18,7 @@ export default defineConfig({
         manualChunks: {
           three: ["three"],
           react: ["react", "react-dom"],
+          gsap: ["gsap", "gsap/ScrollTrigger"],
         },
       },
     },

@@ -10,6 +10,7 @@ import {
 } from "../../data/certificates.js";
 import { track, EVENTS } from "../../utils/analytics.js";
 import { useLang } from "../../i18n/index.jsx";
+import { useParallax } from "../../hooks/useScrollFx.js";
 
 // The 3D cloud paints every badge name into a canvas texture, so those names
 // exist as pixels and nothing else — invisible to Ctrl+F, to screen readers and
@@ -51,6 +52,7 @@ function CertificateList({ srOnly = false }) {
 export function Certificates() {
   const [certView, setCertView] = useState("3d");
   const { t } = useLang();
+  const cloudRef = useParallax({ from: 46, to: -46 });
 
   return (
     <section id="certificates" className="section">
@@ -83,7 +85,9 @@ export function Certificates() {
         {certView === "3d" ? (
           <>
             <div className="cert-cloud-wrap">
-              <CertificateCloud3D certs={CERT_DATA} />
+              <div ref={cloudRef} className="fx-layer">
+                <CertificateCloud3D certs={CERT_DATA} />
+              </div>
             </div>
             <CertificateList srOnly />
           </>
