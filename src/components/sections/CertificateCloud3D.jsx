@@ -1,9 +1,15 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
+import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
+import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { bloomSupported, createBloomComposer } from "../../utils/bloom.js";
 import { tuneRenderer, tuneTexture } from "../../utils/gfx.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
-import { makeCertBadgeTexture } from "../../utils/canvasTextures.js";
+import {
+  makeCertBadgeTexture,
+  makeGlowSpriteTexture,
+} from "../../utils/canvasTextures.js";
 import { CERT_FALLBACK_URL, CERT_PALETTE } from "../../data/certificates.js";
 import { track, EVENTS } from "../../utils/analytics.js";
 
@@ -37,14 +43,21 @@ export function CertificateCloud3D({ certs }) {
     scene.add(group);
 
     // glowing achievement core at the center
-    const coreGeo = new THREE.IcosahedronGeometry(0.4, 1);
+    const coreGeo = new THREE.IcosahedronGeometry(0.78, 1);
     const coreEdges = new THREE.EdgesGeometry(coreGeo);
-    const coreMat = new THREE.LineBasicMaterial({
+    // LineMaterial converts pixel widths using the canvas size, so each one has
+    // to be told when that changes.
+    const lineMaterials = [];
+
+    const coreLineGeo = new LineSegmentsGeometry().fromEdgesGeometry(coreEdges);
+    const coreMat = new LineMaterial({
       color: 0xeef1fb,
       transparent: true,
       opacity: 0.8,
+      linewidth: 1.5,
     });
-    const core = new THREE.LineSegments(coreEdges, coreMat);
+    lineMaterials.push(coreMat);
+    const core = new LineSegments2(coreLineGeo, coreMat);
     group.add(core);
 
     const coreGlow = new THREE.Sprite(
@@ -66,7 +79,7 @@ export function CertificateCloud3D({ certs }) {
         blending: THREE.AdditiveBlending,
       })
     );
-    coreGlow.scale.set(1.6, 1.6, 1);
+    coreGlow.scale.set(2.9, 2.9, 1);
     group.add(coreGlow);
 
     // badge sprite size, needed both here and by the camera fit below
@@ -75,6 +88,15 @@ export function CertificateCloud3D({ certs }) {
 
     // see makeCertBadgeTexture: the soft halo is the part phones render wrong
     const haloEnabled = window.innerWidth >= 1024;
+
+    // Depth-driven prominence. The front badge reaches FOCUS_MAX_SCALE and full
+    // opacity; the one directly behind the core falls to FOCUS_MIN_SCALE and
+    // FOCUS_MIN_FADE, which is present enough to read as a cluster and quiet
+    // enough to stay out of the way.
+    const FOCUS_MIN_SCALE = 0.62;
+    const FOCUS_MAX_SCALE = 1.55;
+    const FOCUS_MIN_FADE = 0.45;
+    const worldPos = new THREE.Vector3();
 
     const n = certs.length;
     const golden = Math.PI * (3 - Math.sqrt(5));
@@ -101,6 +123,8 @@ export function CertificateCloud3D({ certs }) {
         map: texture,
         transparent: true,
         depthWrite: false,
+        // driven per frame by depth, so it starts wherever it will settle
+        opacity: 1,
       });
       const sprite = new THREE.Sprite(material);
       const baseScaleX = baseScaleXRef;
@@ -116,32 +140,35 @@ export function CertificateCloud3D({ certs }) {
       group.add(sprite);
       badges.push(sprite);
 
+      // Both ends used to carry the same colour, which drew a flat spoke. Fading
+      // the inner end to almost nothing makes each line read as light leaving
+      // the core and arriving at its badge, rather than a wire holding it up.
+      const INNER = 0.08;
       linePositions.push(0, 0, 0, pos.x, pos.y, pos.z);
       lineColors.push(
-        colorObj.r,
-        colorObj.g,
-        colorObj.b,
+        colorObj.r * INNER,
+        colorObj.g * INNER,
+        colorObj.b * INNER,
         colorObj.r,
         colorObj.g,
         colorObj.b
       );
     });
 
-    const linesGeo = new THREE.BufferGeometry();
-    linesGeo.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(linePositions, 3)
-    );
-    linesGeo.setAttribute(
-      "color",
-      new THREE.Float32BufferAttribute(lineColors, 3)
-    );
-    const linesMat = new THREE.LineBasicMaterial({
+    const linesGeo = new LineSegmentsGeometry();
+    linesGeo.setPositions(linePositions);
+    linesGeo.setColors(lineColors);
+    const linesMat = new LineMaterial({
       vertexColors: true,
       transparent: true,
-      opacity: 0.28,
+      // the gradient does the fading now, so the material can carry more
+      opacity: 0.6,
+      linewidth: 1.3,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
     });
-    const connectorLines = new THREE.LineSegments(linesGeo, linesMat);
+    lineMaterials.push(linesMat);
+    const connectorLines = new LineSegments2(linesGeo, linesMat);
     group.add(connectorLines);
 
     // ambient drifting particles for depth
@@ -157,13 +184,19 @@ export function CertificateCloud3D({ certs }) {
     }
     const dustGeo = new THREE.BufferGeometry();
     dustGeo.setAttribute("position", new THREE.BufferAttribute(dustPositions, 3));
+    // A PointsMaterial with no map draws hard-edged squares; at this size they
+    // read as grit. The soft radial sprite turns them into motes of light, and
+    // the size goes up because a feathered edge gives away most of its area.
+    const dustTexture = makeGlowSpriteTexture();
     const dustMat = new THREE.PointsMaterial({
       color: 0x8d97b5,
-      size: 0.035,
+      map: dustTexture,
+      size: 0.11,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.45,
       sizeAttenuation: true,
       depthWrite: false,
+      blending: THREE.AdditiveBlending,
     });
     const dust = new THREE.Points(dustGeo, dustMat);
     scene.add(dust);
@@ -192,6 +225,7 @@ export function CertificateCloud3D({ certs }) {
       camera.position.z = Math.max(BASE_DISTANCE, fitWidth);
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      lineMaterials.forEach((m) => m.resolution.set(w, h));
       if (post) post.setSize(w, h);
     }
     resize();
@@ -318,9 +352,13 @@ export function CertificateCloud3D({ certs }) {
         group.rotation.y += 0.0012 * (1 - coasting);
         core.rotation.y += 0.006;
         core.rotation.x += 0.003;
-        const pulse = 1 + Math.sin(t * 2) * 0.12;
+        // The glow swings harder than the shape it wraps, so the breath reads as
+        // light spilling out rather than the object itself inflating.
+        const beat = Math.sin(t * 2);
+        const pulse = 1 + beat * 0.3;
         core.scale.set(pulse, pulse, pulse);
-        coreGlow.scale.set(1.5 + Math.sin(t * 2) * 0.25, 1.5 + Math.sin(t * 2) * 0.25, 1);
+        const glow = 2.8 + beat * 0.75;
+        coreGlow.scale.set(glow, glow, 1);
         dust.rotation.y += 0.0003;
 
         badges.forEach((sprite) => {
@@ -330,14 +368,37 @@ export function CertificateCloud3D({ certs }) {
             .copy(sprite.userData.basePos)
             .addScaledVector(dir, bob);
 
+          // How far towards the camera this badge currently sits, 0 at the back
+          // of the cluster and 1 at the very front.
+          sprite.getWorldPosition(worldPos);
+          const front = THREE.MathUtils.clamp(
+            (worldPos.z + sphereRadius) / (sphereRadius * 2),
+            0,
+            1
+          );
+          // Size and fade want different curves. Sharpening the size makes one
+          // or two badges clearly lead; sharpening the fade the same way buried
+          // everything behind them, so opacity follows a much gentler slope and
+          // never drops below FOCUS_MIN_FADE.
+          const focus = Math.pow(front, 2.6);
+          const focusFade = Math.pow(front, 1.3);
+
           const targetT = sprite === hovered ? 1 : 0;
           sprite.userData.hoverT += (targetT - sprite.userData.hoverT) * 0.15;
-          const mul = 1 + sprite.userData.hoverT * 0.16;
+
+          const mul =
+            FOCUS_MIN_SCALE +
+            focus * (FOCUS_MAX_SCALE - FOCUS_MIN_SCALE) +
+            sprite.userData.hoverT * 0.16;
           sprite.scale.set(
             sprite.userData.baseScaleX * mul,
             sprite.userData.baseScaleY * mul,
             1
           );
+          sprite.material.opacity =
+            FOCUS_MIN_FADE + focusFade * (1 - FOCUS_MIN_FADE);
+          // the leading badge should also sort above the ones behind it
+          sprite.renderOrder = Math.round(focus * 100);
         });
       }
       if (post) post.render();
@@ -376,12 +437,14 @@ export function CertificateCloud3D({ certs }) {
       container.removeEventListener("pointercancel", onPointerUp);
       coreGeo.dispose();
       coreEdges.dispose();
+      coreLineGeo.dispose();
       coreMat.dispose();
       coreGlow.material.map.dispose();
       coreGlow.material.dispose();
       linesGeo.dispose();
       linesMat.dispose();
       dustGeo.dispose();
+      dustTexture.dispose();
       dustMat.dispose();
       badges.forEach((sprite) => {
         sprite.material.map.dispose();
