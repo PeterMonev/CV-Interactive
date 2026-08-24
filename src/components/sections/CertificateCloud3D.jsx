@@ -73,6 +73,9 @@ export function CertificateCloud3D({ certs }) {
     const baseScaleXRef = 2.05;
     const baseScaleYRef = 1.04;
 
+    // see makeCertBadgeTexture: the soft halo is the part phones render wrong
+    const haloEnabled = window.innerWidth >= 1024;
+
     const n = certs.length;
     const golden = Math.PI * (3 - Math.sqrt(5));
     const sphereRadius = 4.6;
@@ -91,7 +94,9 @@ export function CertificateCloud3D({ certs }) {
       const colorHex = CERT_PALETTE[i % CERT_PALETTE.length];
       const colorObj = new THREE.Color(colorHex);
 
-      const texture = makeCertBadgeTexture(cert.name, colorHex);
+      const texture = makeCertBadgeTexture(cert.name, colorHex, {
+        halo: haloEnabled,
+      });
       const material = new THREE.SpriteMaterial({
         map: texture,
         transparent: true,

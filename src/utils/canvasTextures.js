@@ -158,27 +158,35 @@ export function wrapCanvasText(ctx, text, cx, cy, maxWidth, lineHeight) {
 }
 
 
-export function makeCertBadgeTexture(name, colorHex) {
+// halo is opt-out because it is the one part of this badge made of large,
+// soft, semi-transparent pixels — and browsers disagree about those. The same
+// texture reads correctly in desktop Chrome and washed out in WebKit on a
+// phone, where sixteen overlapping halos stack into a pale film over the cards.
+// Desktop keeps it; narrow screens get a badge with no semi-transparent
+// interior at all, so there is nothing left to disagree about.
+export function makeCertBadgeTexture(name, colorHex, { halo = true } = {}) {
   const { canvas, ctx, width, height } = hidpiCanvas(512, 260);
 
   // soft glow halo behind the card
-  ctx.save();
-  try {
-    ctx.filter = "blur(20px)";
-  } catch (err) {
-    /* canvas filter unsupported — skip the halo, card still renders fine */
+  if (halo) {
+    ctx.save();
+    try {
+      ctx.filter = "blur(20px)";
+    } catch (err) {
+      /* canvas filter unsupported — skip the halo, card still renders fine */
+    }
+    roundRectPath(ctx, 26, 26, width - 52, height - 52, 26);
+    ctx.fillStyle = colorHex;
+    ctx.globalAlpha = 0.4;
+    ctx.fill();
+    ctx.restore();
+    ctx.globalAlpha = 1;
   }
-  roundRectPath(ctx, 26, 26, width - 52, height - 52, 26);
-  ctx.fillStyle = colorHex;
-  ctx.globalAlpha = 0.4;
-  ctx.fill();
-  ctx.restore();
-  ctx.globalAlpha = 1;
 
   // card body
   const pad = 14;
   roundRectPath(ctx, pad, pad, width - pad * 2, height - pad * 2, 24);
-  ctx.fillStyle = "rgba(8,11,22,0.95)";
+  ctx.fillStyle = "rgb(8,11,22)";
   ctx.fill();
   ctx.lineWidth = 3;
   ctx.strokeStyle = colorHex;
