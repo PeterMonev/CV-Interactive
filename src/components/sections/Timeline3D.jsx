@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { tuneRenderer } from "../../utils/gfx.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
+import { makeGlowSpriteTexture } from "../../utils/canvasTextures.js";
 
 export function Timeline3D({ count }) {
   const mountRef = useRef(null);
@@ -13,8 +14,10 @@ export function Timeline3D({ count }) {
     const reduced = prefersReducedMotion();
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 20);
-    camera.position.set(0.9, 0, 3.4);
+    const FOV = 45;
+    const TUBE_SPAN = 7.4; // the curve covers 6.8 units, plus margin
+    const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 40);
+    camera.position.set(0.12, 0, TUBE_SPAN / (2 * Math.tan((FOV / 2) * Math.PI / 180)));
     camera.lookAt(0, 0, 0);
 
     const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
@@ -35,17 +38,17 @@ export function Timeline3D({ count }) {
     for (let i = 0; i <= segments; i++) {
       const t = i / segments;
       const y = 3.4 - t * 6.8;
-      const x = Math.sin(t * Math.PI * 1.4) * 0.32;
-      const z = Math.cos(t * Math.PI * 1.1) * 0.22;
+      const x = Math.sin(t * Math.PI * 1.4) * 0.16;
+      const z = Math.cos(t * Math.PI * 1.1) * 0.12;
       curvePoints.push(new THREE.Vector3(x, y, z));
     }
     const curve = new THREE.CatmullRomCurve3(curvePoints);
 
-    const tubeGeo = new THREE.TubeGeometry(curve, 120, 0.045, 8, false);
+    const tubeGeo = new THREE.TubeGeometry(curve, 120, 0.075, 10, false);
     const tubeMat = new THREE.MeshStandardMaterial({
       color: 0x00e5ff,
       emissive: 0x00e5ff,
-      emissiveIntensity: 0.45,
+      emissiveIntensity: 0.9,
       roughness: 0.4,
       metalness: 0.25,
       transparent: true,
@@ -61,7 +64,7 @@ export function Timeline3D({ count }) {
       const clamped = Math.min(0.94, Math.max(0.06, t));
       const p = curve.getPointAt(clamped);
       const node = new THREE.Mesh(
-        new THREE.SphereGeometry(0.1, 16, 16),
+        new THREE.SphereGeometry(0.15, 16, 16),
         new THREE.MeshStandardMaterial({
           color: 0xeef1fb,
           emissive: 0x00e5ff,
@@ -76,16 +79,26 @@ export function Timeline3D({ count }) {
 
     const flowCount = 22;
     const flowT = Array.from({ length: flowCount }, (_, i) => i / flowCount);
+    // Riding the curve itself meant riding the middle of the tube, and the tube
+    // is already the brightest thing here — an additive spark on top of it moved
+    // the pixel by about 8%, which is nothing. Spiralling them around it instead
+    // puts each spark against the dark background, where it actually reads.
+    const FLOW_RADIUS = 0.24;
+    const FLOW_TWIST = 7.5;
+    const flowPhase = Array.from({ length: flowCount }, () => Math.random() * Math.PI * 2);
     const flowPositions = new Float32Array(flowCount * 3);
     const flowGeo = new THREE.BufferGeometry();
     flowGeo.setAttribute("position", new THREE.BufferAttribute(flowPositions, 3));
+    const flowTexture = makeGlowSpriteTexture();
     const flowMat = new THREE.PointsMaterial({
       color: 0x5eead4,
-      size: 0.075,
+      map: flowTexture,
+      size: 0.38,
       transparent: true,
       opacity: 0.9,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
+      sizeAttenuation: true,
     });
     const flow = new THREE.Points(flowGeo, flowMat);
     scene.add(flow);
@@ -114,12 +127,19 @@ export function Timeline3D({ count }) {
       }
       if (!reduced) {
         const t = performance.now() * 0.001;
-        tubeMat.emissiveIntensity = 0.35 + Math.sin(t * 1.6) * 0.15;
+        tubeMat.emissiveIntensity = 0.85 + Math.sin(t * 3.4) * 0.2;
         const posAttr = flowGeo.attributes.position;
         for (let i = 0; i < flowCount; i++) {
           flowT[i] = (flowT[i] + 0.0018) % 1;
           const p = curve.getPointAt(flowT[i]);
-          posAttr.setXYZ(i, p.x, p.y, p.z);
+          // the curve runs almost straight down, so an offset in x/z wraps it
+          const a = flowT[i] * Math.PI * FLOW_TWIST + flowPhase[i];
+          posAttr.setXYZ(
+            i,
+            p.x + Math.cos(a) * FLOW_RADIUS,
+            p.y,
+            p.z + Math.sin(a) * FLOW_RADIUS
+          );
         }
         posAttr.needsUpdate = true;
         nodes.forEach((node, i) => {
@@ -159,6 +179,7 @@ export function Timeline3D({ count }) {
       tubeGeo.dispose();
       tubeMat.dispose();
       flowGeo.dispose();
+      flowTexture.dispose();
       flowMat.dispose();
       nodes.forEach((node) => {
         node.geometry.dispose();

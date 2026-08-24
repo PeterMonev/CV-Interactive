@@ -1,5 +1,8 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
+import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
+import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { createBloomComposer } from "../../utils/bloom.js";
 import { tuneRenderer } from "../../utils/gfx.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
@@ -19,7 +22,9 @@ export function Hero3D() {
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
     camera.position.z = 11;
 
-    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
+    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }), {
+      toneMap: true,
+    });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
       container.removeChild(container.firstChild);
@@ -28,27 +33,41 @@ export function Hero3D() {
 
     const icoGeo = new THREE.IcosahedronGeometry(1.9, 1);
     const icoEdges = new THREE.EdgesGeometry(icoGeo);
-    const icoMat = new THREE.LineBasicMaterial({
+    const icoLineGeo = new LineSegmentsGeometry().fromEdgesGeometry(icoEdges);
+    const icoMat = new LineMaterial({
       color: 0x00e5ff,
       transparent: true,
       opacity: 0.55,
+      // In CSS pixels, not device pixels — which is the real gain here. The old
+      // material drew one device pixel, so the wireframe rendered half as thick
+      // on a 2x screen as on a 1x one; this stays put on both.
+      //
+      // Kept close to the original weight on purpose. The edge count is
+      // unchanged at 120 either way, but a wider stroke eats the gaps between
+      // them, and past roughly 2px the cage stops reading as a mesh and starts
+      // reading as a solid shape.
+      linewidth: 1.8,
     });
-    const wireframe = new THREE.LineSegments(icoEdges, icoMat);
+    const wireframe = new LineSegments2(icoLineGeo, icoMat);
     scene.add(wireframe);
 
     const knotGeo = new THREE.TorusKnotGeometry(0.95, 0.26, 128, 14);
     const knotEdges = new THREE.EdgesGeometry(knotGeo, 1);
-    const knotMat = new THREE.LineBasicMaterial({
+    const knotLineGeo = new LineSegmentsGeometry().fromEdgesGeometry(knotEdges);
+    const knotMat = new LineMaterial({
       color: 0xff3ec9,
       transparent: true,
       opacity: 0.5,
+      // the knot's mesh is far denser, so it needs a lighter stroke to avoid
+      // turning into a solid blob
+      linewidth: 1.5,
     });
     // Both shapes sit concentric at the origin. They're wireframes (line
     // segments only, no filled faces), so overlapping lines just read as a
     // denser interlocking pattern — there's no hidden-surface/occlusion
     // issue like there would be with solid meshes, so this doesn't need the
     // separated or orbiting positioning tried earlier.
-    const torusWire = new THREE.LineSegments(knotEdges, knotMat);
+    const torusWire = new LineSegments2(knotLineGeo, knotMat);
     scene.add(torusWire);
 
     const starCount = window.innerWidth < 720 ? 260 : 640;
@@ -98,6 +117,8 @@ export function Hero3D() {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      icoMat.resolution.set(w, h);
+      knotMat.resolution.set(w, h);
       if (post) post.setSize(w, h);
     }
     resize();
@@ -209,9 +230,11 @@ export function Hero3D() {
       container.removeEventListener("pointercancel", onPointerUp);
       icoGeo.dispose();
       icoEdges.dispose();
+      icoLineGeo.dispose();
       icoMat.dispose();
       knotGeo.dispose();
       knotEdges.dispose();
+      knotLineGeo.dispose();
       knotMat.dispose();
       starGeo.dispose();
       starMat.dispose();

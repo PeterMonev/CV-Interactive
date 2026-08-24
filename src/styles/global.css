@@ -391,8 +391,9 @@
       .stat-label { color: var(--muted); font-size: 13px; }
 
       /* timeline */
-      .timeline { position: relative; margin-top: 40px; padding-left: 34px; }
-      .timeline-3d { position: absolute; left: -6px; top: 0; width: 40px; height: 100%; z-index: 0; pointer-events: none; }
+      .timeline { position: relative; margin-top: 40px; padding-left: 46px; }
+      /* wide enough for the filament to read as a shape rather than a hairline */
+      .timeline-3d { position: absolute; left: -8px; top: 0; width: 58px; height: 100%; z-index: 0; pointer-events: none; }
       .timeline-3d canvas { display: block; width: 100% !important; height: 100% !important; }
       .timeline-item { position: relative; z-index: 1; margin-bottom: 34px; }
       .timeline-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 24px 26px; transition: border-color 0.3s ease, transform 0.3s ease; }

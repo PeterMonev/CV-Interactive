@@ -1,5 +1,8 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
+import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
+import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { tuneRenderer } from "../../utils/gfx.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeLabelSprite, makeGlowSpriteTexture, makePlanetTexture } from "../../utils/canvasTextures.js";
@@ -74,15 +77,24 @@ export function SkillsGalaxy3D({ onSelect }) {
     const sunCore = new THREE.Mesh(sunCoreGeo, sunCoreMat);
     systemGroup.add(sunCore);
 
+    // LineMaterial converts its pixel width using the canvas size, so every one
+    // of them has to be told when that changes. Declared here because the core
+    // material below is the first to register.
+    const lineMaterials = [];
+
     const coreGeo = new THREE.IcosahedronGeometry(0.5, 1);
     const coreEdges = new THREE.EdgesGeometry(coreGeo);
-    const coreMat = new THREE.LineBasicMaterial({
+    const coreLineGeo = new LineSegmentsGeometry().fromEdgesGeometry(coreEdges);
+    const coreMat = new LineMaterial({
       color: 0xeef1fb,
       transparent: true,
       opacity: 0.6,
+      linewidth: 1.6,
     });
-    const core = new THREE.LineSegments(coreEdges, coreMat);
+    const core = new LineSegments2(coreLineGeo, coreMat);
     systemGroup.add(core);
+
+    lineMaterials.push(coreMat);
 
     const glowTexture = makeGlowSpriteTexture();
     const coreGlow = new THREE.Sprite(
@@ -113,16 +125,40 @@ export function SkillsGalaxy3D({ onSelect }) {
       pivot.rotation.y = (i / RADAR_DOMAINS.length) * Math.PI * 2;
       systemGroup.add(pivot);
 
-      const orbitRing = new THREE.Mesh(
-        new THREE.TorusGeometry(radius, 0.005, 8, 96),
-        new THREE.MeshBasicMaterial({
-          color: domain.color,
-          transparent: true,
-          opacity: 0.18,
-        })
-      );
-      orbitRing.rotation.x = Math.PI / 2;
-      systemGroup.add(orbitRing);
+      const RING_STEPS = 128;
+      const ringPos = [];
+      const ringCol = [];
+      const ringColor = new THREE.Color(domain.color);
+      const ringPoint = (a) => [
+        Math.cos(a) * radius,
+        0,
+        Math.sin(a) * radius,
+      ];
+      // brightest at the planet, falling away around the circle behind it
+      const ringFade = (a) => Math.pow(1 - a / (Math.PI * 2), 2.4);
+      for (let step = 0; step < RING_STEPS; step++) {
+        const a0 = (step / RING_STEPS) * Math.PI * 2;
+        const a1 = ((step + 1) / RING_STEPS) * Math.PI * 2;
+        ringPos.push(...ringPoint(a0), ...ringPoint(a1));
+        for (const a of [a0, a1]) {
+          const f = ringFade(a);
+          ringCol.push(ringColor.r * f, ringColor.g * f, ringColor.b * f);
+        }
+      }
+      const ringGeo = new LineSegmentsGeometry();
+      ringGeo.setPositions(ringPos);
+      ringGeo.setColors(ringCol);
+      const ringMat = new LineMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.75,
+        linewidth: 1.4,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      lineMaterials.push(ringMat);
+      const orbitRing = new LineSegments2(ringGeo, ringMat);
+      pivot.add(orbitRing);
 
       const bodyGroup = new THREE.Object3D();
       bodyGroup.position.set(radius, 0, 0);
@@ -197,6 +233,7 @@ export function SkillsGalaxy3D({ onSelect }) {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      lineMaterials.forEach((m) => m.resolution.set(w, h));
     }
     resize();
     window.addEventListener("resize", resize);

@@ -9,12 +9,17 @@ import * as THREE from "three";
 
 let maxAnisotropy = 1;
 
-// toneMap is opt-out for a reason. Tone mapping deliberately reshapes colour,
-// which is what a scene wants and what a piece of interface does not: the 3D
-// cursor and the scroll-to-top button exist to echo the CSS palette, and ACES
-// pushes a saturated cyan far enough up its curve that it desaturates towards
-// white. Those two keep the raw colour and stay the cyan the stylesheet uses.
-export function tuneRenderer(renderer, { toneMap = true } = {}) {
+// Tone mapping travels with bloom, and only with bloom.
+//
+// Its job is to compress a range wider than the screen can show, which is
+// exactly what a bloomed scene produces and exactly what the others do not.
+// Every scene here draws palette colours directly — a cyan wireframe, additive
+// glow sprites, text baked into a canvas — and ACES pushes those far enough up
+// its curve to desaturate them towards white. Measured on the site's own cyan:
+// 0,229,255 raw against 168,231,235 tone mapped, a drop from full saturation to
+// 29%. That is why the cursor, the scroll button and the stats field all went
+// pale. So it is off unless a scene asks, and only the two bloomed scenes do.
+export function tuneRenderer(renderer, { toneMap = false } = {}) {
   if (!toneMap) {
     maxAnisotropy = Math.max(maxAnisotropy, renderer.capabilities.getMaxAnisotropy());
     return renderer;

@@ -28,9 +28,7 @@ export function Cursor3D() {
       camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
       camera.position.z = 3;
 
-      renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }), {
-      toneMap: false,
-    });
+      renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.setSize(size, size);
       while (container.firstChild) {
