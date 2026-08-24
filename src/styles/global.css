@@ -168,7 +168,7 @@
 
       /* live GitHub activity */
       .gh {
-        margin-top: 34px; padding: 22px 26px 20px;
+        margin: 28px 0 6px; padding: 22px 26px 20px;
         border: 1px solid var(--border); border-radius: 16px;
         background: linear-gradient(160deg, rgba(0,229,255,0.045), rgba(255,255,255,0.015));
       }

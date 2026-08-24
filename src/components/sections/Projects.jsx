@@ -24,6 +24,10 @@ export function Projects() {
         <ScrambleHeading text={t("projects.heading")} className="h2" />
       </Reveal>
 
+      <Reveal delay={60}>
+        <GitHubActivity />
+      </Reveal>
+
       <div className="filter-row">
         {FILTERS.map((f) => (
           <button
@@ -47,10 +51,6 @@ export function Projects() {
       </div>
 
       <Reveal delay={120}>
-        <GitHubActivity />
-      </Reveal>
-
-      <Reveal delay={140}>
         <CaseStudy />
       </Reveal>
     </section>
