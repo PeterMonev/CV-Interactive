@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { createBloomComposer } from "../../utils/bloom.js";
+import { bloomSupported, createBloomComposer } from "../../utils/bloom.js";
 import { tuneRenderer, tuneTexture } from "../../utils/gfx.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeCertBadgeTexture } from "../../utils/canvasTextures.js";
@@ -21,9 +21,11 @@ export function CertificateCloud3D({ certs }) {
     const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 100);
     camera.position.z = 11;
 
-    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }), {
-      toneMap: true,
-    });
+    const useBloom = bloomSupported();
+    const renderer = tuneRenderer(
+      new THREE.WebGLRenderer({ antialias: true, alpha: true }),
+      { toneMap: useBloom }
+    );
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
       container.removeChild(container.firstChild);

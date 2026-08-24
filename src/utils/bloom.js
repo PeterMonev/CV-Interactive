@@ -53,7 +53,10 @@ const RestoreAlphaShader = {
 export function bloomSupported() {
   if (typeof window === "undefined") return false;
   if (prefersReducedMotion()) return false;
-  return window.innerWidth >= 768;
+  // Above a phone in either orientation: a large iPhone in landscape reports
+  // somewhere around 850, and 768 let it through — which meant a rotated phone
+  // still paid for the tone mapping that only bloom justifies.
+  return window.innerWidth >= 1024;
 }
 
 export function createBloomComposer(renderer, scene, camera, options = {}) {
@@ -76,7 +79,7 @@ export function createBloomComposer(renderer, scene, camera, options = {}) {
   const savePass = new SavePass(
     new THREE.WebGLRenderTarget(1, 1, {
       format: THREE.RGBAFormat,
-      type: THREE.HalfFloatType,
+      type: THREE.UnsignedByteType,
     })
   );
   composer.addPass(savePass);

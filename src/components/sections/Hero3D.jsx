@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
-import { createBloomComposer } from "../../utils/bloom.js";
+import { bloomSupported, createBloomComposer } from "../../utils/bloom.js";
 import { tuneRenderer } from "../../utils/gfx.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 
@@ -22,9 +22,11 @@ export function Hero3D() {
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
     camera.position.z = 11;
 
-    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }), {
-      toneMap: true,
-    });
+    const useBloom = bloomSupported();
+    const renderer = tuneRenderer(
+      new THREE.WebGLRenderer({ antialias: true, alpha: true }),
+      { toneMap: useBloom }
+    );
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
       container.removeChild(container.firstChild);
