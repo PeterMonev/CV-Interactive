@@ -69,6 +69,10 @@ export function CertificateCloud3D({ certs }) {
     coreGlow.scale.set(1.6, 1.6, 1);
     group.add(coreGlow);
 
+    // badge sprite size, needed both here and by the camera fit below
+    const baseScaleXRef = 2.05;
+    const baseScaleYRef = 1.04;
+
     const n = certs.length;
     const golden = Math.PI * (3 - Math.sqrt(5));
     const sphereRadius = 4.6;
@@ -94,8 +98,8 @@ export function CertificateCloud3D({ certs }) {
         depthWrite: false,
       });
       const sprite = new THREE.Sprite(material);
-      const baseScaleX = 2.05;
-      const baseScaleY = 1.04;
+      const baseScaleX = baseScaleXRef;
+      const baseScaleY = baseScaleYRef;
       sprite.scale.set(baseScaleX, baseScaleY, 1);
       sprite.position.copy(pos);
       sprite.userData.cert = cert;
@@ -163,11 +167,24 @@ export function CertificateCloud3D({ certs }) {
     // scene falls back to a plain render below.
     const post = createBloomComposer(renderer, scene, camera, { strength: 0.45, radius: 0.45, threshold: 0.68 });
 
+    // A fixed camera distance only frames the cluster at the aspect ratio it was
+    // chosen for. A wide desktop box shows 22 units across and the cluster needs
+    // 11; a phone in portrait shows 9, so the sphere overflowed and the badges —
+    // translucent sprites with a soft halo each — stacked into a milky film.
+    // Pulling back on narrow viewports keeps them apart. Desktop is untouched:
+    // the floor is the distance that was already in use.
+    const BASE_DISTANCE = 11;
+    const CLUSTER_WIDTH = sphereRadius * 2 + baseScaleXRef;
+    const halfFov = Math.tan((48 / 2) * (Math.PI / 180));
+
     function resize() {
       const w = container.clientWidth;
       const h = container.clientHeight;
       if (w === 0 || h === 0) return;
-      camera.aspect = w / h;
+      const aspect = w / h;
+      camera.aspect = aspect;
+      const fitWidth = (CLUSTER_WIDTH * 1.06) / (2 * halfFov * aspect);
+      camera.position.z = Math.max(BASE_DISTANCE, fitWidth);
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
       if (post) post.setSize(w, h);
