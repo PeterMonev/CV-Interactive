@@ -28,7 +28,11 @@ export function SkillsGalaxy3D({ onSelect }) {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 100);
-    camera.position.set(0, 2.6, 9.6);
+    // Stepped back with the taller box. A perspective camera fixes the
+    // vertical span and derives the horizontal one from the aspect, so making
+    // the box taller alone would have bought margin at the bottom by cutting
+    // the widest orbit off at the sides.
+    camera.position.set(0, 2.6, 10.2);
     camera.lookAt(0, 0, 0);
 
     const renderer = createRenderer({ antialias: true, alpha: true });
@@ -56,7 +60,7 @@ export function SkillsGalaxy3D({ onSelect }) {
     // other way, which cancelled it out: the orbits were seen within a degree
     // or two of edge-on, so five rings read as five straight lines and nothing
     // about the structure was legible.
-    systemGroup.rotation.x = 0.44;
+    systemGroup.rotation.x = 0.33;
     scene.add(systemGroup);
 
     // background starfield for depth
@@ -88,7 +92,7 @@ export function SkillsGalaxy3D({ onSelect }) {
     // behind the orbits, so the galaxy reads as somewhere rather than as a
     // diagram on a dark background. Still soft-edged rather than opaque: the moment the
     // clouds are legible as hard shapes they stop being atmosphere.
-    const nebulae = createNebulae(scene, { distance: 9.6 });
+    const nebulae = createNebulae(scene, { distance: 10.2 });
 
     // the "sun" — bright emissive core, wireframe shell, layered glow
     const sunCoreGeo = new THREE.SphereGeometry(0.32, 24, 24);
