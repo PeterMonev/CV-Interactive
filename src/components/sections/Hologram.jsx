@@ -16,7 +16,7 @@ export function Hologram() {
 
   return (
     <section id="hologram" className="section">
-      <Reveal variant="mask">
+      <Reveal>
         <p className="section-eyebrow">
           <Layers size={14} /> {t("hologram.eyebrow")}
         </p>

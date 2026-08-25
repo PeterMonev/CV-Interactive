@@ -32,7 +32,7 @@ export function Contact() {
       </div>
       <div className="contact-fg">
         <Equalizer bars={40} className="eq-divider" />
-        <Reveal variant="mask">
+        <Reveal>
           <p className="section-eyebrow">
             <Music2 size={14} /> {t("contact.eyebrow")}
           </p>
