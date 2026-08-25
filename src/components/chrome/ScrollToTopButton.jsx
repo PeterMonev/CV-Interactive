@@ -22,6 +22,9 @@ function ScrollTop3D({ onFail }) {
     let edges;
     let mat;
     let shape;
+    // declared out here on purpose: the cleanup below is outside the try, and a
+    // const inside it would not exist by the time unmounting calls it
+    let unguardContext = null;
 
     try {
       scene = new THREE.Scene();
@@ -36,7 +39,7 @@ function ScrollTop3D({ onFail }) {
         container.removeChild(container.firstChild);
       }
       container.appendChild(renderer.domElement);
-    const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
+      unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
 
       // dodecahedron — more visually interesting than a plain arrow shape,
       // cyan so it reads clearly now that the button has no filled background
@@ -66,7 +69,7 @@ function ScrollTop3D({ onFail }) {
     animate();
 
     return () => {
-      unguardContext();
+      if (unguardContext) unguardContext();
       cancelAnimationFrame(raf);
       geo.dispose();
       edges.dispose();

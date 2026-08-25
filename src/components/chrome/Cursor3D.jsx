@@ -13,6 +13,14 @@ export function Cursor3D() {
   useEffect(() => {
     if (prefersReducedMotion()) return undefined;
 
+    // A touch device has no cursor to replace. Building one anyway spent a
+    // WebGL context — of which a phone has far fewer than the sixteen a
+    // desktop browser offers — on a scene that can never be seen.
+    const finePointer =
+      !window.matchMedia ||
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if (!finePointer) return undefined;
+
     const wrap = wrapRef.current;
     const container = mountRef.current;
     if (!wrap || !container) return undefined;
@@ -25,6 +33,9 @@ export function Cursor3D() {
     let edges;
     let mat;
     let shape;
+    // declared out here on purpose: the cleanup below is outside the try, and a
+    // const inside it would not exist by the time unmounting calls it
+    let unguardContext = null;
 
     try {
       scene = new THREE.Scene();
@@ -39,7 +50,7 @@ export function Cursor3D() {
         container.removeChild(container.firstChild);
       }
       container.appendChild(renderer.domElement);
-    const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
+      unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
 
       geo = new THREE.OctahedronGeometry(0.85, 0);
       edges = new THREE.EdgesGeometry(geo);
@@ -83,7 +94,7 @@ export function Cursor3D() {
     animate();
 
     return () => {
-      unguardContext();
+      if (unguardContext) unguardContext();
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", handleMove);
       window.removeEventListener("mousedown", handleDown);
