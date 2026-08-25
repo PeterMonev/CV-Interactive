@@ -99,6 +99,66 @@ export function ScrollStarfield() {
     const accent = makeStarField(accentCount, spread * 0.85, depth, 0.11, (i) => palette[i % palette.length]);
     scene.add(accent.points);
 
+    // The one thing on the page that spans every section, and until now the
+    // only thing that did not know which section you were in. The accent stars
+    // take the colour of the region you are passing through, so a long scroll
+    // reads as travelling rather than as a list of boxes going by. The white
+    // field underneath is left alone: it carries most of the pixels behind the
+    // text, and tinting that would cost contrast for no gain.
+    const SECTION_TINTS = {
+      home: 0x00e5ff,
+      about: 0x5eead4,
+      experience: 0x8b5cf6,
+      education: 0xfbbf24,
+      certificates: 0x00e5ff,
+      skills: 0x5eead4,
+      projects: 0xff3ec9,
+      hologram: 0x8b5cf6,
+      contact: 0x5eead4,
+    };
+
+    // Section offsets are cached rather than measured per frame: nine
+    // getBoundingClientRect calls on every scroll event is layout thrash on a
+    // page that already has ten live canvases. They are re-read only when the
+    // document height changes, which is what a lazily mounted scene does.
+    let marks = [];
+    let lastHeight = -1;
+    function remeasureSections() {
+      marks = [];
+      for (const id of Object.keys(SECTION_TINTS)) {
+        const el = document.getElementById(id);
+        if (el) marks.push({ top: el.offsetTop, color: new THREE.Color(SECTION_TINTS[id]) });
+      }
+      marks.sort((m, n) => m.top - n.top);
+      lastHeight = document.documentElement.scrollHeight;
+    }
+    remeasureSections();
+
+    const regionColor = new THREE.Color(SECTION_TINTS.home);
+    const regionTarget = new THREE.Color(SECTION_TINTS.home);
+    const tmpColor = new THREE.Color();
+    const accentColors = accent.geo.attributes.color;
+
+    // Each star keeps a little of its original hue so the field stays a field
+    // rather than turning into one flat colour.
+    function paintAccent() {
+      for (let i = 0; i < accentCount; i++) {
+        tmpColor.copy(regionColor).lerp(palette[i % palette.length], 0.28);
+        accentColors.setXYZ(i, tmpColor.r, tmpColor.g, tmpColor.b);
+      }
+      accentColors.needsUpdate = true;
+    }
+    paintAccent();
+
+    let regionTick = 0;
+    function updateRegion() {
+      if (document.documentElement.scrollHeight !== lastHeight) remeasureSections();
+      const probe = (window.scrollY || document.documentElement.scrollTop || 0) + window.innerHeight * 0.45;
+      for (const m of marks) {
+        if (probe >= m.top - 80) regionTarget.copy(m.color);
+      }
+    }
+
     function resize() {
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -184,6 +244,13 @@ export function ScrollStarfield() {
         stepField(accent, mx, my);
         const t = performance.now() * 0.001;
         accent.mat.opacity = 0.65 + Math.sin(t * 1.4) * 0.2;
+        // A quarter-second cadence is plenty for something that crossfades over
+        // a second and a half, and keeps the layout read off the hot path.
+        if (regionTick++ % 15 === 0) updateRegion();
+        if (regionColor.getHex() !== regionTarget.getHex()) {
+          regionColor.lerp(regionTarget, 0.022);
+          paintAccent();
+        }
       }
       renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
