@@ -76,6 +76,37 @@ export function SkillsGalaxy3D({ onSelect }) {
     const starField = new THREE.Points(starGeo, starMat);
     scene.add(starField);
 
+    // Clouds behind the system. The scene had stars against pure black, which
+    // gives depth but no atmosphere — every planet was a bright object on a
+    // void. Three very soft, very dim sprites in the site palette put colour
+    // behind the orbits, so the galaxy reads as somewhere rather than as a
+    // diagram on a dark background. Kept under 0.2 opacity: the moment the
+    // clouds are legible as shapes they stop being atmosphere.
+    const nebulaTexture = makeGlowSpriteTexture();
+    const nebulae = [
+      { color: 0x8b5cf6, pos: [-3.4, 1.5, -6.5], size: 10, opacity: 0.17, drift: 0.11 },
+      { color: 0x00e5ff, pos: [3.6, -1.4, -7.5], size: 12, opacity: 0.13, drift: 0.08 },
+      { color: 0xff3ec9, pos: [0.8, 2.8, -8.5], size: 9, opacity: 0.1, drift: 0.14 },
+    ].map((spec, i) => {
+      const sprite = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: nebulaTexture,
+          color: spec.color,
+          transparent: true,
+          opacity: spec.opacity,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          depthTest: false,
+        })
+      );
+      sprite.position.set(...spec.pos);
+      sprite.scale.set(spec.size, spec.size, 1);
+      // behind everything, including the stars
+      sprite.renderOrder = -10 + i;
+      scene.add(sprite);
+      return { sprite, base: spec.opacity, size: spec.size, drift: spec.drift, phase: i * 2.1 };
+    });
+
     // the "sun" — bright emissive core, wireframe shell, layered glow
     const sunCoreGeo = new THREE.SphereGeometry(0.32, 24, 24);
     const sunCoreMat = new THREE.MeshBasicMaterial({ color: 0xfff8ea });
@@ -362,6 +393,11 @@ export function SkillsGalaxy3D({ onSelect }) {
         );
         systemGroup.rotation.y += 0.0009 * (1 - coasting);
         starField.rotation.y += 0.0002;
+        nebulae.forEach((n) => {
+          const breathe = 1 + Math.sin(t * n.drift * 2.4 + n.phase) * 0.06;
+          n.sprite.scale.set(n.size * breathe, n.size * breathe, 1);
+          n.sprite.material.opacity = n.base * (0.82 + Math.sin(t * n.drift + n.phase) * 0.18);
+        });
         pivots.forEach(({ pivot, speed }) => {
           pivot.rotation.y += 0.0026 * speed;
         });
