@@ -12,22 +12,40 @@ export function BootLoader({ onDone }) {
 
   useEffect(() => {
     let raf;
+    let finished = false;
     const start = performance.now();
     const duration = 1000;
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      setPct(100);
+      setHide(true);
+      setTimeout(() => onDoneRef.current && onDoneRef.current(), 450);
+    };
+
     const tick = (now) => {
       const p = Math.min(1, (now - start) / duration);
       setPct(Math.round(p * 100));
       if (p < 1) {
         raf = requestAnimationFrame(tick);
       } else {
-        setTimeout(() => {
-          setHide(true);
-          setTimeout(() => onDoneRef.current && onDoneRef.current(), 450);
-        }, 200);
+        setTimeout(finish, 200);
       }
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+
+    // The page is scroll-locked until this finishes, and everything above runs
+    // on animation frames. A tab opened in the background gets none of them, so
+    // without this the visitor arrives at a splash screen that cannot be
+    // scrolled past. The normal path takes 1650ms; this only ever fires when
+    // the frames never came.
+    const failsafe = setTimeout(finish, 2600);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(failsafe);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
