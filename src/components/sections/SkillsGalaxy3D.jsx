@@ -51,7 +51,12 @@ export function SkillsGalaxy3D({ onSelect }) {
     scene.add(rimLight);
 
     const systemGroup = new THREE.Group();
-    systemGroup.rotation.x = -0.24;
+    // Tilted toward the viewer, not away from it. The camera already sits
+    // about 15 degrees above the orbital plane, and this used to lean 14 the
+    // other way, which cancelled it out: the orbits were seen within a degree
+    // or two of edge-on, so five rings read as five straight lines and nothing
+    // about the structure was legible.
+    systemGroup.rotation.x = 0.44;
     scene.add(systemGroup);
 
     // background starfield for depth
