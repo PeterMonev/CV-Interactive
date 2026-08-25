@@ -91,7 +91,30 @@ export function ScrollStarfield() {
     const depth = 46;
     const spread = 22;
     const starCount = window.innerWidth < 720 ? 220 : 420;
-    const field = makeStarField(starCount, spread, depth, 0.045);
+
+    // Every star used to be the same pale blue-white, with colour carried only
+    // by 46 larger accent stars — about one in ten, which the eye reads as an
+    // occasional glint rather than as a colourful sky. The whole field is now
+    // mixed: three parts pale to five parts palette, so the page-wide drift
+    // carries violet, turquoise, pink and amber past every section.
+    //
+    // Pale still leads the count on purpose. This field sits behind all of the
+    // text on the site, and a saturated sky costs contrast where it matters
+    // most. Colour is also why the opacity drops here: a colour function
+    // switches the material to additive blending, which is brighter than the
+    // normal blending the plain white field used.
+    const FIELD_TINTS = [
+      new THREE.Color(0xc4d4f5),
+      new THREE.Color(0xc4d4f5),
+      new THREE.Color(0xc4d4f5),
+      new THREE.Color(0x00e5ff),
+      new THREE.Color(0x5eead4),
+      new THREE.Color(0x8b5cf6),
+      new THREE.Color(0xff3ec9),
+      new THREE.Color(0xfbbf24),
+    ];
+    const field = makeStarField(starCount, spread, depth, 0.05, (i) => FIELD_TINTS[i % FIELD_TINTS.length]);
+    field.mat.opacity = 0.62;
     scene.add(field.points);
 
     const palette = [
