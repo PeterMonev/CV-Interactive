@@ -32,7 +32,7 @@ export function SkillsGalaxy3D({ onSelect }) {
     // vertical span and derives the horizontal one from the aspect, so making
     // the box taller alone would have bought margin at the bottom by cutting
     // the widest orbit off at the sides.
-    camera.position.set(0, 2.6, 10.4);
+    camera.position.set(0, 2.6, 10.8);
     camera.lookAt(0, 0, 0);
 
     const renderer = createRenderer({ antialias: true, alpha: true });
@@ -60,7 +60,7 @@ export function SkillsGalaxy3D({ onSelect }) {
     // other way, which cancelled it out: the orbits were seen within a degree
     // or two of edge-on, so five rings read as five straight lines and nothing
     // about the structure was legible.
-    systemGroup.rotation.x = 0.33;
+    systemGroup.rotation.x = 0.38;
     scene.add(systemGroup);
 
     // background starfield for depth
@@ -92,7 +92,7 @@ export function SkillsGalaxy3D({ onSelect }) {
     // behind the orbits, so the galaxy reads as somewhere rather than as a
     // diagram on a dark background. Still soft-edged rather than opaque: the moment the
     // clouds are legible as hard shapes they stop being atmosphere.
-    const nebulae = createNebulae(scene, { distance: 10.4 });
+    const nebulae = createNebulae(scene, { distance: 10.8 });
 
     // the "sun" — bright emissive core, wireframe shell, layered glow
     const sunCoreGeo = new THREE.SphereGeometry(0.32, 24, 24);
@@ -131,7 +131,7 @@ export function SkillsGalaxy3D({ onSelect }) {
     coreGlow.scale.set(2.2, 2.2, 1);
     systemGroup.add(coreGlow);
 
-    const coreLabel = makeLabelSprite("full-stack", "#eef1fb");
+    const coreLabel = makeLabelSprite("Full-Stack", "#eef1fb");
     coreLabel.position.set(0, 0.95, 0);
     systemGroup.add(coreLabel);
 

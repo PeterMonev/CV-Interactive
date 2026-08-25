@@ -63,8 +63,13 @@ export function Skills() {
             </div>
             <div className="galaxy-info">
               {selectedDomain ? (
-                <>
+                // The panel takes the colour of the planet that was clicked, so
+                // the link between the two is carried by the design rather than
+                // by the reader remembering which sphere they just touched.
+                <div className="galaxy-readout" style={{ "--accent": selectedDomain.color }}>
+                  <p className="galaxy-info-eyebrow">{t("skills.eyebrow")}</p>
                   <p className="galaxy-info-title">{t(`skills.groups.${selectedDomain.category}`)}</p>
+                  <div className="galaxy-info-rule" />
                   <div className="chip-row">
                     {selectedDomain.items.map((item) => (
                       <span className="chip chip-mono" key={item}>
@@ -72,7 +77,10 @@ export function Skills() {
                       </span>
                     ))}
                   </div>
-                </>
+                  <p className="galaxy-info-count">
+                    {selectedDomain.items.length} / {SKILLS.reduce((n, g) => n + g.items.length, 0)}
+                  </p>
+                </div>
               ) : (
                 <p className="galaxy-info-hint">{t("skills.hint")}</p>
               )}

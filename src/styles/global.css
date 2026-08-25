@@ -562,19 +562,37 @@
         display: grid; grid-template-columns: 1fr 260px; align-items: stretch;
         overflow: hidden;
       }
-      /* The system is 13.3 units across and 8.3 tall. A fixed height meant the
+      /* The system is 13.3 units across and 8.6 tall. A fixed height meant the
          box got wider than that on a large screen without getting taller, and
          the difference showed up as dead space down both sides. Tied to the
          proportion instead, so the frame keeps matching what is in it. */
       .galaxy-stage { display: block; min-width: 0; }
-      .galaxy-3d { position: relative; width: 100%; aspect-ratio: 1.62 / 1; max-height: 620px; overflow: hidden; touch-action: none; }
+      .galaxy-3d { position: relative; width: 100%; aspect-ratio: 1.55 / 1; max-height: 660px; overflow: hidden; touch-action: none; }
       .galaxy-3d canvas { display: block; width: 100% !important; height: 100% !important; }
       .galaxy-info {
-        background: rgba(255,255,255,0.02); border-left: 1px solid var(--border);
-        padding: 22px; display: flex; flex-direction: column; justify-content: center;
+        background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012));
+        border-left: 1px solid var(--border);
+        padding: 26px 24px; display: flex; flex-direction: column; justify-content: center; gap: 4px;
       }
-      .galaxy-info-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; margin: 0 0 12px; color: var(--text); }
+      /* Reads as a readout on the system rather than as a caption beside it:
+         a label above the name, the name carrying the colour of the planet that
+         was clicked, and a rule under it tying the two together. */
+      .galaxy-readout { display: flex; flex-direction: column; }
+      .galaxy-info-eyebrow {
+        font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.18em;
+        text-transform: uppercase; color: var(--muted); margin: 0 0 10px;
+      }
+      .galaxy-info-title {
+        font-family: 'Space Grotesk', sans-serif; font-size: 21px; margin: 0 0 6px;
+        color: var(--accent, var(--text)); line-height: 1.2;
+      }
+      .galaxy-info-rule {
+        width: 46px; height: 2px; margin: 0 0 16px; border-radius: 2px;
+        background: linear-gradient(90deg, var(--accent, var(--cyan)), transparent);
+      }
+      .galaxy-info-count { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--muted); margin: 14px 0 0; }
       .galaxy-info-hint { color: var(--muted); font-size: 13px; line-height: 1.75; margin: 0; }
+      .galaxy-info .chip-row { gap: 7px; }
 
       .contact-fg { position: relative; z-index: 1; }
       .contact-3d { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.5; }
