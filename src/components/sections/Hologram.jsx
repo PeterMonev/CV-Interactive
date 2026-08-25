@@ -16,7 +16,7 @@ export function Hologram() {
 
   return (
     <section id="hologram" className="section">
-      <Reveal>
+      <Reveal variant="mask">
         <p className="section-eyebrow">
           <Layers size={14} /> {t("hologram.eyebrow")}
         </p>
@@ -36,7 +36,7 @@ export function Hologram() {
         ))}
       </div>
 
-      <Reveal delay={80}>
+      <Reveal delay={80} variant="scale">
         <div className="hologram-wrap">
           <div ref={rigRef} className="fx-layer">
             <HologramViewer projects={PROJECTS} activeIndex={hologramIndex} />

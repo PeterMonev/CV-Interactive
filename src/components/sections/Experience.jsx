@@ -4,14 +4,17 @@ import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
 import { Timeline3D } from "../ui/lazy3d.js";
 import { EXPERIENCE } from "../../data/experience.js";
 import { useLang, useTx } from "../../i18n/index.jsx";
+import { useParallax } from "../../hooks/useScrollFx.js";
 
 export function Experience() {
   const { t } = useLang();
   const tx = useTx();
+  // the filament runs against the cards rather than with them
+  const filamentRef = useParallax({ from: -34, to: 34 });
 
   return (
     <section id="experience" className="section">
-      <Reveal>
+      <Reveal variant="mask">
         <p className="section-eyebrow">
           <Briefcase size={14} /> {t("experience.eyebrow")}
         </p>
@@ -19,7 +22,9 @@ export function Experience() {
       </Reveal>
 
       <div className="timeline">
-                  <Timeline3D count={EXPERIENCE.length} />
+        <div ref={filamentRef} className="fx-layer timeline-fx">
+          <Timeline3D count={EXPERIENCE.length} />
+        </div>
         {EXPERIENCE.map((job, i) => (
           <Reveal delay={i * 100} key={job.company} className="timeline-item">
             <div className="timeline-card">

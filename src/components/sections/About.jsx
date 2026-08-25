@@ -7,9 +7,11 @@ import { StatsField3D } from "../ui/lazy3d.js";
 import { PHOTO_SRC } from "../../data/photo.js";
 import { STATS_3D_DATA } from "../../data/stats3d.js";
 import { useLang } from "../../i18n/index.jsx";
+import { useParallax } from "../../hooks/useScrollFx.js";
 
 export function About() {
   const { t } = useLang();
+  const statsFieldRef = useParallax({ from: 40, to: -40 });
 
   return (
     <section id="about" className="section">
@@ -28,7 +30,7 @@ export function About() {
         </Reveal>
 
         <div>
-          <Reveal>
+          <Reveal variant="mask">
             <p className="section-eyebrow">{t("about.eyebrow")}</p>
             <ScrambleHeading text={t("about.heading")} className="h2" />
           </Reveal>
@@ -59,7 +61,9 @@ export function About() {
       <Reveal delay={120}>
         <div className="stats-hologram-wrap">
           <MatrixRain />
-                      <StatsField3D stats={STATS_3D_DATA} />
+            <div ref={statsFieldRef} className="fx-layer stats-fx">
+              <StatsField3D stats={STATS_3D_DATA} />
+            </div>
         </div>
       </Reveal>
     </section>

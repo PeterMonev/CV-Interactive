@@ -10,7 +10,7 @@ export function Education() {
 
   return (
     <section id="education" className="section">
-      <Reveal>
+      <Reveal variant="mask">
         <p className="section-eyebrow">
           <GraduationCap size={14} /> {t("education.eyebrow")}
         </p>

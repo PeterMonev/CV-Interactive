@@ -10,10 +10,12 @@ import { CV_URL, CV_FILENAME } from "../../data/cv.js";
 import { track, EVENTS } from "../../utils/analytics.js";
 import { ContactForm } from "./ContactForm.jsx";
 import { useLang } from "../../i18n/index.jsx";
+import { useParallax } from "../../hooks/useScrollFx.js";
 
 export function Contact() {
   const [copied, setCopied] = useState(null);
   const { t } = useLang();
+  const orbRef = useParallax({ from: 60, to: -60 });
 
   const copyToClipboard = useCallback((text, field) => {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -25,10 +27,12 @@ export function Contact() {
 
   return (
     <section id="contact" className="section contact">
-      <ContactOrb3D />
+      <div ref={orbRef} className="fx-layer contact-fx">
+        <ContactOrb3D />
+      </div>
       <div className="contact-fg">
         <Equalizer bars={40} className="eq-divider" />
-        <Reveal>
+        <Reveal variant="mask">
           <p className="section-eyebrow">
             <Music2 size={14} /> {t("contact.eyebrow")}
           </p>

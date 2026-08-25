@@ -56,7 +56,7 @@ export function Certificates() {
 
   return (
     <section id="certificates" className="section">
-      <Reveal>
+      <Reveal variant="mask">
         <p className="section-eyebrow">
           <Award size={14} /> {t("certificates.eyebrow")}
         </p>
@@ -81,7 +81,7 @@ export function Certificates() {
         </button>
       </div>
 
-      <Reveal delay={80}>
+      <Reveal delay={80} variant="scale">
         {certView === "3d" ? (
           <>
             <div className="cert-cloud-wrap">

@@ -422,8 +422,25 @@
       .eq-divider { margin: 0 0 8px; }
 
       /* reveal */
-      .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s cubic-bezier(.22,1,.36,1), transform 0.7s cubic-bezier(.22,1,.36,1); }
-      .reveal-in { opacity: 1; transform: translateY(0); }
+      .reveal {
+        opacity: 0;
+        transition: opacity 0.7s cubic-bezier(.22,1,.36,1),
+                    transform 0.7s cubic-bezier(.22,1,.36,1),
+                    clip-path 0.9s cubic-bezier(.22,1,.36,1);
+      }
+      .reveal-in { opacity: 1; }
+
+      /* the original: content lifts into place */
+      .reveal-rise { transform: translateY(26px); }
+      .reveal-rise.reveal-in { transform: translateY(0); }
+
+      /* headings: wiped across rather than faded, which reads as typeset */
+      .reveal-mask { clip-path: inset(0 100% 0 0); transform: translateY(10px); }
+      .reveal-mask.reveal-in { clip-path: inset(0 0 0 0); transform: translateY(0); }
+
+      /* media and canvases: settle into their box instead of sliding into it */
+      .reveal-scale { transform: scale(0.945); }
+      .reveal-scale.reveal-in { transform: scale(1); }
 
       /* stats */
       .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 44px; }
@@ -673,6 +690,12 @@
 
       /* hero 3d */
       .fx-layer { will-change: transform; }
+      .timeline-fx { position: absolute; left: -8px; top: 0; width: 58px; height: 100%; z-index: 0; pointer-events: none; }
+      .timeline-fx .timeline-3d { position: absolute; inset: 0; left: 0; width: 100%; }
+      .stats-fx { position: absolute; inset: 0; z-index: 1; }
+      .stats-fx .stats-3d { position: absolute; inset: 0; z-index: auto; }
+      .contact-fx { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+      .contact-fx .contact-3d { position: absolute; inset: 0; z-index: auto; }
       .hero-3d-layer { position: absolute; inset: 0; z-index: 0; pointer-events: none; will-change: transform; }
       .hero-3d { position: absolute; inset: 0; pointer-events: none; opacity: 0.9; }
       .hero-3d canvas { display: block; width: 100% !important; height: 100% !important; }
@@ -749,5 +772,5 @@
 
       @media (prefers-reduced-motion: reduce) {
         .cv-root * { animation: none !important; transition: none !important; }
-        .reveal { opacity: 1 !important; transform: none !important; }
+        .reveal { opacity: 1 !important; transform: none !important; clip-path: none !important; }
       }
