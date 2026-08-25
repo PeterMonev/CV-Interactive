@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { createNebulae } from "../../utils/nebula.js";
 import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeGlowSpriteTexture } from "../../utils/canvasTextures.js";
@@ -32,6 +33,8 @@ export function ContactOrb3D() {
     }
     container.appendChild(renderer.domElement);
     const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
+
+    const nebulae = createNebulae(scene, { distance: 6 });
 
     const geo = new THREE.TorusKnotGeometry(1.3, 0.34, 140, 14);
     const edges = new THREE.EdgesGeometry(geo, 1);
@@ -118,6 +121,7 @@ export function ContactOrb3D() {
       }
       const now = performance.now();
       const t = now * 0.001;
+      nebulae.update(t);
 
       charge += (target.charge - charge) * 0.06;
       const sending = target.status === "sending";
@@ -179,6 +183,7 @@ export function ContactOrb3D() {
 
     return () => {
       unguardContext();
+      nebulae.dispose();
       running = false;
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();

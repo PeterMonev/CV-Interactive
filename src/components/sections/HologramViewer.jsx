@@ -4,6 +4,7 @@ import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { tuneRenderer, tuneTexture, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { createNebulae } from "../../utils/nebula.js";
 import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { makeGlowSpriteTexture } from "../../utils/canvasTextures.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
@@ -46,6 +47,8 @@ export function HologramViewer({ projects, activeIndex }) {
     }
     container.appendChild(renderer.domElement);
     const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
+
+    const nebulae = createNebulae(scene, { distance: 6.1, strength: 0.7 });
 
     const group = new THREE.Group();
     scene.add(group);
@@ -321,6 +324,7 @@ export function HologramViewer({ projects, activeIndex }) {
       }
       if (!reduced) {
         const t = performance.now() * 0.001;
+        nebulae.update(t);
         if (!dragging) {
           group.rotation.y += 0.0018;
         }
@@ -381,6 +385,7 @@ export function HologramViewer({ projects, activeIndex }) {
 
     return () => {
       unguardContext();
+      nebulae.dispose();
       running = false;
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();

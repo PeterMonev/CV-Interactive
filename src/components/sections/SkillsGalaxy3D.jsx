@@ -7,6 +7,7 @@ import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../ut
 import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeLabelSprite, makeGlowSpriteTexture, makePlanetTexture } from "../../utils/canvasTextures.js";
+import { createNebulae } from "../../utils/nebula.js";
 import { RADAR_DOMAINS } from "../../data/skills.js";
 
 export function SkillsGalaxy3D({ onSelect }) {
@@ -82,30 +83,7 @@ export function SkillsGalaxy3D({ onSelect }) {
     // behind the orbits, so the galaxy reads as somewhere rather than as a
     // diagram on a dark background. Still soft-edged rather than opaque: the moment the
     // clouds are legible as hard shapes they stop being atmosphere.
-    const nebulaTexture = makeGlowSpriteTexture();
-    const nebulae = [
-      { color: 0x8b5cf6, pos: [-3.4, 1.5, -6.5], size: 13, opacity: 0.46, drift: 0.11 },
-      { color: 0x00e5ff, pos: [3.6, -1.4, -7.5], size: 15, opacity: 0.38, drift: 0.08 },
-      { color: 0xff3ec9, pos: [0.8, 2.8, -8.5], size: 11, opacity: 0.3, drift: 0.14 },
-    ].map((spec, i) => {
-      const sprite = new THREE.Sprite(
-        new THREE.SpriteMaterial({
-          map: nebulaTexture,
-          color: spec.color,
-          transparent: true,
-          opacity: spec.opacity,
-          blending: THREE.AdditiveBlending,
-          depthWrite: false,
-          depthTest: false,
-        })
-      );
-      sprite.position.set(...spec.pos);
-      sprite.scale.set(spec.size, spec.size, 1);
-      // behind everything, including the stars
-      sprite.renderOrder = -10 + i;
-      scene.add(sprite);
-      return { sprite, base: spec.opacity, size: spec.size, drift: spec.drift, phase: i * 2.1 };
-    });
+    const nebulae = createNebulae(scene, { distance: 9.6 });
 
     // the "sun" — bright emissive core, wireframe shell, layered glow
     const sunCoreGeo = new THREE.SphereGeometry(0.32, 24, 24);
@@ -393,11 +371,7 @@ export function SkillsGalaxy3D({ onSelect }) {
         );
         systemGroup.rotation.y += 0.0009 * (1 - coasting);
         starField.rotation.y += 0.0002;
-        nebulae.forEach((n) => {
-          const breathe = 1 + Math.sin(t * n.drift * 2.4 + n.phase) * 0.06;
-          n.sprite.scale.set(n.size * breathe, n.size * breathe, 1);
-          n.sprite.material.opacity = n.base * (0.82 + Math.sin(t * n.drift + n.phase) * 0.18);
-        });
+        nebulae.update(t);
         pivots.forEach(({ pivot, speed }) => {
           pivot.rotation.y += 0.0026 * speed;
         });

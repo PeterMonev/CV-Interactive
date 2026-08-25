@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { createNebulae } from "../../utils/nebula.js";
 import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeGlowSpriteTexture, makeStatLabelSprite } from "../../utils/canvasTextures.js";
@@ -39,6 +40,8 @@ export function StatsField3D({ stats }) {
     }
     container.appendChild(renderer.domElement);
     const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
+
+    const nebulae = createNebulae(scene, { distance: 6.4 });
 
     const group = new THREE.Group();
     scene.add(group);
@@ -310,6 +313,7 @@ export function StatsField3D({ stats }) {
       }
       if (!reduced) {
         const t = performance.now() * 0.001;
+        nebulae.update(t);
         coreUniforms.uTime.value = t;
         core.rotation.y -= 0.0016;
         core.rotation.x += 0.0006;
@@ -349,6 +353,7 @@ export function StatsField3D({ stats }) {
 
     return () => {
       unguardContext();
+      nebulae.dispose();
       running = false;
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();

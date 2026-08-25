@@ -5,6 +5,7 @@ import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeome
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { bloomSupported, createBloomComposer } from "../../utils/bloom.js";
 import { tuneRenderer, tuneTexture, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { createNebulae } from "../../utils/nebula.js";
 import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import {
@@ -39,6 +40,8 @@ export function CertificateCloud3D({ certs }) {
     }
     container.appendChild(renderer.domElement);
     const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
+
+    const nebulae = createNebulae(scene, { distance: 11, strength: 0.85 });
 
     const group = new THREE.Group();
     group.rotation.x = -0.15;
@@ -340,6 +343,7 @@ export function CertificateCloud3D({ certs }) {
       }
       if (!reduced) {
         const t = performance.now() * 0.001;
+        nebulae.update(t);
         if (!pointerDown) {
           group.rotation.y += spinY;
           group.rotation.x += spinX;
@@ -429,6 +433,7 @@ export function CertificateCloud3D({ certs }) {
 
     return () => {
       unguardContext();
+      nebulae.dispose();
       running = false;
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();

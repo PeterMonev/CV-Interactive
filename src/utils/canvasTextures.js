@@ -48,6 +48,52 @@ export function makeGlowSpriteTexture() {
 }
 
 
+// A cloud rather than a dot.
+//
+// The obvious way to place a nebula is the glow sprite above, but that is one
+// radial gradient — a perfect circle, which the eye reads as a point of light
+// however large and dim it is made. Real interstellar cloud is lumpy and
+// stretched. This scatters several dozen soft blobs along a horizontal band,
+// with the vertical spread kept much tighter than the horizontal one, so the
+// result already leans sideways before the sprite is stretched any further.
+//
+// The randomness is seeded. A cloud that reshuffles itself every time the scene
+// is rebuilt — a language switch, a recovered context — would visibly flicker.
+export function makeNebulaTexture(seed = 1) {
+  const W = 512;
+  const H = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+
+  // small deterministic generator: same seed, same cloud, every time
+  let state = seed * 9301 + 49297;
+  const rand = () => {
+    state = (state * 9301 + 49297) % 233280;
+    return state / 233280;
+  };
+
+  const BLOBS = 46;
+  for (let i = 0; i < BLOBS; i++) {
+    // bunched toward the middle of the band, trailing off at the ends
+    const t = rand();
+    const x = W * (0.5 + (t - 0.5) * (0.55 + rand() * 0.85));
+    const y = H * (0.5 + (rand() - 0.5) * 0.42);
+    const spread = 1 - Math.abs(x / W - 0.5) * 1.6;
+    const radius = (26 + rand() * 92) * Math.max(0.25, spread);
+    const alpha = (0.05 + rand() * 0.1) * Math.max(0.2, spread);
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    grad.addColorStop(0, `rgba(255,255,255,${alpha})`);
+    grad.addColorStop(0.45, `rgba(255,255,255,${alpha * 0.45})`);
+    grad.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  return tuneTexture(new THREE.CanvasTexture(canvas));
+}
+
 export function makeStatLabelSprite(text, colorHex) {
   const fontSize = 30;
   const font = `600 ${fontSize}px 'JetBrains Mono', monospace`;

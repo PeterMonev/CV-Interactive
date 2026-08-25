@@ -1,0 +1,80 @@
+import * as THREE from "three";
+import { makeNebulaTexture } from "./canvasTextures.js";
+
+// Coloured cloud behind a scene.
+//
+// Bright objects on pure black read as a diagram: correct, legible, and airless.
+// A few very soft bands in the site palette put something behind them, so a
+// scene reads as somewhere rather than as shapes on a dark page. Written once
+// here because five scenes want the same thing, and five copies of it would
+// drift apart the first time one of them was adjusted.
+//
+// Two details do the work. The texture is a scatter of soft blobs along a
+// horizontal band rather than one radial gradient, because a radial gradient is
+// a circle and the eye reads a circle as a point of light however large it is.
+// And each band is stretched wide and shallow and laid at its own angle, so
+// three of them never line up into a single smear.
+
+const DEFAULT_COLORS = [0x8b5cf6, 0x00e5ff, 0xff3ec9];
+
+// Sized against the camera distance, so a scene viewed from 6 units away and one
+// viewed from 11 get clouds that fill a comparable part of the frame.
+export function createNebulae(scene, { distance = 9, strength = 1, colors = DEFAULT_COLORS } = {}) {
+  const unit = distance / 9.6;
+  const specs = [
+    { color: colors[0], pos: [-1.7 * unit, 0.9 * unit, -6.6 * unit], w: 34, h: 11, tilt: 0.42, opacity: 0.55, drift: 0.09 },
+    { color: colors[1], pos: [4.2 * unit, -2.0 * unit, -7.6 * unit], w: 27, h: 8.5, tilt: -0.3, opacity: 0.42, drift: 0.07 },
+    { color: colors[2], pos: [-2.9 * unit, 2.7 * unit, -8.6 * unit], w: 22, h: 7, tilt: 0.95, opacity: 0.34, drift: 0.12 },
+  ];
+
+  const textures = [makeNebulaTexture(7), makeNebulaTexture(23), makeNebulaTexture(41)];
+
+  const clouds = specs.map((spec, i) => {
+    const sprite = new THREE.Sprite(
+      new THREE.SpriteMaterial({
+        map: textures[i],
+        color: spec.color,
+        transparent: true,
+        opacity: spec.opacity * strength,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        // behind everything without competing for depth against the scene
+        depthTest: false,
+        rotation: spec.tilt,
+      })
+    );
+    sprite.position.set(spec.pos[0], spec.pos[1], spec.pos[2]);
+    sprite.scale.set(spec.w * unit, spec.h * unit, 1);
+    sprite.renderOrder = -10 + i;
+    scene.add(sprite);
+    return {
+      sprite,
+      base: spec.opacity * strength,
+      w: spec.w * unit,
+      h: spec.h * unit,
+      tilt: spec.tilt,
+      drift: spec.drift,
+      phase: i * 2.1,
+    };
+  });
+
+  return {
+    // Slow enough that nothing appears to move while you look at it, and
+    // different enough per cloud that the three never breathe in unison.
+    update(t) {
+      for (const c of clouds) {
+        const breathe = 1 + Math.sin(t * c.drift * 2.4 + c.phase) * 0.05;
+        c.sprite.scale.set(c.w * breathe, c.h * breathe, 1);
+        c.sprite.material.opacity = c.base * (0.85 + Math.sin(t * c.drift + c.phase) * 0.15);
+        c.sprite.material.rotation = c.tilt + Math.sin(t * c.drift * 0.5 + c.phase) * 0.05;
+      }
+    },
+    dispose() {
+      for (const c of clouds) {
+        scene.remove(c.sprite);
+        c.sprite.material.dispose();
+      }
+      for (const texture of textures) texture.dispose();
+    },
+  };
+}
