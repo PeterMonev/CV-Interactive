@@ -485,12 +485,41 @@
       .timeline-bullets li { margin-bottom: 4px; }
 
       /* education */
-      .edu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 40px; }
-      .edu-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; transition: border-color 0.3s ease, transform 0.3s ease; }
-      .edu-card:hover { border-color: rgba(139,92,246,0.4); transform: translateY(-2px); }
-      .edu-period { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--violet); letter-spacing: 0.04em; }
-      .edu-title { font-family: 'Space Grotesk', sans-serif; font-size: 17px; margin: 8px 0 4px; }
-      .edu-school { color: var(--muted); font-size: 13.5px; margin: 0 0 14px; }
+      .edu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 40px; align-items: stretch; }
+      /* The reveal wrapper is the grid item, so the card can only match its
+         neighbours height if the wrapper stretches first. */
+      .edu-grid > .reveal { height: 100%; }
+
+      .edu-card {
+        position: relative; height: 100%; overflow: hidden;
+        background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+        padding: 20px 24px 22px 26px; display: flex; flex-direction: column;
+        transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      /* The accent is a bar rather than a border colour, so it can fade down the
+         card instead of ringing it — a full coloured outline on four cards at
+         once turns a quiet section into a set of warning boxes. */
+      .edu-card::before {
+        content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+        background: linear-gradient(180deg, var(--accent, var(--violet)), transparent 85%);
+        opacity: 0.5; transition: opacity 0.3s ease;
+      }
+      .edu-card:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-3px); box-shadow: 0 12px 34px rgba(0,0,0,0.32); }
+      .edu-card:hover::before { opacity: 1; }
+
+      .edu-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+      .edu-index { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: var(--muted); opacity: 0.55; }
+      .edu-period {
+        font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em;
+        color: var(--accent, var(--violet)); background: rgba(255,255,255,0.04);
+        border: 1px solid var(--border); border-radius: 999px; padding: 4px 11px; white-space: nowrap;
+      }
+      .edu-title { font-family: 'Space Grotesk', sans-serif; font-size: 17.5px; margin: 0 0 6px; line-height: 1.35; }
+      .edu-school { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 13.5px; margin: 0; }
+      .edu-school svg { color: var(--accent, var(--violet)); opacity: 0.85; flex: none; }
+      .edu-rule { height: 1px; margin: 16px 0 14px; background: linear-gradient(90deg, var(--border), transparent); }
+      /* pushed down so the tag rows line up across a row of cards */
+      .edu-card .chip-row { margin-top: auto; }
 
       .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
       .chip { font-size: 12.5px; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text); transition: border-color 0.25s ease, transform 0.25s ease; }
@@ -775,6 +804,7 @@
         .nav-mobile button { background: none; border: none; color: var(--muted); text-align: left; padding: 10px 0; font-size: 15px; }
         .stats { grid-template-columns: repeat(2, 1fr); }
         .edu-grid { grid-template-columns: 1fr; }
+        .edu-card-top { flex-wrap: wrap; }
         .skills-grid { grid-template-columns: 1fr; }
         .flip-grid { grid-template-columns: 1fr; }
         .flip-card { height: 300px; }
