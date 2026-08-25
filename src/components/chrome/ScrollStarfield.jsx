@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { tuneRenderer } from "../../utils/gfx.js";
+import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 
 function makeStarField(count, spread, depth, size, colorFn) {
@@ -61,6 +62,8 @@ function makeStarField(count, spread, depth, size, colorFn) {
 export function ScrollStarfield() {
   const mountRef = useRef(null);
 
+  const [generation, rebuildScene] = useSceneGeneration();
+
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return undefined;
@@ -76,12 +79,14 @@ export function ScrollStarfield() {
     );
     camera.position.set(0, 0, 5.5);
 
-    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
+    const renderer = createRenderer({ antialias: true, alpha: true });
+    if (!renderer) return retryScene(rebuildScene, { attempt: generation });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
     container.appendChild(renderer.domElement);
+    const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
 
     const depth = 46;
     const spread = 22;
@@ -258,6 +263,7 @@ export function ScrollStarfield() {
     animate();
 
     return () => {
+      unguardContext();
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
       window.removeEventListener("scroll", onScroll);
@@ -272,7 +278,7 @@ export function ScrollStarfield() {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [generation]);
 
   return <div ref={mountRef} className="scroll-starfield" aria-hidden="true" />;
 }

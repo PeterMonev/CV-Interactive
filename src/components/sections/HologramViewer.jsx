@@ -3,7 +3,8 @@ import * as THREE from "three";
 import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
-import { tuneRenderer, tuneTexture } from "../../utils/gfx.js";
+import { tuneRenderer, tuneTexture, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { makeGlowSpriteTexture } from "../../utils/canvasTextures.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 
@@ -12,6 +13,8 @@ export function HologramViewer({ projects, activeIndex }) {
   const planeMatRef = useRef(null);
   const texturesRef = useRef({});
   const activeIndexRef = useRef(activeIndex);
+
+  const [generation, rebuildScene] = useSceneGeneration();
 
   useEffect(() => {
     activeIndexRef.current = activeIndex;
@@ -22,7 +25,7 @@ export function HologramViewer({ projects, activeIndex }) {
       mat.opacity = 0.95;
       mat.needsUpdate = true;
     }
-  }, [activeIndex, projects]);
+  }, [activeIndex, projects, generation]);
 
   useEffect(() => {
     const container = mountRef.current;
@@ -35,12 +38,14 @@ export function HologramViewer({ projects, activeIndex }) {
     camera.position.set(0, 0.15, 6.1);
     camera.lookAt(0, 0.1, 0);
 
-    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
+    const renderer = createRenderer({ antialias: true, alpha: true });
+    if (!renderer) return retryScene(rebuildScene, { attempt: generation });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
     container.appendChild(renderer.domElement);
+    const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
 
     const group = new THREE.Group();
     scene.add(group);
@@ -375,6 +380,7 @@ export function HologramViewer({ projects, activeIndex }) {
     }
 
     return () => {
+      unguardContext();
       running = false;
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();

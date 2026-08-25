@@ -1,11 +1,14 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { tuneRenderer } from "../../utils/gfx.js";
+import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeGlowSpriteTexture, makeStatLabelSprite } from "../../utils/canvasTextures.js";
 
 export function StatsField3D({ stats }) {
   const mountRef = useRef(null);
+
+  const [generation, rebuildScene] = useSceneGeneration();
 
   useEffect(() => {
     const container = mountRef.current;
@@ -18,12 +21,14 @@ export function StatsField3D({ stats }) {
     camera.position.set(0, 0, 6.4);
     camera.lookAt(0, 0, 0);
 
-    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
+    const renderer = createRenderer({ antialias: true, alpha: true });
+    if (!renderer) return retryScene(rebuildScene, { attempt: generation });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
     container.appendChild(renderer.domElement);
+    const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
 
     const group = new THREE.Group();
     scene.add(group);
@@ -186,6 +191,7 @@ export function StatsField3D({ stats }) {
     }
 
     return () => {
+      unguardContext();
       running = false;
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();
@@ -207,7 +213,7 @@ export function StatsField3D({ stats }) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
       }
     };
-  }, [stats]);
+  }, [stats, generation]);
 
   return <div ref={mountRef} className="stats-3d" aria-hidden="true" />;
 }

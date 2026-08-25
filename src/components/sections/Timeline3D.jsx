@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { tuneRenderer } from "../../utils/gfx.js";
+import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeGlowSpriteTexture } from "../../utils/canvasTextures.js";
 
@@ -12,6 +13,8 @@ import { makeGlowSpriteTexture } from "../../utils/canvasTextures.js";
 // am I" instead of merely occupying the gutter.
 export function Timeline3D({ count }) {
   const mountRef = useRef(null);
+
+  const [generation, rebuildScene] = useSceneGeneration();
 
   useEffect(() => {
     const container = mountRef.current;
@@ -29,12 +32,14 @@ export function Timeline3D({ count }) {
     camera.position.set(0, 0, camDist);
     camera.lookAt(0, 0, 0);
 
-    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
+    const renderer = createRenderer({ antialias: true, alpha: true });
+    if (!renderer) return retryScene(rebuildScene, { attempt: generation });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
     container.appendChild(renderer.domElement);
+    const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
 
     scene.add(new THREE.AmbientLight(0x40446a, 0.7));
     const point = new THREE.PointLight(0xffffff, 1.6, 12);
@@ -305,6 +310,7 @@ export function Timeline3D({ count }) {
     }
 
     return () => {
+      unguardContext();
       running = false;
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();
@@ -328,7 +334,7 @@ export function Timeline3D({ count }) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
       }
     };
-  }, [count]);
+  }, [count, generation]);
 
   return <div ref={mountRef} className="timeline-3d" aria-hidden="true" />;
 }

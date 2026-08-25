@@ -1,19 +1,45 @@
-import { lazy, Suspense, createElement } from "react";
+import { Component, lazy, Suspense, createElement } from "react";
 
 // Every WebGL scene sits behind React.lazy so three.js — roughly half the
 // shipped JavaScript — never lands in the initial bundle. The nav, the hero
 // copy and the CV button paint while the three chunk is still in flight, then
 // each canvas swaps itself in. The fallback renders the same element the real
 // component would, so it reserves the identical box and nothing shifts.
+// A decorative scene is never worth a blank page.
+//
+// Everything below renders inside one React tree, so an exception thrown while
+// a scene is building — a refused WebGL context, a shader that will not compile
+// on some driver — unmounts everything above it. Measured under context
+// pressure: the entire site went white. Each scene now fails alone, leaving the
+// same empty box its loading fallback reserves.
+class SceneBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { failed: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
 function lazy3D(loader, exportName, className) {
-  const Component = lazy(() =>
+  const Scene = lazy(() =>
     loader().then((mod) => ({ default: mod[exportName] }))
   );
   const fallback = className
     ? createElement("div", { className, "aria-hidden": "true" })
     : null;
   return function Lazy3DBoundary(props) {
-    return createElement(Suspense, { fallback }, createElement(Component, props));
+    return createElement(
+      SceneBoundary,
+      { fallback },
+      createElement(Suspense, { fallback }, createElement(Scene, props))
+    );
   };
 }
 

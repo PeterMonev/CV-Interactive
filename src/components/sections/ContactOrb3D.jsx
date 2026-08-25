@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { tuneRenderer } from "../../utils/gfx.js";
+import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeGlowSpriteTexture } from "../../utils/canvasTextures.js";
 import { onContactState } from "../../utils/contactSignal.js";
@@ -12,6 +13,8 @@ const FAIL = new THREE.Color(0xff3ec9);
 export function ContactOrb3D() {
   const mountRef = useRef(null);
 
+  const [generation, rebuildScene] = useSceneGeneration();
+
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return undefined;
@@ -21,12 +24,14 @@ export function ContactOrb3D() {
     const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 50);
     camera.position.z = 6;
 
-    const renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
+    const renderer = createRenderer({ antialias: true, alpha: true });
+    if (!renderer) return retryScene(rebuildScene, { attempt: generation });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
     container.appendChild(renderer.domElement);
+    const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
 
     const geo = new THREE.TorusKnotGeometry(1.3, 0.34, 140, 14);
     const edges = new THREE.EdgesGeometry(geo, 1);
@@ -173,6 +178,7 @@ export function ContactOrb3D() {
     }
 
     return () => {
+      unguardContext();
       running = false;
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();
@@ -192,7 +198,7 @@ export function ContactOrb3D() {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [generation]);
 
   return <div ref={mountRef} className="contact-3d" aria-hidden="true" />;
 }

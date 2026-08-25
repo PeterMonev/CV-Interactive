@@ -1,11 +1,14 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { tuneRenderer } from "../../utils/gfx.js";
+import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 
 export function Cursor3D() {
   const wrapRef = useRef(null);
   const mountRef = useRef(null);
+
+  const [generation, rebuildScene] = useSceneGeneration();
 
   useEffect(() => {
     if (prefersReducedMotion()) return undefined;
@@ -28,13 +31,15 @@ export function Cursor3D() {
       camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
       camera.position.z = 3;
 
-      renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
+      renderer = createRenderer({ antialias: true, alpha: true });
+      if (!renderer) return;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.setSize(size, size);
       while (container.firstChild) {
         container.removeChild(container.firstChild);
       }
       container.appendChild(renderer.domElement);
+    const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
 
       geo = new THREE.OctahedronGeometry(0.85, 0);
       edges = new THREE.EdgesGeometry(geo);
@@ -78,6 +83,7 @@ export function Cursor3D() {
     animate();
 
     return () => {
+      unguardContext();
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", handleMove);
       window.removeEventListener("mousedown", handleDown);
@@ -91,7 +97,7 @@ export function Cursor3D() {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [generation]);
 
   return (
     <div ref={wrapRef} className="cursor-3d-wrap" aria-hidden="true">

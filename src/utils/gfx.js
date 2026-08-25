@@ -64,3 +64,91 @@ export function tuneTexture(texture, { srgb = false } = {}) {
 // for a texture nobody can resolve.
 export const texturePixelRatio = () =>
   Math.min(typeof window === "undefined" ? 1 : window.devicePixelRatio || 1, 2);
+
+// Keeps a scene alive across a lost GPU context.
+//
+// Two different failures wear the same name. A GPU process crash is handed
+// back by the browser: preventDefault on webglcontextlost asks for it, and
+// webglcontextrestored eventually arrives. Eviction is not. When a page holds
+// ten of the sixteen contexts Chrome allows and something else wants the GPU,
+// these are taken away and never offered back — measured on this site, all ten
+// died at once and stayed dead until a reload. Recovering from that means
+// asking for a new context, and ten scenes asking at the same instant is what
+// caused the eviction in the first place, so the requests are queued.
+
+const rebuildQueue = [];
+let draining = false;
+
+function drainRebuilds() {
+  if (draining) return;
+  draining = true;
+  const step = () => {
+    const next = rebuildQueue.shift();
+    if (!next) {
+      draining = false;
+      return;
+    }
+    try {
+      next();
+    } catch (err) {
+      /* one scene failing to come back must not strand the rest of the queue */
+    }
+    setTimeout(step, 600);
+  };
+  setTimeout(step, 300);
+}
+
+export function guardContext(renderer, rebuild, { attempt = 0 } = {}) {
+  const canvas = renderer.domElement;
+  const MAX_ATTEMPTS = 5;
+  let queued = false;
+
+  function requestRebuild() {
+    if (queued || attempt >= MAX_ATTEMPTS) return;
+    queued = true;
+    rebuildQueue.push(rebuild);
+    drainRebuilds();
+  }
+
+  function onLost(event) {
+    // not politeness: without this the browser never offers the context back
+    event.preventDefault();
+    requestRebuild();
+  }
+
+  canvas.addEventListener("webglcontextlost", onLost, false);
+  canvas.addEventListener("webglcontextrestored", requestRebuild, false);
+  return () => {
+    queued = true; // a scene being unmounted has no business rebuilding itself
+    canvas.removeEventListener("webglcontextlost", onLost);
+    canvas.removeEventListener("webglcontextrestored", requestRebuild);
+  };
+}
+
+// A renderer that refuses rather than throws.
+//
+// new THREE.WebGLRenderer throws when the browser will not grant a context —
+// which happens whenever the sixteen-context budget is already spent, either by
+// this page recovering all its scenes at once or by whatever else the visitor
+// has open. Thrown from inside an effect that exception unmounts the React tree
+// above it, and the measured result was not a missing canvas but a blank page.
+// A scene that cannot draw should be absent, never fatal.
+export function createRenderer(rendererOptions = {}, tuneOptions = {}) {
+  try {
+    const renderer = new THREE.WebGLRenderer(rendererOptions);
+    if (!renderer.getContext()) return null;
+    return tuneRenderer(renderer, tuneOptions);
+  } catch (err) {
+    return null;
+  }
+}
+
+// Ask for this scene again later, once the queue has drained. Returns undefined
+// so a scene can bail out of its effect with a single line.
+export function retryScene(rebuild, { attempt = 0 } = {}) {
+  if (attempt < 5) {
+    rebuildQueue.push(rebuild);
+    drainRebuilds();
+  }
+  return undefined;
+}

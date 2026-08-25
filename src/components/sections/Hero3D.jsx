@@ -4,11 +4,14 @@ import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { bloomSupported, createBloomComposer } from "../../utils/bloom.js";
-import { tuneRenderer } from "../../utils/gfx.js";
+import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 
 export function Hero3D() {
   const mountRef = useRef(null);
+
+  const [generation, rebuildScene] = useSceneGeneration();
 
   useEffect(() => {
     const container = mountRef.current;
@@ -23,15 +26,14 @@ export function Hero3D() {
     camera.position.z = 11;
 
     const useBloom = bloomSupported();
-    const renderer = tuneRenderer(
-      new THREE.WebGLRenderer({ antialias: true, alpha: true }),
-      { toneMap: useBloom }
-    );
+    const renderer = createRenderer({ antialias: true, alpha: true }, { toneMap: useBloom });
+    if (!renderer) return retryScene(rebuildScene, { attempt: generation });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
     container.appendChild(renderer.domElement);
+    const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
 
     const icoGeo = new THREE.IcosahedronGeometry(1.9, 1);
     const icoEdges = new THREE.EdgesGeometry(icoGeo);
@@ -220,6 +222,7 @@ export function Hero3D() {
     }
 
     return () => {
+      unguardContext();
       running = false;
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();
@@ -246,7 +249,7 @@ export function Hero3D() {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [generation]);
 
   return <div ref={mountRef} className="hero-3d" aria-hidden="true" />;
 }

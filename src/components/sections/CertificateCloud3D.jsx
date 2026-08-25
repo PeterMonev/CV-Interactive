@@ -4,7 +4,8 @@ import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { bloomSupported, createBloomComposer } from "../../utils/bloom.js";
-import { tuneRenderer, tuneTexture } from "../../utils/gfx.js";
+import { tuneRenderer, tuneTexture, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import {
   makeCertBadgeTexture,
@@ -15,6 +16,8 @@ import { track, EVENTS } from "../../utils/analytics.js";
 
 export function CertificateCloud3D({ certs }) {
   const mountRef = useRef(null);
+
+  const [generation, rebuildScene] = useSceneGeneration();
 
   useEffect(() => {
     const container = mountRef.current;
@@ -28,15 +31,14 @@ export function CertificateCloud3D({ certs }) {
     camera.position.z = 11;
 
     const useBloom = bloomSupported();
-    const renderer = tuneRenderer(
-      new THREE.WebGLRenderer({ antialias: true, alpha: true }),
-      { toneMap: useBloom }
-    );
+    const renderer = createRenderer({ antialias: true, alpha: true }, { toneMap: useBloom });
+    if (!renderer) return retryScene(rebuildScene, { attempt: generation });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
     container.appendChild(renderer.domElement);
+    const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
 
     const group = new THREE.Group();
     group.rotation.x = -0.15;
@@ -426,6 +428,7 @@ export function CertificateCloud3D({ certs }) {
     }
 
     return () => {
+      unguardContext();
       running = false;
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();
@@ -456,7 +459,7 @@ export function CertificateCloud3D({ certs }) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
       }
     };
-  }, [certs]);
+  }, [certs, generation]);
 
   return <div ref={mountRef} className="cert-3d" aria-hidden="true" />;
 }

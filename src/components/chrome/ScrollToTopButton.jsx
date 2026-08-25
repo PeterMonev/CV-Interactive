@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import * as THREE from "three";
-import { tuneRenderer } from "../../utils/gfx.js";
+import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { ArrowUp } from "lucide-react";
 import { prefersReducedMotion, magneticMove, magneticLeave } from "../../utils/motion.js";
 
 function ScrollTop3D({ onFail }) {
   const mountRef = useRef(null);
+
+  const [generation, rebuildScene] = useSceneGeneration();
 
   useEffect(() => {
     const container = mountRef.current;
@@ -25,13 +28,15 @@ function ScrollTop3D({ onFail }) {
       camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
       camera.position.z = 3;
 
-      renderer = tuneRenderer(new THREE.WebGLRenderer({ antialias: true, alpha: true }));
+      renderer = createRenderer({ antialias: true, alpha: true });
+      if (!renderer) return;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.setSize(42, 42);
       while (container.firstChild) {
         container.removeChild(container.firstChild);
       }
       container.appendChild(renderer.domElement);
+    const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
 
       // dodecahedron — more visually interesting than a plain arrow shape,
       // cyan so it reads clearly now that the button has no filled background
@@ -61,6 +66,7 @@ function ScrollTop3D({ onFail }) {
     animate();
 
     return () => {
+      unguardContext();
       cancelAnimationFrame(raf);
       geo.dispose();
       edges.dispose();
@@ -71,7 +77,7 @@ function ScrollTop3D({ onFail }) {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [generation]);
 
   return <div ref={mountRef} className="scroll-top-3d" aria-hidden="true" />;
 }
