@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Send, Check, AlertCircle, Loader2 } from "lucide-react";
 import { CONTACT_FORM, isFormConfigured } from "../../data/contactForm.js";
 import { track, EVENTS } from "../../utils/analytics.js";
 import { useLang } from "../../i18n/index.jsx";
+import { setContactState, chargeOf } from "../../utils/contactSignal.js";
 
 const EMPTY = { name: "", email: "", message: "" };
 
@@ -25,6 +26,17 @@ export function ContactForm() {
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
   const [botField, setBotField] = useState("");
   const { t } = useLang();
+
+  // The orb behind this form watches the same two facts the visitor can see:
+  // how far the message has got, and whether it went out. Reported rather than
+  // passed as props, because the scene mounts lazily in a different subtree.
+  useEffect(() => {
+    setContactState({ charge: chargeOf(values) });
+  }, [values]);
+
+  useEffect(() => {
+    setContactState({ status });
+  }, [status]);
 
   const set = (field) => (e) => {
     const v = e.target.value;
