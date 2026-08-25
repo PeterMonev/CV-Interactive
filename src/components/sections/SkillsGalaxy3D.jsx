@@ -358,8 +358,8 @@ export function SkillsGalaxy3D({ onSelect }) {
     // Construction now happens about a viewport early, so an entrance started
     // there would be over before the reader arrived.
     let spawnStart = null;
-    const SPAWN_MS = 900;
-    const SPAWN_STAGGER = 130;
+    const SPAWN_MS = 1500;
+    const SPAWN_STAGGER = 260;
     const beginSpawn = () => {
       if (spawnStart === null) spawnStart = performance.now();
     };
