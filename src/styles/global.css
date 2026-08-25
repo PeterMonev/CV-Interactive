@@ -559,17 +559,19 @@
 
       .galaxy-wrap {
         margin-top: 30px; background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
-        padding: 20px; display: grid; grid-template-columns: 1fr 260px; gap: 20px; align-items: stretch;
+        display: grid; grid-template-columns: 1fr 260px; align-items: stretch;
+        overflow: hidden;
       }
       /* The system is 13.3 units across and 8.3 tall. A fixed height meant the
          box got wider than that on a large screen without getting taller, and
          the difference showed up as dead space down both sides. Tied to the
          proportion instead, so the frame keeps matching what is in it. */
-      .galaxy-3d { position: relative; width: 100%; aspect-ratio: 1.62 / 1; max-height: 620px; border-radius: 12px; overflow: hidden; touch-action: none; }
+      .galaxy-stage { display: block; min-width: 0; }
+      .galaxy-3d { position: relative; width: 100%; aspect-ratio: 1.62 / 1; max-height: 620px; overflow: hidden; touch-action: none; }
       .galaxy-3d canvas { display: block; width: 100% !important; height: 100% !important; }
       .galaxy-info {
-        background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px;
-        padding: 20px; display: flex; flex-direction: column; justify-content: center;
+        background: rgba(255,255,255,0.02); border-left: 1px solid var(--border);
+        padding: 22px; display: flex; flex-direction: column; justify-content: center;
       }
       .galaxy-info-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; margin: 0 0 12px; color: var(--text); }
       .galaxy-info-hint { color: var(--muted); font-size: 13px; line-height: 1.75; margin: 0; }
@@ -730,6 +732,7 @@
         .drag-hint { display: none; }
         .galaxy-wrap { grid-template-columns: 1fr; }
         .galaxy-3d { aspect-ratio: auto; height: 360px; }
+        .galaxy-info { border-left: none; border-top: 1px solid var(--border); }
         .cert-3d { height: 360px; }
         .cmdk-backdrop { padding: 8vh 14px 14px; }
         .cmdk-item-hint { display: none; }

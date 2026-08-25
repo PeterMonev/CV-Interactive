@@ -5,13 +5,14 @@ import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
 import { SkillsGalaxy3D } from "../ui/lazy3d.js";
 import { SKILLS } from "../../data/skills.js";
 import { useLang } from "../../i18n/index.jsx";
-import { useParallax } from "../../hooks/useScrollFx.js";
 
 export function Skills() {
   const [skillsView, setSkillsView] = useState("3d");
   const [selectedDomain, setSelectedDomain] = useState(null);
   const { t } = useLang();
-  const galaxyRef = useParallax({ from: 44, to: -44 });
+  // No parallax here. The canvas now runs to the edge of its panel, which
+  // clips, so shifting it inside that frame only exposed a bare strip at one
+  // end and cut the scene at the other.
 
   return (
     <section id="skills" className="section">
@@ -57,7 +58,7 @@ export function Skills() {
       ) : (
         <Reveal>
           <div className="galaxy-wrap">
-            <div ref={galaxyRef} className="fx-layer">
+            <div className="galaxy-stage">
               <SkillsGalaxy3D onSelect={(domain) => setSelectedDomain(domain)} />
             </div>
             <div className="galaxy-info">
