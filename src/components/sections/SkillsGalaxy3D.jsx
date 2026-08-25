@@ -80,13 +80,13 @@ export function SkillsGalaxy3D({ onSelect }) {
     // gives depth but no atmosphere — every planet was a bright object on a
     // void. Three very soft, very dim sprites in the site palette put colour
     // behind the orbits, so the galaxy reads as somewhere rather than as a
-    // diagram on a dark background. Kept under 0.2 opacity: the moment the
-    // clouds are legible as shapes they stop being atmosphere.
+    // diagram on a dark background. Still soft-edged rather than opaque: the moment the
+    // clouds are legible as hard shapes they stop being atmosphere.
     const nebulaTexture = makeGlowSpriteTexture();
     const nebulae = [
-      { color: 0x8b5cf6, pos: [-3.4, 1.5, -6.5], size: 10, opacity: 0.17, drift: 0.11 },
-      { color: 0x00e5ff, pos: [3.6, -1.4, -7.5], size: 12, opacity: 0.13, drift: 0.08 },
-      { color: 0xff3ec9, pos: [0.8, 2.8, -8.5], size: 9, opacity: 0.1, drift: 0.14 },
+      { color: 0x8b5cf6, pos: [-3.4, 1.5, -6.5], size: 13, opacity: 0.46, drift: 0.11 },
+      { color: 0x00e5ff, pos: [3.6, -1.4, -7.5], size: 15, opacity: 0.38, drift: 0.08 },
+      { color: 0xff3ec9, pos: [0.8, 2.8, -8.5], size: 11, opacity: 0.3, drift: 0.14 },
     ].map((spec, i) => {
       const sprite = new THREE.Sprite(
         new THREE.SpriteMaterial({
