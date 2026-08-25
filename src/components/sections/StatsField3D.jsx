@@ -5,6 +5,14 @@ import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeGlowSpriteTexture, makeStatLabelSprite } from "../../utils/canvasTextures.js";
 
+// The four headline numbers, as a system rather than a diagram.
+//
+// They used to be pinned at fixed coordinates inside a rotating group, which
+// meant the labels swung behind the wireframe and out of the frame as the whole
+// thing turned. Each figure now holds its own inclined orbit around the core,
+// keeps its label beside it, and fades as it passes behind — the same depth
+// language the certificate cloud already speaks, so the two sections read as
+// one site instead of two experiments.
 export function StatsField3D({ stats }) {
   const mountRef = useRef(null);
 
@@ -17,8 +25,10 @@ export function StatsField3D({ stats }) {
     const reduced = prefersReducedMotion();
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 20);
-    camera.position.set(0, 0, 6.4);
+    const FOV = 46;
+    const CAM_Z = 6.4;
+    const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 20);
+    camera.position.set(0, 0, CAM_Z);
     camera.lookAt(0, 0, 0);
 
     const renderer = createRenderer({ antialias: true, alpha: true });
@@ -33,6 +43,50 @@ export function StatsField3D({ stats }) {
     const group = new THREE.Group();
     scene.add(group);
 
+    // The core: a lit shell inside a wire cage inside a wider, slower cage.
+    // One wireframe on its own reads as a diagram; three layers at different
+    // rates read as an object with a volume.
+    const coreUniforms = {
+      uTime: { value: 0 },
+      uHot: { value: new THREE.Color(0x00e5ff) },
+      uCool: { value: new THREE.Color(0x8b5cf6) },
+    };
+    const coreMat = new THREE.ShaderMaterial({
+      uniforms: coreUniforms,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vView;
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          vec4 mv = modelViewMatrix * vec4(position, 1.0);
+          vView = normalize(-mv.xyz);
+          gl_Position = projectionMatrix * mv;
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        uniform vec3 uHot;
+        uniform vec3 uCool;
+        varying vec3 vNormal;
+        varying vec3 vView;
+        void main() {
+          // bright at the silhouette, hollow through the middle, so it glows
+          // like a shell rather than sitting there as a solid ball
+          float facing = abs(dot(normalize(vNormal), normalize(vView)));
+          float rim = pow(1.0 - facing, 2.4);
+          float breathe = 0.86 + 0.14 * sin(uTime * 1.5);
+          vec3 col = mix(uCool, uHot, rim);
+          gl_FragColor = vec4(col * breathe, rim * 0.72 + 0.05);
+        }
+      `,
+    });
+    const coreGeo = new THREE.IcosahedronGeometry(1.16, 2);
+    const core = new THREE.Mesh(coreGeo, coreMat);
+    group.add(core);
+
     const icoGeo = new THREE.IcosahedronGeometry(1.5, 1);
     const icoEdges = new THREE.EdgesGeometry(icoGeo);
     const icoMat = new THREE.LineBasicMaterial({
@@ -42,6 +96,16 @@ export function StatsField3D({ stats }) {
     });
     const wireframe = new THREE.LineSegments(icoEdges, icoMat);
     group.add(wireframe);
+
+    const shellGeo = new THREE.IcosahedronGeometry(2.05, 1);
+    const shellEdges = new THREE.EdgesGeometry(shellGeo);
+    const shellMat = new THREE.LineBasicMaterial({
+      color: 0x8b5cf6,
+      transparent: true,
+      opacity: 0.2,
+    });
+    const shell = new THREE.LineSegments(shellEdges, shellMat);
+    group.add(shell);
 
     const coreGlow = new THREE.Sprite(
       new THREE.SpriteMaterial({
@@ -56,28 +120,59 @@ export function StatsField3D({ stats }) {
     coreGlow.scale.set(3.2, 3.2, 1);
     group.add(coreGlow);
 
-    const markers = [];
-    stats.forEach((s) => {
+    // A tether from the core to each figure, brightest at the figure. Rebuilt
+    // every frame because the markers move.
+    const linkPositions = new Float32Array(stats.length * 6);
+    const linkColors = new Float32Array(stats.length * 6);
+    const linkGeo = new THREE.BufferGeometry();
+    linkGeo.setAttribute("position", new THREE.BufferAttribute(linkPositions, 3));
+    linkGeo.setAttribute("color", new THREE.BufferAttribute(linkColors, 3));
+    const linkMat = new THREE.LineBasicMaterial({
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.5,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const links = new THREE.LineSegments(linkGeo, linkMat);
+    group.add(links);
+
+    const glowTexture = makeGlowSpriteTexture();
+    const markers = stats.map((s, i) => {
+      const color = new THREE.Color(s.color);
       const dot = new THREE.Sprite(
         new THREE.SpriteMaterial({
-          map: makeGlowSpriteTexture(),
-          color: new THREE.Color(s.color),
+          map: glowTexture,
+          color,
           transparent: true,
           depthWrite: false,
           blending: THREE.AdditiveBlending,
         })
       );
-      dot.position.set(s.x, s.y, s.z);
       dot.scale.set(0.5, 0.5, 1);
       group.add(dot);
 
       const label = makeStatLabelSprite(`${s.value} ${s.label}`, s.color);
-      label.position.set(s.x + 0.32, s.y + 0.05, s.z);
       group.add(label);
 
-      markers.push({ dot, phase: Math.random() * Math.PI * 2 });
+      return {
+        dot,
+        label,
+        color,
+        labelWidth: label.scale.x,
+        // spread around the circle, each on its own tilted plane so the four
+        // orbits never collapse into one ring seen edge-on
+        phase: (i / stats.length) * Math.PI * 2,
+        speed: 0.16 + i * 0.026,
+        tilt: -0.5 + i * 0.34,
+        wobble: Math.random() * Math.PI * 2,
+      };
     });
 
+    // Fitted to the box rather than fixed, because this canvas is as wide as
+    // the About column and only 420px tall — a radius chosen for one aspect
+    // pushes the labels off the edge at another.
+    let orbitRadius = 2.4;
     function resize() {
       const w = container.clientWidth;
       const h = container.clientHeight;
@@ -85,6 +180,10 @@ export function StatsField3D({ stats }) {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      const halfH = Math.tan((FOV / 2) * (Math.PI / 180)) * CAM_Z;
+      const halfW = halfH * camera.aspect;
+      const widestLabel = markers.reduce((m, k) => Math.max(m, k.labelWidth), 0);
+      orbitRadius = Math.max(1.9, Math.min(halfW - widestLabel * 0.7, halfH * 0.86));
     }
     resize();
     window.addEventListener("resize", resize);
@@ -149,6 +248,57 @@ export function StatsField3D({ stats }) {
 
     let raf = null;
     let running = true;
+    const world = new THREE.Vector3();
+
+    function placeMarkers(t) {
+      const posAttr = linkGeo.attributes.position;
+      const colAttr = linkGeo.attributes.color;
+
+      markers.forEach((m, i) => {
+        const angle = m.phase + t * m.speed;
+        const x = Math.cos(angle) * orbitRadius;
+        const z = Math.sin(angle) * orbitRadius;
+        const y = Math.sin(angle) * Math.sin(m.tilt) * orbitRadius * 0.55
+          + Math.sin(t * 0.9 + m.wobble) * 0.08;
+        const zt = z * Math.cos(m.tilt);
+
+        m.dot.position.set(x, y, zt);
+        // the label sits outward from the core so it never crosses it
+        const out = Math.hypot(x, zt) || 1;
+        m.label.position.set(
+          x + (x / out) * (m.labelWidth * 0.5 + 0.22),
+          y + 0.05,
+          zt + (zt / out) * 0.1
+        );
+
+        // How much of the marker is facing us. Behind the core it dims rather
+        // than disappearing, so the ring stays readable as a ring.
+        m.dot.getWorldPosition(world);
+        const front = (world.z / orbitRadius + 1) * 0.5;
+        const focus = Math.pow(Math.max(0, Math.min(1, front)), 1.4);
+        const near = 0.34 + focus * 0.72;
+
+        const pulse = 1 + Math.sin(t * 2.4 + m.wobble) * 0.18;
+        m.dot.scale.set(0.42 * pulse * near, 0.42 * pulse * near, 1);
+        m.dot.material.opacity = 0.35 + focus * 0.65;
+        m.label.material.opacity = 0.2 + focus * 0.8;
+        m.label.scale.set(m.labelWidth * near, 0.4 * near, 1);
+
+        posAttr.setXYZ(i * 2, 0, 0, 0);
+        posAttr.setXYZ(i * 2 + 1, x, y, zt);
+        const dim = 0.1 + focus * 0.15;
+        colAttr.setXYZ(i * 2, m.color.r * dim, m.color.g * dim, m.color.b * dim);
+        colAttr.setXYZ(
+          i * 2 + 1,
+          m.color.r * (0.4 + focus * 0.6),
+          m.color.g * (0.4 + focus * 0.6),
+          m.color.b * (0.4 + focus * 0.6)
+        );
+      });
+
+      posAttr.needsUpdate = true;
+      colAttr.needsUpdate = true;
+    }
 
     function animate() {
       if (!running) {
@@ -157,16 +307,19 @@ export function StatsField3D({ stats }) {
       }
       if (!reduced) {
         const t = performance.now() * 0.001;
+        coreUniforms.uTime.value = t;
+        core.rotation.y -= 0.0016;
+        core.rotation.x += 0.0006;
         wireframe.rotation.y += 0.0022;
         wireframe.rotation.x += 0.0008;
+        // against the cage, so the two never lock into one rigid shape
+        shell.rotation.y -= 0.0013;
+        shell.rotation.z += 0.0005;
         if (!dragging) {
           group.rotation.y += 0.0009;
         }
         coreGlow.material.opacity = 0.4 + Math.sin(t * 1.6) * 0.12;
-        markers.forEach(({ dot, phase }) => {
-          const pulse = 1 + Math.sin(t * 2.4 + phase) * 0.25;
-          dot.scale.set(0.5 * pulse, 0.5 * pulse, 1);
-        });
+        placeMarkers(t);
       }
       renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
@@ -174,6 +327,7 @@ export function StatsField3D({ stats }) {
 
     let io = null;
     if (reduced) {
+      placeMarkers(0);
       renderer.render(scene, camera);
     } else {
       io = new IntersectionObserver(
@@ -201,6 +355,7 @@ export function StatsField3D({ stats }) {
       container.removeEventListener("pointermove", onPointerMove);
       container.removeEventListener("pointerup", onPointerUp);
       container.removeEventListener("pointercancel", onPointerUp);
+      glowTexture.dispose();
       scene.traverse((obj) => {
         if (obj.geometry) obj.geometry.dispose();
         if (obj.material) {
