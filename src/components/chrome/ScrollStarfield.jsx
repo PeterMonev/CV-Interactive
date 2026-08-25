@@ -100,8 +100,12 @@ export function ScrollStarfield() {
       new THREE.Color(0x8b5cf6),
       new THREE.Color(0x5eead4),
     ];
-    const accentCount = window.innerWidth < 720 ? 26 : 46;
-    const accent = makeStarField(accentCount, spread * 0.85, depth, 0.11, (i) => palette[i % palette.length]);
+    // Most of what flies past is the plain field, which is deliberately
+    // near-white so it never competes with content. That left the coloured
+    // stars too sparse to register as colour at all — roughly one in ten.
+    // Nearly doubled, and a touch larger, so the palette actually reads.
+    const accentCount = window.innerWidth < 720 ? 48 : 88;
+    const accent = makeStarField(accentCount, spread * 0.85, depth, 0.135, (i) => palette[i % palette.length]);
     scene.add(accent.points);
 
     // The one thing on the page that spans every section, and until now the

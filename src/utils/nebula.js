@@ -22,9 +22,9 @@ const DEFAULT_COLORS = [0x8b5cf6, 0x00e5ff, 0xff3ec9];
 export function createNebulae(scene, { distance = 9, strength = 1, colors = DEFAULT_COLORS } = {}) {
   const unit = distance / 9.6;
   const specs = [
-    { color: colors[0], pos: [-1.7 * unit, 0.9 * unit, -6.6 * unit], w: 34, h: 11, tilt: 0.42, opacity: 0.55, drift: 0.09 },
-    { color: colors[1], pos: [4.2 * unit, -2.0 * unit, -7.6 * unit], w: 27, h: 8.5, tilt: -0.3, opacity: 0.42, drift: 0.07 },
-    { color: colors[2], pos: [-2.9 * unit, 2.7 * unit, -8.6 * unit], w: 22, h: 7, tilt: 0.95, opacity: 0.34, drift: 0.12 },
+    { color: colors[0], pos: [-1.7 * unit, 0.9 * unit, -6.6 * unit], w: 48, h: 15, tilt: 0.42, opacity: 0.55, drift: 0.09 },
+    { color: colors[1], pos: [4.2 * unit, -2.0 * unit, -7.6 * unit], w: 38, h: 12, tilt: -0.3, opacity: 0.42, drift: 0.07 },
+    { color: colors[2], pos: [-2.9 * unit, 2.7 * unit, -8.6 * unit], w: 31, h: 10, tilt: 0.95, opacity: 0.34, drift: 0.12 },
   ];
 
   const textures = [makeNebulaTexture(7), makeNebulaTexture(23), makeNebulaTexture(41)];

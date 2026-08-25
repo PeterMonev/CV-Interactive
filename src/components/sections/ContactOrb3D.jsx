@@ -77,6 +77,50 @@ export function ContactOrb3D() {
     const burst = new THREE.Mesh(burstGeo, burstMat);
     scene.add(burst);
 
+    // Motes in the palette, orbiting the knot.
+    //
+    // Everything that flew past this section came from the page-wide starfield,
+    // which is deliberately near-white so it never competes with text — so the
+    // last thing a visitor sees before writing to him was the only scene on the
+    // site with no colour of its own moving in it. These carry the same four
+    // hues the rest of the page uses, and brighten with the message like the
+    // knot does.
+    const MOTES = 110;
+    const motePalette = [
+      new THREE.Color(0x00e5ff),
+      new THREE.Color(0x5eead4),
+      new THREE.Color(0x8b5cf6),
+      new THREE.Color(0xff3ec9),
+    ];
+    const motePositions = new Float32Array(MOTES * 3);
+    const moteColors = new Float32Array(MOTES * 3);
+    const moteSeeds = [];
+    for (let i = 0; i < MOTES; i++) {
+      const radius = 1.9 + Math.random() * 1.7;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      moteSeeds.push({ radius, theta, phi, speed: 0.04 + Math.random() * 0.09 });
+      const c = motePalette[i % motePalette.length];
+      moteColors[i * 3] = c.r;
+      moteColors[i * 3 + 1] = c.g;
+      moteColors[i * 3 + 2] = c.b;
+    }
+    const moteGeo = new THREE.BufferGeometry();
+    moteGeo.setAttribute("position", new THREE.BufferAttribute(motePositions, 3));
+    moteGeo.setAttribute("color", new THREE.BufferAttribute(moteColors, 3));
+    const moteMat = new THREE.PointsMaterial({
+      map: glowTexture,
+      size: 0.13,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.7,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      sizeAttenuation: true,
+    });
+    const motes = new THREE.Points(moteGeo, moteMat);
+    scene.add(motes);
+
     function resize() {
       const w = container.clientWidth;
       const h = container.clientHeight;
@@ -146,6 +190,22 @@ export function ContactOrb3D() {
       core.material.opacity = charge * 0.5 + (sending ? 0.25 : 0);
       core.scale.setScalar(0.9 + charge * 1.1 + Math.sin(t * 3) * 0.06 * charge);
 
+      const motePos = moteGeo.attributes.position;
+      for (let i = 0; i < MOTES; i++) {
+        const m = moteSeeds[i];
+        const a2 = m.theta + t * m.speed;
+        const sp = Math.sin(m.phi);
+        motePos.setXYZ(
+          i,
+          Math.cos(a2) * sp * m.radius,
+          Math.cos(m.phi) * m.radius + Math.sin(t * 0.5 + i) * 0.05,
+          Math.sin(a2) * sp * m.radius
+        );
+      }
+      motePos.needsUpdate = true;
+      moteMat.opacity = 0.42 + charge * 0.5 + (sending ? 0.15 : 0);
+      moteMat.size = 0.11 + charge * 0.06;
+
       if (burstAt > 0) {
         const age = (now - burstAt) / 1100;
         if (age >= 1) {
@@ -194,6 +254,8 @@ export function ContactOrb3D() {
       geo.dispose();
       edges.dispose();
       mat.dispose();
+      moteGeo.dispose();
+      moteMat.dispose();
       burstGeo.dispose();
       burstMat.dispose();
       core.material.dispose();
