@@ -10,7 +10,9 @@ export function Experience() {
   const { t } = useLang();
   const tx = useTx();
   // the filament runs against the cards rather than with them
-  const filamentRef = useParallax({ from: -34, to: 34 });
+  // Small on purpose: the filament now marks where the reader is, so a wide
+  // parallax would slide the lit node away from the card it belongs to.
+  const filamentRef = useParallax({ from: -10, to: 10 });
 
   return (
     <section id="experience" className="section">
