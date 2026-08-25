@@ -15,7 +15,7 @@ export function Skills() {
 
   return (
     <section id="skills" className="section">
-      <Reveal>
+      <Reveal variant="wipe">
         <p className="section-eyebrow">
           <Code2 size={14} /> {t("skills.eyebrow")}
         </p>

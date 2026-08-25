@@ -56,7 +56,7 @@ export function Certificates() {
 
   return (
     <section id="certificates" className="section">
-      <Reveal>
+      <Reveal variant="wipe">
         <p className="section-eyebrow">
           <Award size={14} /> {t("certificates.eyebrow")}
         </p>

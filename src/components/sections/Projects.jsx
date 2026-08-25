@@ -17,7 +17,7 @@ export function Projects() {
 
   return (
     <section id="projects" className="section">
-      <Reveal>
+      <Reveal variant="wipe">
         <p className="section-eyebrow">
           <Database size={14} /> {t("projects.eyebrow")}
         </p>

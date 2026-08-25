@@ -16,7 +16,7 @@ export function Experience() {
 
   return (
     <section id="experience" className="section">
-      <Reveal>
+      <Reveal variant="wipe">
         <p className="section-eyebrow">
           <Briefcase size={14} /> {t("experience.eyebrow")}
         </p>

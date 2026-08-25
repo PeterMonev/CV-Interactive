@@ -30,7 +30,7 @@ export function About() {
         </Reveal>
 
         <div>
-          <Reveal>
+          <Reveal variant="wipe">
             <p className="section-eyebrow">{t("about.eyebrow")}</p>
             <ScrambleHeading text={t("about.heading")} className="h2" />
           </Reveal>

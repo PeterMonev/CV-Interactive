@@ -438,6 +438,19 @@
       .reveal-mask { clip-path: inset(0 100% 0 0); transform: translateY(10px); }
       .reveal-mask.reveal-in { clip-path: inset(0 0 0 0); transform: translateY(0); }
 
+      /* headings: wiped across, as an animation rather than as two states.
+         The earlier version parked the heading at clip-path: inset(0 100% 0 0)
+         and relied on a class arriving to open it, so anything that stopped the
+         class left the heading not merely unanimated but gone. Here the hidden
+         half exists only inside the keyframes, and fill-mode none hands the
+         element back to its natural, unclipped state when the animation ends —
+         a wipe that fails to play leaves a heading that is simply there. */
+      .reveal-wipe.reveal-in { animation: revealWipe 0.9s cubic-bezier(.22,1,.36,1); }
+      @keyframes revealWipe {
+        from { clip-path: inset(0 100% 0 0); transform: translateY(10px); }
+        to   { clip-path: inset(0 0 0 0); transform: translateY(0); }
+      }
+
       /* media and canvases: settle into their box instead of sliding into it */
       .reveal-scale { transform: scale(0.945); }
       .reveal-scale.reveal-in { transform: scale(1); }
@@ -772,5 +785,5 @@
 
       @media (prefers-reduced-motion: reduce) {
         .cv-root * { animation: none !important; transition: none !important; }
-        .reveal { opacity: 1 !important; transform: none !important; clip-path: none !important; }
+        .reveal { opacity: 1 !important; transform: none !important; clip-path: none !important; animation: none !important; }
       }
