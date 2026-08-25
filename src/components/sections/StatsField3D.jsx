@@ -271,28 +271,31 @@ export function StatsField3D({ stats }) {
           zt + (zt / out) * 0.1
         );
 
-        // How much of the marker is facing us. Behind the core it dims rather
-        // than disappearing, so the ring stays readable as a ring.
+        // How much of the marker is facing us. The far half only darkens: a
+        // figure that fades out is a figure the reader has to wait for, and
+        // half the orbit spent waiting made the set look broken rather than
+        // deep. Floors are high and the curve is linear, so the back of the
+        // ring reads as shaded, never as absent.
         m.dot.getWorldPosition(world);
         const front = (world.z / orbitRadius + 1) * 0.5;
-        const focus = Math.pow(Math.max(0, Math.min(1, front)), 1.4);
-        const near = 0.34 + focus * 0.72;
+        const focus = Math.max(0, Math.min(1, front));
+        const near = 0.82 + focus * 0.24;
 
         const pulse = 1 + Math.sin(t * 2.4 + m.wobble) * 0.18;
         m.dot.scale.set(0.42 * pulse * near, 0.42 * pulse * near, 1);
-        m.dot.material.opacity = 0.35 + focus * 0.65;
-        m.label.material.opacity = 0.2 + focus * 0.8;
+        m.dot.material.opacity = 0.74 + focus * 0.26;
+        m.label.material.opacity = 0.66 + focus * 0.34;
         m.label.scale.set(m.labelWidth * near, 0.4 * near, 1);
 
         posAttr.setXYZ(i * 2, 0, 0, 0);
         posAttr.setXYZ(i * 2 + 1, x, y, zt);
-        const dim = 0.1 + focus * 0.15;
+        const dim = 0.16 + focus * 0.12;
         colAttr.setXYZ(i * 2, m.color.r * dim, m.color.g * dim, m.color.b * dim);
         colAttr.setXYZ(
           i * 2 + 1,
-          m.color.r * (0.4 + focus * 0.6),
-          m.color.g * (0.4 + focus * 0.6),
-          m.color.b * (0.4 + focus * 0.6)
+          m.color.r * (0.62 + focus * 0.38),
+          m.color.g * (0.62 + focus * 0.38),
+          m.color.b * (0.62 + focus * 0.38)
         );
       });
 
