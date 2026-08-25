@@ -32,7 +32,7 @@ export function SkillsGalaxy3D({ onSelect }) {
     // vertical span and derives the horizontal one from the aspect, so making
     // the box taller alone would have bought margin at the bottom by cutting
     // the widest orbit off at the sides.
-    camera.position.set(0, 2.6, 11.2);
+    camera.position.set(0, 2.6, 10.4);
     camera.lookAt(0, 0, 0);
 
     const renderer = createRenderer({ antialias: true, alpha: true });
@@ -92,7 +92,7 @@ export function SkillsGalaxy3D({ onSelect }) {
     // behind the orbits, so the galaxy reads as somewhere rather than as a
     // diagram on a dark background. Still soft-edged rather than opaque: the moment the
     // clouds are legible as hard shapes they stop being atmosphere.
-    const nebulae = createNebulae(scene, { distance: 11.2 });
+    const nebulae = createNebulae(scene, { distance: 10.4 });
 
     // the "sun" — bright emissive core, wireframe shell, layered glow
     const sunCoreGeo = new THREE.SphereGeometry(0.32, 24, 24);
