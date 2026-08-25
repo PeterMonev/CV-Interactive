@@ -1,4 +1,4 @@
-import { Component, lazy, Suspense, createElement } from "react";
+import { Component, lazy, Suspense, createElement, useEffect, useRef, useState } from "react";
 
 // Every WebGL scene sits behind React.lazy so three.js — roughly half the
 // shipped JavaScript — never lands in the initial bundle. The nav, the hero
@@ -27,7 +27,72 @@ class SceneBoundary extends Component {
   }
 }
 
-function lazy3D(loader, exportName, className) {
+// Builds a scene only once the reader is close to it.
+//
+// Ten scenes used to construct themselves the moment the page rendered: ten
+// GPU contexts out of the sixteen the browser allows, plus every geometry and
+// every generated label texture, all competing with the first paint. Almost
+// none of it is on screen. The six that live inside sections now wait until
+// they are roughly a viewport away.
+//
+// Once built, a scene stays built. An earlier version of this idea unmounted
+// scenes on the way out, which meant scrolling back up restarted animations
+// that had been running — the page kept losing its place.
+//
+// Two independent triggers, because a scene that never mounts is a far worse
+// failure than one that mounts early. IntersectionObserver is the efficient
+// signal; a rect read on scroll is the one that still works when observer
+// callbacks are not being delivered. Either is enough, and whichever fires
+// first detaches the other.
+function DeferredScene({ className, children }) {
+  const ref = useRef(null);
+  const [near, setNear] = useState(false);
+
+  useEffect(() => {
+    if (near) return undefined;
+    let settled = false;
+    const check = () => {
+      const el = ref.current;
+      if (settled || !el) return;
+      const rect = el.getBoundingClientRect();
+      const margin = window.innerHeight * 1.2;
+      if (rect.top < window.innerHeight + margin && rect.bottom > -margin) {
+        settled = true;
+        setNear(true);
+      }
+    };
+    let io = null;
+    if (typeof IntersectionObserver !== "undefined") {
+      io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting) && !settled) {
+            settled = true;
+            setNear(true);
+          }
+        },
+        { rootMargin: "120% 0px" }
+      );
+      if (ref.current) io.observe(ref.current);
+    }
+
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    return () => {
+      if (io) io.disconnect();
+      window.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
+  }, [near]);
+
+  // The placeholder is the same element the scene renders, so the box it
+  // occupies never changes and nothing shifts when the real thing arrives.
+  return near
+    ? children
+    : createElement("div", { ref, className, "aria-hidden": "true" });
+}
+
+function lazy3D(loader, exportName, className, { defer = false } = {}) {
   const Scene = lazy(() =>
     loader().then((mod) => ({ default: mod[exportName] }))
   );
@@ -35,11 +100,13 @@ function lazy3D(loader, exportName, className) {
     ? createElement("div", { className, "aria-hidden": "true" })
     : null;
   return function Lazy3DBoundary(props) {
-    return createElement(
+    const scene = createElement(
       SceneBoundary,
       { fallback },
       createElement(Suspense, { fallback }, createElement(Scene, props))
     );
+    if (!defer) return scene;
+    return createElement(DeferredScene, { className }, scene);
   };
 }
 
@@ -68,30 +135,36 @@ export const Hero3D = lazy3D(
 export const StatsField3D = lazy3D(
   () => import("../sections/StatsField3D.jsx"),
   "StatsField3D",
-  "stats-3d"
+  "stats-3d",
+  { defer: true }
 );
 export const Timeline3D = lazy3D(
   () => import("../sections/Timeline3D.jsx"),
   "Timeline3D",
-  "timeline-3d"
+  "timeline-3d",
+  { defer: true }
 );
 export const CertificateCloud3D = lazy3D(
   () => import("../sections/CertificateCloud3D.jsx"),
   "CertificateCloud3D",
-  "cert-3d"
+  "cert-3d",
+  { defer: true }
 );
 export const SkillsGalaxy3D = lazy3D(
   () => import("../sections/SkillsGalaxy3D.jsx"),
   "SkillsGalaxy3D",
-  "galaxy-3d"
+  "galaxy-3d",
+  { defer: true }
 );
 export const HologramViewer = lazy3D(
   () => import("../sections/HologramViewer.jsx"),
   "HologramViewer",
-  "hologram-viewer"
+  "hologram-viewer",
+  { defer: true }
 );
 export const ContactOrb3D = lazy3D(
   () => import("../sections/ContactOrb3D.jsx"),
   "ContactOrb3D",
-  "contact-3d"
+  "contact-3d",
+  { defer: true }
 );
