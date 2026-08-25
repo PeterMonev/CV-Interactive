@@ -31,9 +31,6 @@ export const UI = {
       cta: "Get in touch",
       github: "View GitHub",
       dragHint: "drag the shapes to spin them",
-      statusOpen: "Open to junior full-stack roles",
-      statusRemote: "On site in Sofia or remote",
-      statusLocation: "Sofia, Bulgaria",
     },
     about: {
       eyebrow: "About",
@@ -180,9 +177,6 @@ export const UI = {
       cta: "Свържи се с мен",
       github: "Виж GitHub",
       dragHint: "хвани фигурите и ги завърти",
-      statusOpen: "Отворен за junior full-stack позиции",
-      statusRemote: "На място в София или дистанционно",
-      statusLocation: "София, България",
     },
     about: {
       eyebrow: "За мен",

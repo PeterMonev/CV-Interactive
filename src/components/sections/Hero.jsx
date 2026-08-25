@@ -1,4 +1,4 @@
-import { Github, ArrowUpRight, Download, MapPin, BadgeCheck, Laptop } from "lucide-react";
+import { Github, ArrowUpRight, Download } from "lucide-react";
 import { magneticMove, magneticLeave } from "../../utils/motion.js";
 import { CV_URL, CV_FILENAME, CV_LABEL } from "../../data/cv.js";
 import { track, EVENTS } from "../../utils/analytics.js";
@@ -61,15 +61,6 @@ export function Hero({ scrollTo }) {
             </a>
           </div>
 
-          {/* The three things a recruiter checks first — where he is, whether
-              he is looking, and whether the arrangement can work — all lived at
-              the very bottom of the page in the contact block, or inside the
-              code art where they read as decoration rather than as facts. */}
-          <ul className="hero-facts">
-            <li><MapPin size={13} /> {t("hero.statusLocation")}</li>
-            <li><BadgeCheck size={13} /> {t("hero.statusOpen")}</li>
-            <li><Laptop size={13} /> {t("hero.statusRemote")}</li>
-          </ul>
         </div>
 
         <HeroTerminal onHireMe={() => scrollTo("contact")} scrollTo={scrollTo} />
