@@ -581,10 +581,33 @@
       .filter-btn-active { background: linear-gradient(90deg, var(--cyan), var(--mint)); color: var(--bg); border-color: transparent; }
 
       /* skills */
-      .skills-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 30px; }
-      .skill-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; transition: border-color 0.3s ease, transform 0.3s ease; }
-      .skill-card:hover { border-color: rgba(94,234,212,0.4); transform: translateY(-2px); }
-      .skill-group { font-family: 'Space Grotesk', sans-serif; font-size: 15px; margin: 0 0 14px; color: var(--mint); }
+      .skills-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 30px; align-items: stretch; }
+      .skills-grid > .reveal { height: 100%; }
+
+      /* Built to match the education cards: same accent bar, same numbered
+         header, same equal heights. Two list-shaped sections in one page that
+         are styled differently read as two different sites. */
+      .skill-card {
+        position: relative; height: 100%; overflow: hidden;
+        background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+        padding: 20px 22px 22px 24px; display: flex; flex-direction: column;
+        transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .skill-card::before {
+        content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+        background: linear-gradient(180deg, var(--accent, var(--mint)), transparent 85%);
+        opacity: 0.5; transition: opacity 0.3s ease;
+      }
+      .skill-card:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-3px); box-shadow: 0 12px 34px rgba(0,0,0,0.32); }
+      .skill-card:hover::before { opacity: 1; }
+
+      .skill-card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+      .skill-group { font-family: 'Space Grotesk', sans-serif; font-size: 15.5px; margin: 0; color: var(--accent, var(--mint)); }
+      /* The count answers a question the chips make you do arithmetic for. */
+      .skill-count {
+        font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted);
+        border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; flex: none;
+      }
 
       .galaxy-wrap {
         margin-top: 30px; background: var(--panel); border: 1px solid var(--border); border-radius: 16px;

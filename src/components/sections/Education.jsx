@@ -6,7 +6,7 @@ import { useLang, useTx } from "../../i18n/index.jsx";
 
 // One accent per entry, cycling the site palette. Four identical cards read as
 // a table of contents; four that each carry a colour read as a set.
-const EDU_ACCENTS = ["#00e5ff", "#8b5cf6", "#5eead4", "#fbbf24"];
+const EDU_ACCENTS = ["#00e5ff", "#8b5cf6", "#ff3ec9", "#5eead4"];
 
 export function Education() {
   const { t } = useLang();

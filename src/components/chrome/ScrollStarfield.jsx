@@ -111,7 +111,7 @@ export function ScrollStarfield() {
       new THREE.Color(0x5eead4),
       new THREE.Color(0x8b5cf6),
       new THREE.Color(0xff3ec9),
-      new THREE.Color(0xfbbf24),
+      new THREE.Color(0xff3ec9),
     ];
     const field = makeStarField(starCount, spread, depth, 0.05, (i) => FIELD_TINTS[i % FIELD_TINTS.length]);
     field.mat.opacity = 0.62;
@@ -141,7 +141,7 @@ export function ScrollStarfield() {
       home: 0x00e5ff,
       about: 0x5eead4,
       experience: 0x8b5cf6,
-      education: 0xfbbf24,
+      education: 0xff3ec9,
       certificates: 0x00e5ff,
       skills: 0x5eead4,
       projects: 0xff3ec9,

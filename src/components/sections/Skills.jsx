@@ -6,6 +6,10 @@ import { SkillsGalaxy3D } from "../ui/lazy3d.js";
 import { SKILLS } from "../../data/skills.js";
 import { useLang } from "../../i18n/index.jsx";
 
+// Same four accents the education cards use, in the same order, so the two
+// list-shaped sections of the page look like they were designed together.
+const SKILL_ACCENTS = ["#00e5ff", "#8b5cf6", "#ff3ec9", "#5eead4"];
+
 export function Skills() {
   const [skillsView, setSkillsView] = useState("3d");
   const [selectedDomain, setSelectedDomain] = useState(null);
@@ -42,8 +46,14 @@ export function Skills() {
         <div className="skills-grid">
           {SKILLS.map((group, i) => (
             <Reveal delay={i * 70} key={group.group}>
-              <div className="skill-card">
-                <h3 className="skill-group">{t(`skills.groups.${group.group}`)}</h3>
+              <div
+                className="skill-card"
+                style={{ "--accent": SKILL_ACCENTS[i % SKILL_ACCENTS.length] }}
+              >
+                <div className="skill-card-top">
+                  <h3 className="skill-group">{t(`skills.groups.${group.group}`)}</h3>
+                  <span className="skill-count">{group.items.length}</span>
+                </div>
                 <div className="chip-row">
                   {group.items.map((item) => (
                     <span className="chip chip-mono" key={item}>
