@@ -147,12 +147,28 @@
       .nav-link {
         background: transparent;
       }
+      /* Hovering a link glows in the colour of the section it jumps to — the
+         same nine hues the sky and the section labels already use. The pill is
+         the second child of the bar, so the links start at three. */
+      .nav-link:nth-child(2) { --link-accent: #00e5ff; }
+      .nav-link:nth-child(3) { --link-accent: #5eead4; }
+      .nav-link:nth-child(4) { --link-accent: #8b5cf6; }
+      .nav-link:nth-child(5) { --link-accent: #ff3ec9; }
+      .nav-link:nth-child(6) { --link-accent: #00e5ff; }
+      .nav-link:nth-child(7) { --link-accent: #5eead4; }
+      .nav-link:nth-child(8) { --link-accent: #ff3ec9; }
+      .nav-link:nth-child(9) { --link-accent: #8b5cf6; }
+      .nav-link:nth-child(10) { --link-accent: #5eead4; }
+
       .nav-link:hover {
         color: var(--text);
-        background: rgba(0,229,255,0.09);
-        box-shadow: inset 0 0 0 1px rgba(0,229,255,0.16);
+        background: color-mix(in srgb, var(--link-accent, #00e5ff) 13%, transparent);
+        box-shadow:
+          inset 0 0 0 1px color-mix(in srgb, var(--link-accent, #00e5ff) 34%, transparent),
+          0 0 20px -3px color-mix(in srgb, var(--link-accent, #00e5ff) 85%, transparent);
+        text-shadow: 0 0 13px color-mix(in srgb, var(--link-accent, #00e5ff) 65%, transparent);
       }
-      .nav-link { transition: color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease; }
+      .nav-link { transition: color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, text-shadow 0.25s ease; }
       /* the active one already sits on the indicator, so it must not double up */
       .nav-link-active:hover { background: transparent; box-shadow: none; }
       .nav-link-active { color: var(--bg); }
