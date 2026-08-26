@@ -167,10 +167,22 @@
       }
 
       /* live GitHub activity */
+      /* This panel is the only thing on the page reporting something that is
+         still happening, so it is the one place where a live look is earned
+         rather than decorative. */
       .gh {
+        position: relative; overflow: hidden;
         margin: 28px 0 6px; padding: 22px 26px 20px;
         border: 1px solid var(--border); border-radius: 16px;
-        background: linear-gradient(160deg, rgba(0,229,255,0.045), rgba(255,255,255,0.015));
+        background:
+          radial-gradient(90% 130% at 0% 0%, rgba(0,229,255,0.1), transparent 60%),
+          linear-gradient(160deg, rgba(0,229,255,0.045), rgba(255,255,255,0.015));
+      }
+      /* a lit hairline along the top edge, brightest where the heading sits */
+      .gh::before {
+        content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, var(--cyan), var(--mint) 30%, transparent 75%);
+        opacity: 0.7;
       }
       .gh-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
       .gh-head {
@@ -190,6 +202,9 @@
         font-family: 'Space Grotesk', sans-serif; font-size: 44px; font-weight: 700; line-height: 1;
         background: linear-gradient(90deg, var(--cyan), var(--mint));
         -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        /* the glow has to come from a filter: a text-shadow would be clipped
+           away by the same background-clip that colours the digits */
+        filter: drop-shadow(0 0 16px rgba(0,229,255,0.4));
       }
       .gh-count-label { font-size: 12px; color: var(--muted); line-height: 1.45; }
 
@@ -198,14 +213,20 @@
       .gh-bar {
         flex: 1; min-width: 0; border-radius: 3px 3px 2px 2px;
         height: 4px; align-self: flex-end;
-        background: rgba(255,255,255,0.06);
-        transition: height 0.55s cubic-bezier(.22,1,.36,1) var(--delay);
+        background: rgba(255,255,255,0.07);
+        transition: height 0.55s cubic-bezier(.22,1,.36,1) var(--delay), box-shadow 0.4s ease;
       }
       /* colour walks along the strip so the month reads left to right */
       .gh-bar-on {
-        background: color-mix(in srgb, var(--cyan) calc((1 - var(--t)) * 100%), var(--mint));
-        box-shadow: 0 0 10px -2px color-mix(in srgb, var(--cyan) calc((1 - var(--t)) * 100%), var(--mint));
+        background: linear-gradient(180deg,
+          color-mix(in srgb, var(--cyan) calc((1 - var(--t)) * 100%), var(--mint)),
+          color-mix(in srgb, var(--cyan) calc((1 - var(--t)) * 55%), transparent));
+        box-shadow:
+          0 0 14px -1px color-mix(in srgb, var(--cyan) calc((1 - var(--t)) * 100%), var(--mint)),
+          0 0 4px 0 color-mix(in srgb, var(--cyan) calc((1 - var(--t)) * 100%), var(--mint));
       }
+      /* the newest day reads as now rather than as one more column */
+      .gh-bar:last-child.gh-bar-on { box-shadow: 0 0 20px 0 var(--mint), 0 0 6px 0 var(--mint); }
       .gh-strip-grown .gh-bar { height: var(--h); }
       .gh-axis {
         display: flex; justify-content: space-between; margin-top: 8px;
