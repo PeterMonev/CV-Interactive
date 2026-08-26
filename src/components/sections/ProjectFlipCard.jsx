@@ -13,6 +13,10 @@ const PROJECT_TINTS = [
 
 // The colour the card glows in when you reach it. Stronger than the wash
 // behind the artwork, and the same hue, so the two read as one card.
+// The same four hues at full strength, for anything that has to be read
+// rather than felt: the title on the back, the rule under it, the tag.
+const PROJECT_SOLIDS = ["#00e5ff", "#ff3ec9", "#5eead4", "#8b5cf6"];
+
 const PROJECT_EDGES = [
   "rgba(0,229,255,0.55)",
   "rgba(255,62,201,0.5)",
@@ -29,6 +33,7 @@ export function ProjectFlipCard({ project, index }) {
   const Icon = projectIcon(project.name);
   const [tint1, tint2] = PROJECT_TINTS[index % PROJECT_TINTS.length];
   const edge = PROJECT_EDGES[index % PROJECT_EDGES.length];
+  const solid = PROJECT_SOLIDS[index % PROJECT_SOLIDS.length];
 
   useEffect(() => {
     finePointerRef.current =
@@ -53,7 +58,7 @@ export function ProjectFlipCard({ project, index }) {
   return (
     <div
       className={`flip-card ${project.featured ? "flip-card-featured" : ""}`}
-      style={{ animationDelay: `${(index % 4) * 0.4}s`, "--tint-edge": edge }}
+      style={{ animationDelay: `${(index % 4) * 0.4}s`, "--tint-edge": edge, "--tint-solid": solid }}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -114,6 +119,7 @@ export function ProjectFlipCard({ project, index }) {
 
         <div className="flip-card-face flip-card-back">
           <h3 className="flip-card-name">{project.name}</h3>
+          <span className="flip-card-rule" />
           <p className="flip-card-desc">{tx(project.description)}</p>
           <div className="chip-row">
             {project.stack.map((s) => (
