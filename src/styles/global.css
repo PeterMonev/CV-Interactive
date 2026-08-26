@@ -1033,7 +1033,11 @@
          Tied to the column width so the row keeps its proportion as the grid
          reflows, with a floor for narrow columns. */
       .flip-card {
-        position: relative; aspect-ratio: 0.66; min-height: 340px; max-height: 430px; cursor: pointer;
+        /* width: 100% is load-bearing. With only a ratio and a min-height, the
+           browser satisfies the height first and then derives the width from
+           the ratio — at 400px the card shrank to 224 inside a 352 column and
+           floated there. A definite width makes the ratio produce the height. */
+        position: relative; width: 100%; aspect-ratio: 0.66; min-height: 340px; max-height: 430px; cursor: pointer;
         animation: cardFloat 5s ease-in-out infinite;
         perspective: 1600px; -webkit-perspective: 1600px;
       }
@@ -1308,7 +1312,10 @@
         .edu-card-top { flex-wrap: wrap; }
         .skills-grid { grid-template-columns: 1fr; }
         .flip-grid { grid-template-columns: 1fr; }
-        .flip-card { height: 300px; }
+        /* At one column the ratio would make a 352px card 533px tall. A flat
+           height is right here, and 380 clears the tallest back, which needs
+           367 for the flagship. */
+        .flip-card { aspect-ratio: auto; height: 380px; min-height: 0; max-height: none; }
         .contact-grid { grid-template-columns: 1fr; }
         .section { padding: 72px 6vw; }
         .scroll-starfield { opacity: 0.5; }
