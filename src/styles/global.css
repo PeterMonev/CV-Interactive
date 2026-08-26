@@ -153,7 +153,9 @@
       /* language switch */
       .lang-switch {
         display: inline-flex; align-items: center; gap: 2px;
-        border: 1px solid var(--border); border-radius: 999px; padding: 2px;
+        border: 1px solid rgba(0,229,255,0.2); border-radius: 999px; padding: 2px;
+        background: rgba(255,255,255,0.02);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
       }
       .lang-btn {
         background: none; border: none; color: var(--muted);
@@ -423,18 +425,50 @@
 
       /* sections */
       .section { position: relative; z-index: 2; padding: 64px 6vw; max-width: 1400px; margin: 0 auto; }
+      /* Each section already has a colour — the accent stars change hue as you
+         pass through it. These are the same nine values, so the label at the top
+         of a section and the sky behind it finally agree instead of the label
+         being cyan everywhere. */
+      #home { --section-accent: #00e5ff; }
+      #about { --section-accent: #5eead4; }
+      #experience { --section-accent: #8b5cf6; }
+      #education { --section-accent: #ff3ec9; }
+      #certificates { --section-accent: #00e5ff; }
+      #skills { --section-accent: #5eead4; }
+      #projects { --section-accent: #ff3ec9; }
+      #hologram { --section-accent: #8b5cf6; }
+      #contact { --section-accent: #5eead4; }
+
+      /* A pill rather than loose text: it was the only label on the page with
+         nothing around it, sitting above headings that carry real weight. */
       .section-eyebrow {
-        display: flex; align-items: center; gap: 8px;
-        font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em;
-        text-transform: uppercase; color: var(--cyan); margin-bottom: 14px;
+        display: inline-flex; align-items: center; gap: 8px; width: fit-content;
+        font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.14em;
+        text-transform: uppercase; color: var(--section-accent, var(--cyan));
+        margin-bottom: 16px; padding: 6px 14px; border-radius: 999px;
+        border: 1px solid color-mix(in srgb, var(--section-accent, #00e5ff) 30%, transparent);
+        background:
+          radial-gradient(120% 160% at 0% 0%, color-mix(in srgb, var(--section-accent, #00e5ff) 18%, transparent), transparent 62%),
+          linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.08),
+          0 0 24px -12px color-mix(in srgb, var(--section-accent, #00e5ff) 95%, transparent);
       }
+      .section-eyebrow svg { filter: drop-shadow(0 0 7px color-mix(in srgb, var(--section-accent, #00e5ff) 70%, transparent)); }
       .h2 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(26px, 3.4vw, 40px); font-weight: 600; line-height: 1.2; max-width: 720px; margin: 0 0 20px; }
       .lead { color: var(--muted); font-size: 16px; line-height: 1.75; max-width: 640px; }
 
       /* hero */
       .hero { padding-top: 72px; padding-bottom: 40px; }
       .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: center; }
-      .eyebrow { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+      .eyebrow {
+        display: inline-flex; align-items: center; gap: 9px; width: fit-content;
+        font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--text);
+        margin-bottom: 22px; padding: 6px 15px 6px 13px; border-radius: 999px;
+        border: 1px solid rgba(94,234,212,0.28);
+        background: linear-gradient(160deg, rgba(94,234,212,0.1), rgba(255,255,255,0.02));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 26px -12px rgba(94,234,212,0.9);
+      }
       .dot-live { width: 8px; height: 8px; border-radius: 50%; background: var(--mint); animation: pulseDot 2s infinite; }
       @keyframes pulseDot { 0% { box-shadow: 0 0 0 0 rgba(94,234,212,0.5); } 70% { box-shadow: 0 0 0 8px rgba(94,234,212,0); } 100% { box-shadow: 0 0 0 0 rgba(94,234,212,0); } }
       .h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(34px, 5vw, 58px); font-weight: 700; line-height: 1.12; letter-spacing: -0.01em; margin: 0 0 22px; }
