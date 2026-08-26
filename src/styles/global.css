@@ -836,19 +836,55 @@
 
       /* contact */
       .contact { text-align: left; }
-      .contact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 36px; }
-      .contact-card {
-        display: flex; align-items: center; gap: 14px; text-align: left; width: 100%;
-        background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px;
-        transition: border-color 0.3s ease, transform 0.3s ease;
+      .contact-grid {
+        /* Rows in a grid size themselves independently, so the row holding the
+           email and phone cards stood taller than the one below it. */ display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 36px;   grid-auto-rows: 1fr;
       }
-      .contact-card:hover { border-color: var(--cyan); transform: translateY(-2px); }
-      .contact-card > svg { color: var(--cyan); flex-shrink: 0; }
+      /* The colour comes from position in the grid rather than from a prop, so
+         the three cards that are their own components (email, phone, CV) get it
+         without being touched. Same four hues, same order, as every other list
+         on the page. */
+      .contact-grid > *:nth-child(4n + 1) { --accent: #00e5ff; }
+      .contact-grid > *:nth-child(4n + 2) { --accent: #8b5cf6; }
+      .contact-grid > *:nth-child(4n + 3) { --accent: #ff3ec9; }
+      .contact-grid > *:nth-child(4n + 4) { --accent: #5eead4; }
+
+      .contact-card {
+        position: relative; height: 100%;
+        display: flex; align-items: center; gap: 14px; text-align: left; width: 100%;
+        background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px;
+        transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      /* Same glow the project cards use, so reaching a contact detail feels like
+         the same gesture as reaching a project. */
+      .contact-card::after {
+        content: ""; position: absolute; inset: -6px; border-radius: 20px; pointer-events: none;
+        background: linear-gradient(140deg, var(--accent, var(--cyan)), transparent 64%);
+        filter: blur(12px); opacity: 0; transition: opacity 0.35s ease; z-index: -1;
+      }
+      .contact-card:hover::after { opacity: 0.45; }
+      .contact-card:hover { border-color: color-mix(in srgb, var(--accent, #00e5ff) 45%, var(--border)); transform: translateY(-3px); }
+
+      /* The icon becomes a tile in the card colour instead of a loose glyph. */
+      .contact-card > svg {
+        color: var(--accent, var(--cyan)); flex-shrink: 0; box-sizing: content-box;
+        padding: 9px; border-radius: 11px;
+        background: color-mix(in srgb, var(--accent, #00e5ff) 12%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent, #00e5ff) 26%, transparent);
+        transition: background 0.3s ease, border-color 0.3s ease;
+      }
+      .contact-card:hover > svg { background: color-mix(in srgb, var(--accent, #00e5ff) 22%, transparent); }
       .contact-body { flex: 1; min-width: 0; }
       .contact-label { display: block; font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
       .contact-value { display: block; font-size: 14px; font-weight: 600; margin-top: 2px; word-break: break-word; transition: color 0.25s ease; }
       .contact-value-copied { color: var(--mint); }
-      .contact-card-cv { border-color: rgba(0,229,255,0.3); background: rgba(0,229,255,0.05); }
+      /* The one card that is a download rather than a link keeps standing out,
+         but now in whatever colour its position gives it. */
+      .contact-card-cv {
+        border-color: color-mix(in srgb, var(--accent, #00e5ff) 34%, var(--border));
+        background: linear-gradient(140deg, color-mix(in srgb, var(--accent, #00e5ff) 9%, var(--panel)), var(--panel));
+      }
+      .contact-card-cv::after { opacity: 0.28; }
       .contact-value-muted { color: var(--muted); font-style: italic; font-weight: 500; }
       .contact-static { cursor: default; }
       .contact-actions { display: flex; gap: 6px; flex-shrink: 0; }
