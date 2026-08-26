@@ -27,6 +27,7 @@ export const EDUCATION = [
       "JavaScript Advanced",
       "HTML & CSS",
       "QA Fundamentals",
+      "Programming Fundamentals with JavaScript",
     ],
   },
   {
