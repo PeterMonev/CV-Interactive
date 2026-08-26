@@ -1,10 +1,13 @@
-import { Briefcase } from "lucide-react";
+import { Briefcase, Building2 } from "lucide-react";
 import { Reveal } from "../ui/Reveal.jsx";
 import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
 import { Timeline3D } from "../ui/lazy3d.js";
 import { EXPERIENCE } from "../../data/experience.js";
 import { useLang, useTx } from "../../i18n/index.jsx";
 import { useParallax } from "../../hooks/useScrollFx.js";
+
+// The same four accents education and skills use, in the same order.
+const EXP_ACCENTS = ["#00e5ff", "#8b5cf6", "#ff3ec9", "#5eead4"];
 
 export function Experience() {
   const { t } = useLang();
@@ -29,12 +32,15 @@ export function Experience() {
         </div>
         {EXPERIENCE.map((job, i) => (
           <Reveal delay={i * 100} key={job.company} className="timeline-item">
-            <div className="timeline-card">
+            <div
+              className="timeline-card"
+              style={{ "--accent": EXP_ACCENTS[i % EXP_ACCENTS.length] }}
+            >
               <div className="timeline-head">
                 <div>
                   <h3 className="timeline-role">{tx(job.role)}</h3>
                   <p className="timeline-company">
-                    {tx(job.company)} · {tx(job.location)}
+                    <Building2 size={13} /> {tx(job.company)} · {tx(job.location)}
                   </p>
                 </div>
                 <span className="timeline-period">{tx(job.period)}</span>

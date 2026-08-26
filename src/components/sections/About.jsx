@@ -9,6 +9,9 @@ import { STATS_3D_DATA } from "../../data/stats3d.js";
 import { useLang } from "../../i18n/index.jsx";
 import { useParallax } from "../../hooks/useScrollFx.js";
 
+// Same four accents as experience, education and skills, same order.
+const STAT_ACCENTS = ["#00e5ff", "#8b5cf6", "#ff3ec9", "#5eead4"];
+
 export function About() {
   const { t } = useLang();
   const statsFieldRef = useParallax({ from: 40, to: -40 });
@@ -46,7 +49,10 @@ export function About() {
               { to: 16, label: t("about.stats.certificates") },
             ].map((s, i) => (
               <Reveal delay={i * 80} key={s.label}>
-                <div className="stat">
+                <div
+                  className="stat"
+                  style={{ "--accent": STAT_ACCENTS[i % STAT_ACCENTS.length] }}
+                >
                   <span className="stat-num">
                     <CountUp to={s.to} />+
                   </span>
