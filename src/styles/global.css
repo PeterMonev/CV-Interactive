@@ -582,14 +582,26 @@
       .chip {
         position: relative;
         font-size: 12.5px; padding: 6px 12px; border-radius: 999px;
-        background: linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025));
-        border: 1px solid var(--border); color: var(--text);
+        /* Three layers, and each is doing a job at rest rather than waiting for
+           a hover: a wash of the section accent coming in from the left, the
+           glass gradient over it, and an inset highlight along the top edge
+           that gives the pill an actual lip instead of a flat fill. */
+        background:
+          radial-gradient(130% 150% at 0% 0%, color-mix(in srgb, var(--accent, #00e5ff) 15%, transparent), transparent 58%),
+          linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.022));
+        border: 1px solid color-mix(in srgb, var(--accent, #00e5ff) 20%, var(--border));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+        color: var(--text);
         transition: border-color 0.25s ease, transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
       }
       .chip:hover {
-        border-color: color-mix(in srgb, var(--accent, var(--cyan)) 55%, var(--border));
-        background: linear-gradient(160deg, color-mix(in srgb, var(--accent, #00e5ff) 16%, transparent), rgba(255,255,255,0.03));
-        box-shadow: 0 4px 16px -6px color-mix(in srgb, var(--accent, #00e5ff) 70%, transparent);
+        border-color: color-mix(in srgb, var(--accent, var(--cyan)) 60%, var(--border));
+        background:
+          radial-gradient(130% 150% at 0% 0%, color-mix(in srgb, var(--accent, #00e5ff) 30%, transparent), transparent 62%),
+          linear-gradient(160deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.12),
+          0 5px 18px -6px color-mix(in srgb, var(--accent, #00e5ff) 85%, transparent);
         transform: translateY(-1px);
       }
       .chip-mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
