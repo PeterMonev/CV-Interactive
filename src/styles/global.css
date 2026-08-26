@@ -563,7 +563,12 @@
         margin-top: 34px; border: 1px solid var(--border); border-radius: 18px; padding: 14px;
         background: radial-gradient(ellipse at center, rgba(0,229,255,0.07), transparent 65%), var(--panel);
       }
-      .cert-3d { position: relative; width: 100%; height: 480px; border-radius: 14px; overflow: hidden; touch-action: none; }
+      /* Taller on purpose. A perspective camera fixes the vertical world span,
+         so a taller box does not reveal more of the scene — it draws the same
+         span across more pixels, which is what actually makes the cards bigger.
+         The gain stops below about 1.175, where the width-based fit takes over
+         and starts pushing the camera back again. */
+      .cert-3d { position: relative; width: 100%; aspect-ratio: 1.3 / 1; max-height: 700px; border-radius: 14px; overflow: hidden; touch-action: none; }
       .cert-3d canvas { display: block; width: 100% !important; height: 100% !important; }
 
       /* list view — the text-and-links counterpart to the canvas badges */
@@ -834,7 +839,7 @@
         .galaxy-wrap { grid-template-columns: 1fr; }
         .galaxy-3d { aspect-ratio: auto; height: 360px; }
         .galaxy-info { border-left: none; border-top: 1px solid var(--border); }
-        .cert-3d { height: 360px; }
+        .cert-3d { aspect-ratio: auto; height: 360px; }
         .cmdk-backdrop { padding: 8vh 14px 14px; }
         .cmdk-item-hint { display: none; }
         .cs-arch { grid-template-columns: 1fr; }
