@@ -97,13 +97,17 @@ export function CertificateCloud3D({ certs }) {
     // see makeCertBadgeTexture: the soft halo is the part phones render wrong
     const haloEnabled = window.innerWidth >= 1024;
 
-    // Depth-driven prominence. The front badge reaches FOCUS_MAX_SCALE and full
+    // Depth-driven prominence, narrowed. The front card used to reach 1.55 and
+    // the back one 0.62 — two and a half times apart, which at the new card size
+    // meant the front row was clipped by the frame while the back row was too
+    // small to read. The spread is now under two to one.
+    // The front badge reaches FOCUS_MAX_SCALE and full
     // opacity; the one directly behind the core falls to FOCUS_MIN_SCALE and
     // FOCUS_MIN_FADE, which is present enough to read as a cluster and quiet
     // enough to stay out of the way.
-    const FOCUS_MIN_SCALE = 0.62;
-    const FOCUS_MAX_SCALE = 1.55;
-    const FOCUS_MIN_FADE = 0.45;
+    const FOCUS_MIN_SCALE = 0.74;
+    const FOCUS_MAX_SCALE = 1.28;
+    const FOCUS_MIN_FADE = 0.55;
     const worldPos = new THREE.Vector3();
 
     const n = certs.length;
@@ -222,7 +226,7 @@ export function CertificateCloud3D({ certs }) {
     // Sized for the badges rather than for the sphere. Growing the sphere with
     // the cards pushed the camera back by more than the cards had gained, which
     // would have made them slightly smaller on screen than before.
-    const BASE_DISTANCE = 11.8;
+    const BASE_DISTANCE = 12.2;
     const CLUSTER_WIDTH = sphereRadius * 2 + baseScaleXRef;
     const halfFov = Math.tan((48 / 2) * (Math.PI / 180));
 
