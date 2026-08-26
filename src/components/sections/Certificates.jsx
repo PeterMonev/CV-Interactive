@@ -25,14 +25,15 @@ function CertificateList({ srOnly = false }) {
       {CERT_DATA.map((cert, i) => {
         const accent = CERT_PALETTE[i % CERT_PALETTE.length];
         return (
-          <li key={cert.name}>
+          // the accent sits on the item, not the link, so the halo behind it can
+          // read the same variable the card does
+          <li key={cert.name} style={srOnly ? undefined : { "--cert-accent": accent }}>
             <a
               className={srOnly ? undefined : "cert-card"}
               href={cert.url || CERT_FALLBACK_URL}
               target="_blank"
               rel="noreferrer"
               onClick={() => track(EVENTS.CERT_OPEN, { name: cert.name, view: "list" })}
-              style={srOnly ? undefined : { "--cert-accent": accent }}
             >
               {!srOnly && <BadgeCheck size={18} className="cert-card-icon" />}
               <span className="cert-card-name">{cert.name}</span>

@@ -553,8 +553,24 @@
       .edu-card .chip-row { margin-top: auto; }
 
       .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
-      .chip { font-size: 12.5px; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text); transition: border-color 0.25s ease, transform 0.25s ease; }
-      .chip:hover { border-color: var(--cyan); transform: translateY(-1px); }
+      /* Chips are the most repeated object on the page — skills, course tags,
+         project stacks, certificate names. A flat grey pill repeated eighty
+         times sets the tone more than any single hero does. The surface is now
+         a gradient rather than one flat wash, and hovering lights the chip in
+         whatever accent its section carries instead of always cyan. */
+      .chip {
+        position: relative;
+        font-size: 12.5px; padding: 6px 12px; border-radius: 999px;
+        background: linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025));
+        border: 1px solid var(--border); color: var(--text);
+        transition: border-color 0.25s ease, transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+      }
+      .chip:hover {
+        border-color: color-mix(in srgb, var(--accent, var(--cyan)) 55%, var(--border));
+        background: linear-gradient(160deg, color-mix(in srgb, var(--accent, #00e5ff) 16%, transparent), rgba(255,255,255,0.03));
+        box-shadow: 0 4px 16px -6px color-mix(in srgb, var(--accent, #00e5ff) 70%, transparent);
+        transform: translateY(-1px);
+      }
       .chip-mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
       .chip-sm { font-size: 11.5px; padding: 5px 10px; }
       .chip-tag { background: linear-gradient(90deg, rgba(0,229,255,0.15), rgba(255,62,201,0.15)); border-color: rgba(0,229,255,0.3); font-family: 'JetBrains Mono', monospace; }
@@ -594,8 +610,17 @@
       }
       .cert-card:hover {
         border-color: var(--cert-accent); transform: translateY(-3px);
-        box-shadow: 0 14px 34px -18px var(--cert-accent);
       }
+      /* The list view is the same sixteen credentials as the orbit, so it should
+         glow the same way rather than settling for a drop shadow. overflow is
+         hidden on the card for the accent bar, so the halo goes on a wrapper. */
+      .cert-grid > li { position: relative; }
+      .cert-grid > li::after {
+        content: ""; position: absolute; inset: -7px; border-radius: 20px; pointer-events: none; z-index: -1;
+        background: linear-gradient(140deg, var(--cert-accent, var(--cyan)), transparent 64%);
+        filter: blur(13px); opacity: 0; transition: opacity 0.35s ease;
+      }
+      .cert-grid > li:hover::after { opacity: 0.5; }
       .cert-card:hover::before { opacity: 1; }
       .cert-card-icon { color: var(--cert-accent); flex-shrink: 0; }
       .cert-card-name { font-size: 14.5px; font-weight: 600; line-height: 1.4; flex: 1; }
