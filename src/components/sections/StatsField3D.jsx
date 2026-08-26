@@ -253,6 +253,7 @@ export function StatsField3D({ stats }) {
     let raf = null;
     let running = true;
     const world = new THREE.Vector3();
+    const projected = new THREE.Vector3();
 
     // Each figure is flung out of the core to its own orbit as you arrive,
     // one after another, which is also what makes the four read as belonging
@@ -295,8 +296,20 @@ export function StatsField3D({ stats }) {
         const pulse = 1 + Math.sin(t * 2.4 + m.wobble) * 0.18;
         m.dot.scale.set(0.42 * pulse * near, 0.42 * pulse * near, 1);
         const fade = spawn.linear(i);
+
+        // A figure passing in front of the core projects onto the middle of the
+        // frame, which is exactly where the core is drawn — the label lands on
+        // top of it and neither can be read. Measured in screen space rather
+        // than in the scene, because that is where the collision happens.
+        projected.copy(world).project(camera);
+        const fromCentre = Math.hypot(projected.x * camera.aspect, projected.y);
+        const screenPull = Math.min(1, Math.max(0, (fromCentre - 0.12) / 0.22));
+        // only the near half is a problem: a label behind the core is occluded
+        // anyway, and dimming it there would just make the far side emptier
+        const overCore = focus > 0.5 ? screenPull : 1;
+
         m.dot.material.opacity = (0.74 + focus * 0.26) * fade;
-        m.label.material.opacity = (0.66 + focus * 0.34) * fade;
+        m.label.material.opacity = (0.66 + focus * 0.34) * fade * overCore;
         m.label.scale.set(m.labelWidth * near, 0.4 * near, 1);
 
         posAttr.setXYZ(i * 2, 0, 0, 0);

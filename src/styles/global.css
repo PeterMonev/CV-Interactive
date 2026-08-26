@@ -683,7 +683,18 @@
       .galaxy-info .chip-row { gap: 7px; }
 
       .contact-fg { position: relative; z-index: 1; }
-      .contact-3d { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.5; }
+      /* The knot lives behind the whole section, including the form. At half
+         opacity it was still drawing wireframe through the input fields, which
+         is the one place on the page where a busy background actually costs
+         something. Dimmer overall, and faded down the page so it keeps its
+         presence behind the heading and gets out of the way of the writing.
+         The form begins about half way down this layer, so the fade has to be
+         well under by then rather than starting there. */
+      .contact-3d {
+        position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.3;
+        -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.88) 20%, rgba(0,0,0,0.32) 44%, rgba(0,0,0,0.1) 70%, rgba(0,0,0,0.08) 100%);
+        mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.88) 20%, rgba(0,0,0,0.32) 44%, rgba(0,0,0,0.1) 70%, rgba(0,0,0,0.08) 100%);
+      }
       .contact-3d canvas { display: block; width: 100% !important; height: 100% !important; }
 
       /* projects */
