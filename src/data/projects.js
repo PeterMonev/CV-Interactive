@@ -9,6 +9,9 @@ import {
   PROJECT_IMG_BOUTIQUE_HEADER,
   PROJECT_IMG_REHEARSAL_SONGS,
   PROJECT_IMG_REHEARSAL_BAND,
+  PROJECT_IMG_CV_HERO,
+  PROJECT_IMG_CV_GALAXY,
+  PROJECT_IMG_CV_CERTIFICATES,
 } from "./projectImages.js";
 
 export const PROJECTS = [
@@ -43,7 +46,7 @@ export const PROJECTS = [
     stack: ["React", "Three.js", "GSAP", "Vite"],
     live: "https://github.com/PeterMonev/CV-Interactive",
     featured: false,
-    images: [],
+    images: [PROJECT_IMG_CV_HERO, PROJECT_IMG_CV_GALAXY, PROJECT_IMG_CV_CERTIFICATES],
   },
   {
     name: "Music Instruments Shop",

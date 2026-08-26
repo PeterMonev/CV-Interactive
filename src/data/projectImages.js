@@ -25,3 +25,11 @@ export const PROJECT_IMG_BOUTIQUE_2 = boutique2;
 export const PROJECT_IMG_BOUTIQUE_HEADER = boutiqueHeader;
 export const PROJECT_IMG_REHEARSAL_SONGS = rehearsalSongs;
 export const PROJECT_IMG_REHEARSAL_BAND = rehearsalBand;
+
+// Screenshots of this very site, used by its own project card.
+import cvHero from "../assets/project-cv-hero.jpg";
+import cvGalaxy from "../assets/project-cv-galaxy.jpg";
+import cvCertificates from "../assets/project-cv-certificates.jpg";
+export const PROJECT_IMG_CV_HERO = cvHero;
+export const PROJECT_IMG_CV_GALAXY = cvGalaxy;
+export const PROJECT_IMG_CV_CERTIFICATES = cvCertificates;
