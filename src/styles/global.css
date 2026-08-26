@@ -122,9 +122,18 @@
       .nav-brand { display: flex; align-items: center; gap: 8px; background: none; border: none; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 14px; letter-spacing: 0.02em; }
       .nav-brand svg { color: var(--cyan); filter: drop-shadow(0 0 9px rgba(0,229,255,0.5)); transition: filter 0.25s ease; }
       .nav-brand:hover svg { filter: drop-shadow(0 0 15px rgba(0,229,255,0.9)); }
-      .nav-links { position: relative; display: flex; align-items: center; gap: 4px; height: 40px; }
+      /* The links were the only group in the header without a shell of its own,
+         next to a language switch that had one. The bar now reads as three
+         capsules — links, language, CV — rather than loose text beside pills. */
+      .nav-links {
+        position: relative; display: flex; align-items: center; gap: 4px;
+        height: 40px; padding: 0 5px; border-radius: 999px;
+        border: 1px solid rgba(0,229,255,0.16);
+        background: rgba(255,255,255,0.03);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 0 22px -14px rgba(0,229,255,0.9);
+      }
       .nav-indicator {
-        position: absolute; top: 0; bottom: 0; left: 0; border-radius: 999px;
+        position: absolute; top: 4px; bottom: 4px; left: 0; border-radius: 999px;
         background: linear-gradient(90deg, var(--cyan), var(--mint)); z-index: 0;
         box-shadow: 0 4px 18px -4px rgba(0,229,255,0.7), 0 0 0 1px rgba(0,229,255,0.3);
         transition: transform 0.35s cubic-bezier(.22,1,.36,1), width 0.35s cubic-bezier(.22,1,.36,1), opacity 0.3s ease;
