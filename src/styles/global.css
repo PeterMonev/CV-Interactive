@@ -713,7 +713,7 @@
          Tied to the column width so the row keeps its proportion as the grid
          reflows, with a floor for narrow columns. */
       .flip-card {
-        position: relative; aspect-ratio: 3 / 4; min-height: 310px; max-height: 380px; cursor: pointer;
+        position: relative; aspect-ratio: 0.66; min-height: 340px; max-height: 430px; cursor: pointer;
         animation: cardFloat 5s ease-in-out infinite;
         perspective: 1600px; -webkit-perspective: 1600px;
       }
@@ -769,15 +769,22 @@
         background:
           radial-gradient(120% 90% at 100% 0%, var(--tint-edge, rgba(0,229,255,0.5)), transparent 58%),
           linear-gradient(165deg, rgba(255,255,255,0.05), rgba(10,14,26,0.4));
-        padding: 26px 28px; justify-content: center; gap: 12px;
+        padding: 18px 20px; justify-content: center; gap: 8px;
+        /* Measured: the flagship needed 402px of content in a 348px card, so
+           its title was cut off at the top and its button at the bottom. The
+           spacing above brings that down; this is the guarantee that no future
+           description can put text out of reach again. */
+        overflow-y: auto; overscroll-behavior: contain;
       }
+      .flip-card-back::-webkit-scrollbar { width: 0; }
       .flip-card-back .flip-card-name { color: var(--tint-solid, var(--text)); }
       .flip-card-rule {
         width: 42px; height: 2px; border-radius: 2px; flex: none;
         background: linear-gradient(90deg, var(--tint-solid, var(--cyan)), transparent);
       }
       /* the stack reads as belonging to this project rather than as generic tags */
-      .flip-card-back .chip { border-color: color-mix(in srgb, var(--tint-solid, #00e5ff) 34%, var(--border)); }
+      .flip-card-back .chip { border-color: color-mix(in srgb, var(--tint-solid, #00e5ff) 34%, var(--border)); font-size: 11.5px; padding: 5px 10px; }
+      .flip-card-back .chip-row { gap: 6px; }
       .flip-card-visual {
         flex: 1; position: relative; display: flex; align-items: center; justify-content: center;
         background: linear-gradient(135deg, var(--tint1), var(--tint2));
@@ -824,7 +831,7 @@
         background: linear-gradient(180deg, rgba(10,14,26,0), rgba(10,14,26,0.55) 40%, rgba(10,14,26,0.9));
       }
       .flip-card-name { font-family: 'Space Grotesk', sans-serif; font-size: 18px; margin: 0; letter-spacing: -0.01em; }
-      .flip-card-desc { color: var(--muted); font-size: 14px; line-height: 1.7; margin: 0; }
+      .flip-card-desc { color: var(--muted); font-size: 13px; line-height: 1.55; margin: 0; }
       .flip-card-cta { align-self: flex-start; }
 
       /* contact */
