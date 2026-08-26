@@ -5,6 +5,7 @@ import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeome
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { tuneRenderer, tuneTexture, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
 import { createNebulae } from "../../utils/nebula.js";
+import { createSpawn } from "../../utils/spawn.js";
 import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { makeGlowSpriteTexture } from "../../utils/canvasTextures.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
@@ -121,12 +122,14 @@ export function HologramViewer({ projects, activeIndex }) {
     const moteGeo = new THREE.BufferGeometry();
     moteGeo.setAttribute("position", new THREE.BufferAttribute(motePositions, 3));
     const moteTexture = makeGlowSpriteTexture();
+    const MOTE_OPACITY = 0.55;
+
     const moteMat = new THREE.PointsMaterial({
       color: 0x9beaff,
       map: moteTexture,
       size: 0.09,
       transparent: true,
-      opacity: 0.55,
+      opacity: MOTE_OPACITY,
       sizeAttenuation: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
@@ -314,6 +317,12 @@ export function HologramViewer({ projects, activeIndex }) {
     container.addEventListener("pointerup", onPointerUp);
     container.addEventListener("pointercancel", onPointerUp);
 
+    // A projector powering up rather than pieces flying apart, because that is
+    // what this object claims to be. Four stages: the emitter rings light, the
+    // beam rises out of them, the motes catch in it, and only then does the
+    // screen snap open — the way a tube television used to.
+    const spawn = createSpawn({ skip: reduced, duration: 620, stagger: 300 });
+
     let raf = null;
     let running = true;
 
@@ -336,17 +345,26 @@ export function HologramViewer({ projects, activeIndex }) {
         const facing = Math.abs(Math.cos(group.rotation.y));
         const visible = FACE_FLOOR + (1 - FACE_FLOOR) * Math.sqrt(facing);
 
+        const powerRings = spawn.linear(0);
+        const powerBeam = spawn.linear(1);
+        const powerMotes = spawn.linear(2);
+        const powerScreen = spawn.linear(3);
+        // opens from a horizontal line, so it reads as switching on
+        screenGroup.scale.y = Math.max(0.02, spawn.at(3));
+
         const flicker = 0.97 + Math.sin(t * 6) * 0.03;
-        planeMat.opacity = planeMat.map ? Math.min(1, flicker) * visible : 0;
-        scanMat.opacity = 0.14 * visible;
+        planeMat.opacity = planeMat.map ? Math.min(1, flicker) * visible * powerScreen : 0;
+        scanMat.opacity = 0.14 * visible * powerScreen;
         reflectionMat.map = planeMat.map;
-        reflectionMat.opacity = planeMat.map ? 0.3 * visible : 0;
+        reflectionMat.opacity = planeMat.map ? 0.3 * visible * powerScreen : 0;
 
         scanTex.offset.y -= 0.006;
         // the two rings breathe out of step, so the base never looks like one part
-        outer.mat.opacity = 0.7 + Math.sin(t * 2) * 0.15;
-        inner.mat.opacity = 0.55 + Math.sin(t * 2 + 1.1) * 0.15;
-        beamMat.opacity = 0.14 + Math.sin(t * 1.6) * 0.05;
+        outer.mat.opacity = (0.7 + Math.sin(t * 2) * 0.15) * powerRings;
+        inner.mat.opacity = (0.55 + Math.sin(t * 2 + 1.1) * 0.15) * powerRings;
+        beamMat.opacity = (0.14 + Math.sin(t * 1.6) * 0.05) * powerBeam;
+        beam.scale.y = Math.max(0.02, powerBeam);
+        moteMat.opacity = MOTE_OPACITY * powerMotes;
 
         // motes ride up the cone, which narrows towards the top
         const motePos = moteGeo.attributes.position;
@@ -374,6 +392,7 @@ export function HologramViewer({ projects, activeIndex }) {
           entries.forEach((entry) => {
             const was = running;
             running = entry.isIntersecting;
+            if (running) spawn.begin();
             if (running && !was) animate();
           });
         },
@@ -386,6 +405,7 @@ export function HologramViewer({ projects, activeIndex }) {
     return () => {
       unguardContext();
       nebulae.dispose();
+      spawn.dispose();
       running = false;
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();
