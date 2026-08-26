@@ -6,6 +6,7 @@ import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { bloomSupported, createBloomComposer } from "../../utils/bloom.js";
 import { tuneRenderer, tuneTexture, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
 import { createNebulae } from "../../utils/nebula.js";
+import { createSpawn } from "../../utils/spawn.js";
 import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import {
@@ -333,6 +334,11 @@ export function CertificateCloud3D({ certs }) {
     container.addEventListener("pointerup", onPointerUp);
     container.addEventListener("pointercancel", onPointerUp);
 
+    // The badges fly out of the core into the sphere as you arrive. Sixteen
+    // staggered one behind another would take half a minute, so they arrive in
+    // four waves instead: enough to read as a sequence, short enough to watch.
+    const spawn = createSpawn({ skip: reduced, duration: 1200, stagger: 150 });
+
     let raf = null;
     let running = true;
 
@@ -366,13 +372,21 @@ export function CertificateCloud3D({ certs }) {
         const glow = 2.8 + beat * 0.75;
         coreGlow.scale.set(glow, glow, 1);
         dust.rotation.y += 0.0003;
+        // The connectors are one geometry built once, so they are scaled as a
+        // whole rather than rebuilt: without this they hung at full length
+        // while the badges they point at were still inside the core.
+        const reach = spawn.at(0);
+        connectorLines.scale.setScalar(Math.max(0.001, reach));
 
-        badges.forEach((sprite) => {
+        badges.forEach((sprite, i) => {
           const bob = Math.sin(t * 0.6 + sprite.userData.phase) * 0.1;
           const dir = sprite.userData.basePos.clone().normalize();
+          // four waves rather than sixteen single steps
+          const arrive = spawn.at(i % 4);
           sprite.position
             .copy(sprite.userData.basePos)
-            .addScaledVector(dir, bob);
+            .multiplyScalar(arrive)
+            .addScaledVector(dir, bob * arrive);
 
           // How far towards the camera this badge currently sits, 0 at the back
           // of the cluster and 1 at the very front.
@@ -422,6 +436,7 @@ export function CertificateCloud3D({ certs }) {
           entries.forEach((entry) => {
             const was = running;
             running = entry.isIntersecting;
+            if (running) spawn.begin();
             if (running && !was) animate();
           });
         },
@@ -434,6 +449,7 @@ export function CertificateCloud3D({ certs }) {
     return () => {
       unguardContext();
       nebulae.dispose();
+      spawn.dispose();
       running = false;
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();

@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
 import { createNebulae } from "../../utils/nebula.js";
+import { createSpawn } from "../../utils/spawn.js";
 import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeGlowSpriteTexture, makeStatLabelSprite } from "../../utils/canvasTextures.js";
@@ -253,15 +254,22 @@ export function StatsField3D({ stats }) {
     let running = true;
     const world = new THREE.Vector3();
 
+    // Each figure is flung out of the core to its own orbit as you arrive,
+    // one after another, which is also what makes the four read as belonging
+    // to one system rather than as four markers that happen to be nearby.
+    const spawn = createSpawn({ skip: reduced });
+
     function placeMarkers(t) {
       const posAttr = linkGeo.attributes.position;
       const colAttr = linkGeo.attributes.color;
 
       markers.forEach((m, i) => {
+        const arrive = spawn.at(i);
+        const reach = orbitRadius * arrive;
         const angle = m.phase + t * m.speed;
-        const x = Math.cos(angle) * orbitRadius;
-        const z = Math.sin(angle) * orbitRadius;
-        const y = Math.sin(angle) * Math.sin(m.tilt) * orbitRadius * 0.55
+        const x = Math.cos(angle) * reach;
+        const z = Math.sin(angle) * reach;
+        const y = Math.sin(angle) * Math.sin(m.tilt) * reach * 0.55
           + Math.sin(t * 0.9 + m.wobble) * 0.08;
         const zt = z * Math.cos(m.tilt);
 
@@ -286,8 +294,9 @@ export function StatsField3D({ stats }) {
 
         const pulse = 1 + Math.sin(t * 2.4 + m.wobble) * 0.18;
         m.dot.scale.set(0.42 * pulse * near, 0.42 * pulse * near, 1);
-        m.dot.material.opacity = 0.74 + focus * 0.26;
-        m.label.material.opacity = 0.66 + focus * 0.34;
+        const fade = spawn.linear(i);
+        m.dot.material.opacity = (0.74 + focus * 0.26) * fade;
+        m.label.material.opacity = (0.66 + focus * 0.34) * fade;
         m.label.scale.set(m.labelWidth * near, 0.4 * near, 1);
 
         posAttr.setXYZ(i * 2, 0, 0, 0);
@@ -342,6 +351,7 @@ export function StatsField3D({ stats }) {
           entries.forEach((entry) => {
             const was = running;
             running = entry.isIntersecting;
+            if (running) spawn.begin();
             if (running && !was) animate();
           });
         },
@@ -354,6 +364,7 @@ export function StatsField3D({ stats }) {
     return () => {
       unguardContext();
       nebulae.dispose();
+      spawn.dispose();
       running = false;
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();

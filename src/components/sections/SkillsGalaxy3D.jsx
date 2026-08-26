@@ -8,6 +8,7 @@ import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeLabelSprite, makeGlowSpriteTexture, makePlanetTexture } from "../../utils/canvasTextures.js";
 import { createNebulae } from "../../utils/nebula.js";
+import { createSpawn } from "../../utils/spawn.js";
 import { RADAR_DOMAINS } from "../../data/skills.js";
 
 export function SkillsGalaxy3D({ onSelect }) {
@@ -363,17 +364,7 @@ export function SkillsGalaxy3D({ onSelect }) {
     // in on. Each orbit expands out of the sun in turn, which also explains the
     // structure: the planets clearly belong to the core rather than merely
     // sitting near it.
-    // Timed from the moment the scene is seen, not the moment it is built.
-    // Construction now happens about a viewport early, so an entrance started
-    // there would be over before the reader arrived.
-    let spawnStart = null;
-    const SPAWN_MS = 1500;
-    const SPAWN_STAGGER = 260;
-    const beginSpawn = () => {
-      if (spawnStart === null) spawnStart = performance.now();
-    };
-    // and a scene whose visibility signal never arrives still has to assemble
-    const spawnFallback = setTimeout(beginSpawn, 2500);
+    const spawn = createSpawn();
     if (reduced) pivots.forEach(({ pivot }) => pivot.scale.setScalar(1));
     else pivots.forEach(({ pivot }) => pivot.scale.setScalar(0.001));
 
@@ -403,19 +394,10 @@ export function SkillsGalaxy3D({ onSelect }) {
         systemGroup.rotation.y += 0.0009 * (1 - coasting);
         starField.rotation.y += 0.0002;
         nebulae.update(t);
-        const spawnAge = spawnStart === null ? 0 : performance.now() - spawnStart;
         pivots.forEach(({ pivot, speed }, i) => {
           pivot.rotation.y += 0.0026 * speed;
           // outermost last, so the eye follows the system opening up
-          const p2 = Math.min(1, Math.max(0, (spawnAge - i * SPAWN_STAGGER) / SPAWN_MS));
-          if (p2 < 1) {
-            // overshoots a little before settling, so it lands rather than stops
-            const eased = 1 - Math.pow(1 - p2, 3);
-            const overshoot = Math.sin(p2 * Math.PI) * 0.06;
-            pivot.scale.setScalar(Math.max(0.001, eased + overshoot));
-          } else {
-            pivot.scale.setScalar(1);
-          }
+          pivot.scale.setScalar(Math.max(0.001, spawn.at(i)));
         });
         spinners.forEach(({ mesh, speed }) => {
           mesh.rotation.y += speed;
@@ -434,7 +416,7 @@ export function SkillsGalaxy3D({ onSelect }) {
           entries.forEach((entry) => {
             const was = running;
             running = entry.isIntersecting;
-            if (running) beginSpawn();
+            if (running) spawn.begin();
             if (running && !was) animate();
           });
         },
@@ -449,7 +431,7 @@ export function SkillsGalaxy3D({ onSelect }) {
       running = false;
       if (raf) cancelAnimationFrame(raf);
       if (io) io.disconnect();
-      clearTimeout(spawnFallback);
+      spawn.dispose();
       window.removeEventListener("resize", resize);
       if (ro) ro.disconnect();
       container.removeEventListener("pointerdown", onPointerDown);
