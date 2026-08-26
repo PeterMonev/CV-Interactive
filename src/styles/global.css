@@ -538,7 +538,7 @@
         background: linear-gradient(180deg, var(--accent, var(--cyan)), transparent 85%);
         opacity: 0.5; transition: opacity 0.3s ease;
       }
-      .stat:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-3px); }
+      .stat:hover { border-color: color-mix(in srgb, var(--accent, #00e5ff) 40%, var(--border)); transform: translateY(-3px); box-shadow: 0 14px 38px -20px color-mix(in srgb, var(--accent, #00e5ff) 90%, transparent); }
       .stat:hover::before { opacity: 1; }
       .stats > .reveal { height: 100%; }
       .stat-num { display: block; font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 700; background: linear-gradient(120deg, var(--accent, var(--cyan)), #eef1fb); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -561,7 +561,7 @@
         background: linear-gradient(180deg, var(--accent, var(--cyan)), transparent 85%);
         opacity: 0.5; transition: opacity 0.3s ease;
       }
-      .timeline-card:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-3px); box-shadow: 0 12px 34px rgba(0,0,0,0.32); }
+      .timeline-card:hover { border-color: color-mix(in srgb, var(--accent, #00e5ff) 40%, var(--border)); transform: translateY(-3px); box-shadow: 0 16px 40px -18px rgba(0,0,0,0.5), 0 14px 40px -22px color-mix(in srgb, var(--accent, #00e5ff) 90%, transparent); }
       .timeline-card:hover::before { opacity: 1; }
       .timeline-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
       .timeline-role { font-family: 'Space Grotesk', sans-serif; font-size: 18px; margin: 0 0 5px; }
@@ -597,7 +597,14 @@
         background: linear-gradient(180deg, var(--accent, var(--violet)), transparent 85%);
         opacity: 0.5; transition: opacity 0.3s ease;
       }
-      .edu-card:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-3px); box-shadow: 0 12px 34px rgba(0,0,0,0.32); }
+      /* A blurred layer outside the card would be cut off by the overflow that
+         keeps the accent bar inside it, so the glow is a coloured shadow —
+         a shadow paints outside the box whatever overflow says. */
+      .edu-card:hover {
+        border-color: color-mix(in srgb, var(--accent, #00e5ff) 40%, var(--border));
+        transform: translateY(-3px);
+        box-shadow: 0 16px 40px -18px rgba(0,0,0,0.5), 0 14px 40px -22px color-mix(in srgb, var(--accent, #00e5ff) 90%, transparent);
+      }
       .edu-card:hover::before { opacity: 1; }
 
       .edu-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
@@ -764,7 +771,7 @@
         background: linear-gradient(180deg, var(--accent, var(--mint)), transparent 85%);
         opacity: 0.5; transition: opacity 0.3s ease;
       }
-      .skill-card:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-3px); box-shadow: 0 12px 34px rgba(0,0,0,0.32); }
+      .skill-card:hover { border-color: color-mix(in srgb, var(--accent, #5eead4) 40%, var(--border)); transform: translateY(-3px); box-shadow: 0 16px 40px -18px rgba(0,0,0,0.5), 0 14px 40px -22px color-mix(in srgb, var(--accent, #5eead4) 90%, transparent); }
       .skill-card:hover::before { opacity: 1; }
 
       .skill-card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
