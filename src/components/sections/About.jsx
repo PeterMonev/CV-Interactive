@@ -43,7 +43,7 @@ export function About() {
 
           <div className="stats">
             {[
-              { to: 4, label: t("about.stats.projects") },
+              { to: 5, label: t("about.stats.projects") },
               { to: 3, label: t("about.stats.languages") },
               { to: 5, label: t("about.stats.databases") },
               { to: 16, label: t("about.stats.certificates") },

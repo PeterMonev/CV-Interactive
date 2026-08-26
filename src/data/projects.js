@@ -29,6 +29,23 @@ export const PROJECTS = [
     images: [PROJECT_IMG_REHEARSALHUB, PROJECT_IMG_REHEARSAL_SONGS, PROJECT_IMG_REHEARSAL_BAND],
   },
   {
+    name: "CV-Portfolio-Interactive",
+    tag: { en: "This site", bg: "Този сайт" },
+    period: "2026",
+    // Listed because the CV lists it. Leaving the site itself out of its own
+    // project section means a recruiter reading the PDF looks for it and does
+    // not find it. The link goes to the repository rather than to the live
+    // page, since the page is the one thing they are already looking at.
+    description: {
+      en: "The page you are reading. Ten WebGL scenes that survive a lost GPU context, a working terminal, choreography driven by scroll position, and a bundle that keeps three.js out of the first paint.",
+      bg: "Страницата, която четеш. Десет WebGL сцени, които преживяват отнет графичен контекст, работещ терминал, хореография, вързана към скрола, и bundle, който държи three.js извън първото рисуване.",
+    },
+    stack: ["React", "Three.js", "GSAP", "Vite"],
+    live: "https://github.com/PeterMonev/CV-Interactive",
+    featured: false,
+    images: [],
+  },
+  {
     name: "Music Instruments Shop",
     tag: "Full-Stack",
     period: { en: "Mar — Apr 2023", bg: "март — апр 2023" },
