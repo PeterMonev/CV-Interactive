@@ -211,7 +211,9 @@ export function wrapCanvasText(ctx, text, cx, cy, maxWidth, lineHeight) {
 // Desktop keeps it; narrow screens get a badge with no semi-transparent
 // interior at all, so there is nothing left to disagree about.
 export function makeCertBadgeTexture(name, colorHex, { halo = true } = {}) {
-  const { canvas, ctx, width, height } = hidpiCanvas(512, 260);
+  // Taller than it was: a larger name wraps to three lines on the two diploma
+  // titles, and at the old height the third line met the footer.
+  const { canvas, ctx, width, height } = hidpiCanvas(512, 290);
 
   // soft glow halo behind the card
   if (halo) {
@@ -263,15 +265,15 @@ export function makeCertBadgeTexture(name, colorHex, { halo = true } = {}) {
 
   // name
   ctx.fillStyle = "#eef1fb";
-  ctx.font = "600 30px 'Space Grotesk', sans-serif";
+  ctx.font = "600 34px 'Space Grotesk', sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  wrapCanvasText(ctx, name, cx, 150, width - 96, 36);
+  wrapCanvasText(ctx, name, cx, 162, width - 92, 40);
 
   // footer
-  ctx.font = "500 19px 'JetBrains Mono', monospace";
+  ctx.font = "500 21px 'JetBrains Mono', monospace";
   ctx.fillStyle = colorHex;
-  ctx.fillText("SoftUni · view credential ↗", cx, height - 30);
+  ctx.fillText("SoftUni · view credential ↗", cx, height - 32);
 
   return tuneTexture(new THREE.CanvasTexture(canvas));
 }

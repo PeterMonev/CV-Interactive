@@ -89,8 +89,10 @@ export function CertificateCloud3D({ certs }) {
     group.add(coreGlow);
 
     // badge sprite size, needed both here and by the camera fit below
-    const baseScaleXRef = 2.05;
-    const baseScaleYRef = 1.04;
+    // Matches the badge texture aspect (512 x 290). Bigger than it was, because
+    // the names were genuinely hard to read at the old size.
+    const baseScaleXRef = 2.45;
+    const baseScaleYRef = 1.39;
 
     // see makeCertBadgeTexture: the soft halo is the part phones render wrong
     const haloEnabled = window.innerWidth >= 1024;
@@ -217,7 +219,10 @@ export function CertificateCloud3D({ certs }) {
     // translucent sprites with a soft halo each — stacked into a milky film.
     // Pulling back on narrow viewports keeps them apart. Desktop is untouched:
     // the floor is the distance that was already in use.
-    const BASE_DISTANCE = 11;
+    // Sized for the badges rather than for the sphere. Growing the sphere with
+    // the cards pushed the camera back by more than the cards had gained, which
+    // would have made them slightly smaller on screen than before.
+    const BASE_DISTANCE = 11.8;
     const CLUSTER_WIDTH = sphereRadius * 2 + baseScaleXRef;
     const halfFov = Math.tan((48 / 2) * (Math.PI / 180));
 
