@@ -41,10 +41,21 @@
       .cv-root button { font-family: inherit; cursor: pointer; }
       body.cursor3d-active, body.cursor3d-active * { cursor: none !important; }
 
+      /* Dragging over the email or the phone number to copy it is a thing a
+         recruiter actually does, and until now it painted the browser default
+         blue across a neon dark page — 2.2:1 against the body text, and visibly
+         not part of the design. Cyan with the dark ink the buttons use gives
+         12:1 and looks intentional. */
+      .cv-root ::selection { background: rgba(0,229,255,0.85); color: #06131a; text-shadow: none; }
+      .cv-root ::-moz-selection { background: rgba(0,229,255,0.85); color: #06131a; text-shadow: none; }
+
+      /* The focus ring is the same idea for anyone moving by keyboard: visible
+         on any background rather than a hairline that vanishes over a canvas. */
       .cv-root :focus-visible {
         outline: 2px solid var(--cyan);
         outline-offset: 3px;
         border-radius: 4px;
+        box-shadow: 0 0 0 5px rgba(0,229,255,0.18), 0 0 22px -4px rgba(0,229,255,0.85);
       }
 
       /* boot loader */
