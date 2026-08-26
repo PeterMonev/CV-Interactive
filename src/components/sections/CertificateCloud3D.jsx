@@ -91,8 +91,8 @@ export function CertificateCloud3D({ certs }) {
     // badge sprite size, needed both here and by the camera fit below
     // Matches the badge texture aspect (512 x 290). Bigger than it was, because
     // the names were genuinely hard to read at the old size.
-    const baseScaleXRef = 2.45;
-    const baseScaleYRef = 1.39;
+    const baseScaleXRef = 2.25;
+    const baseScaleYRef = 1.27;
 
     // see makeCertBadgeTexture: the soft halo is the part phones render wrong
     const haloEnabled = window.innerWidth >= 1024;
