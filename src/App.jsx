@@ -116,7 +116,13 @@ function AppShell() {
     <div className="cv-root">
       {!booted && <BootLoader onDone={() => setBooted(true)} />}
 
-      <div className="progress-bar" style={{ width: `${progress}%` }} />
+      {/* The bar already knows how far down the page you are; naming the section
+          lets it also say which one, in the colour that section uses elsewhere. */}
+      <div
+        className="progress-bar"
+        data-section={active}
+        style={{ width: `${progress}%` }}
+      />
 
       <ScrollStarfield />
       <div className="orb orb-a" aria-hidden="true" />

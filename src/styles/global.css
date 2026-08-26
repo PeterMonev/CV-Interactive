@@ -109,10 +109,30 @@
         background-size: 3px 3px; opacity: 0.4;
       }
 
+      /* The same nine hues as the sky, the section labels and the header links.
+         Length says how far, colour says where — and the two agree. */
+      .progress-bar[data-section="home"] { --bar-accent: #00e5ff; }
+      .progress-bar[data-section="about"] { --bar-accent: #5eead4; }
+      .progress-bar[data-section="experience"] { --bar-accent: #8b5cf6; }
+      .progress-bar[data-section="education"] { --bar-accent: #ff3ec9; }
+      .progress-bar[data-section="certificates"] { --bar-accent: #00e5ff; }
+      .progress-bar[data-section="skills"] { --bar-accent: #5eead4; }
+      .progress-bar[data-section="projects"] { --bar-accent: #ff3ec9; }
+      .progress-bar[data-section="hologram"] { --bar-accent: #8b5cf6; }
+      .progress-bar[data-section="contact"] { --bar-accent: #5eead4; }
+
       .progress-bar {
-        position: fixed; top: 0; left: 0; height: 2px;
-        background: linear-gradient(90deg, var(--cyan), var(--magenta));
-        z-index: 100; transition: width 0.1s linear;
+        position: fixed; top: 0; left: 0; height: 3px;
+        border-radius: 0 3px 3px 0;
+        /* fading in from the left keeps a full-width bar from looking like a
+           painted stripe across the top of the page */
+        background: linear-gradient(90deg,
+          color-mix(in srgb, var(--bar-accent, #00e5ff) 30%, transparent),
+          var(--bar-accent, #00e5ff) 55%,
+          color-mix(in srgb, var(--bar-accent, #00e5ff) 78%, white));
+        box-shadow: 0 0 14px -1px var(--bar-accent, #00e5ff), 0 0 4px 0 var(--bar-accent, #00e5ff);
+        z-index: 100;
+        transition: width 0.1s linear, background 0.7s ease, box-shadow 0.7s ease;
       }
 
       /* nav */
