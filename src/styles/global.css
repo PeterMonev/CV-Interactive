@@ -701,12 +701,16 @@
       .filter-hint { text-align: center; font-size: 12px; color: var(--muted); margin: 18px 0 4px; }
 
       .flip-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; margin-top: 14px; perspective: 1600px; }
+      /* One height for every card. The flagship used to be 300px against the
+         others 320, which made the most important project the smallest thing in
+         the row. Its prominence now comes from the ring and the badge instead.
+         Tied to the column width so the row keeps its proportion as the grid
+         reflows, with a floor for narrow columns. */
       .flip-card {
-        position: relative; height: 320px; cursor: pointer;
+        position: relative; aspect-ratio: 3 / 4; min-height: 310px; max-height: 380px; cursor: pointer;
         animation: cardFloat 5s ease-in-out infinite;
         perspective: 1600px; -webkit-perspective: 1600px;
       }
-      .flip-card-featured { height: 300px; }
       @keyframes cardFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
       .flip-card-inner {
         position: relative; width: 100%; height: 100%;
@@ -723,6 +727,32 @@
         background: var(--panel);
         box-shadow: 0 20px 40px -24px rgba(0,0,0,0.6);
       }
+      /* The lit edge is a layer under the face rather than a border on it:
+         a border would be clipped by the same overflow that keeps the photos
+         inside, and it can carry a gradient this way. */
+      .flip-card::after {
+        content: ""; position: absolute; inset: -8px; border-radius: 26px; pointer-events: none;
+        background: linear-gradient(140deg, var(--tint-edge, rgba(0,229,255,0.55)), transparent 62%);
+        filter: blur(12px); opacity: 0; transition: opacity 0.35s ease; z-index: -1;
+      }
+      .flip-card:hover::after { opacity: 1; }
+      .flip-card-featured::after { opacity: 0.55; }
+      .flip-card-featured:hover::after { opacity: 1; }
+
+      /* A sheen that crosses the artwork once on hover. Cheap, and it is what
+         makes a still image feel like it responded to being touched. */
+      .flip-card-visual::before {
+        content: ""; position: absolute; inset: -40%; z-index: 4; pointer-events: none;
+        background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,0.13) 50%, transparent 58%);
+        transform: translateX(-60%); opacity: 0;
+      }
+      .flip-card:hover .flip-card-visual::before { animation: cardSheen 0.9s ease-out; }
+      @keyframes cardSheen {
+        0% { transform: translateX(-60%); opacity: 0; }
+        30% { opacity: 1; }
+        100% { transform: translateX(60%); opacity: 0; }
+      }
+
       .flip-card-back {
         transform: rotateY(180deg); -webkit-transform: rotateY(180deg);
         background: linear-gradient(160deg, rgba(0,229,255,0.08), rgba(255,62,201,0.04));
@@ -769,8 +799,11 @@
         color: var(--amber); background: rgba(10,14,26,0.55); padding: 5px 10px; border-radius: 999px;
         border: 1px solid rgba(251,191,36,0.4);
       }
-      .flip-card-front-footer { padding: 16px 20px; display: flex; flex-direction: column; gap: 6px; }
-      .flip-card-name { font-family: 'Space Grotesk', sans-serif; font-size: 18px; margin: 0; }
+      .flip-card-front-footer {
+        padding: 16px 20px 18px; display: flex; flex-direction: column; gap: 8px;
+        background: linear-gradient(180deg, rgba(10,14,26,0), rgba(10,14,26,0.55) 40%, rgba(10,14,26,0.9));
+      }
+      .flip-card-name { font-family: 'Space Grotesk', sans-serif; font-size: 18px; margin: 0; letter-spacing: -0.01em; }
       .flip-card-desc { color: var(--muted); font-size: 14px; line-height: 1.7; margin: 0; }
       .flip-card-cta { align-self: flex-start; }
 

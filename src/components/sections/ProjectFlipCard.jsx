@@ -8,7 +8,16 @@ const PROJECT_TINTS = [
   ["rgba(0,229,255,0.2)", "rgba(139,92,246,0.14)"],
   ["rgba(255,62,201,0.18)", "rgba(0,229,255,0.12)"],
   ["rgba(94,234,212,0.18)", "rgba(139,92,246,0.12)"],
-  ["rgba(251,191,36,0.18)", "rgba(255,62,201,0.12)"],
+  ["rgba(139,92,246,0.18)", "rgba(255,62,201,0.12)"],
+];
+
+// The colour the card glows in when you reach it. Stronger than the wash
+// behind the artwork, and the same hue, so the two read as one card.
+const PROJECT_EDGES = [
+  "rgba(0,229,255,0.55)",
+  "rgba(255,62,201,0.5)",
+  "rgba(94,234,212,0.5)",
+  "rgba(139,92,246,0.5)",
 ];
 
 
@@ -19,6 +28,7 @@ export function ProjectFlipCard({ project, index }) {
   const finePointerRef = useRef(true);
   const Icon = projectIcon(project.name);
   const [tint1, tint2] = PROJECT_TINTS[index % PROJECT_TINTS.length];
+  const edge = PROJECT_EDGES[index % PROJECT_EDGES.length];
 
   useEffect(() => {
     finePointerRef.current =
@@ -43,7 +53,7 @@ export function ProjectFlipCard({ project, index }) {
   return (
     <div
       className={`flip-card ${project.featured ? "flip-card-featured" : ""}`}
-      style={{ animationDelay: `${(index % 4) * 0.4}s` }}
+      style={{ animationDelay: `${(index % 4) * 0.4}s`, "--tint-edge": edge }}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
