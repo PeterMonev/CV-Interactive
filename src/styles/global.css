@@ -111,12 +111,22 @@
         padding: 18px 6vw; background: rgba(10,14,26,0.6);
         backdrop-filter: blur(14px); border-bottom: 1px solid var(--border);
       }
+      /* The bar is on screen the whole time, so everything here is deliberately
+         under-stated: one lit hairline, and light that appears only under the
+         pointer. A nav that glows as hard as a card would never stop shouting. */
+      .nav::after {
+        content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(0,229,255,0.5) 30%, rgba(139,92,246,0.45) 65%, transparent);
+        pointer-events: none;
+      }
       .nav-brand { display: flex; align-items: center; gap: 8px; background: none; border: none; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 14px; letter-spacing: 0.02em; }
-      .nav-brand svg { color: var(--cyan); }
+      .nav-brand svg { color: var(--cyan); filter: drop-shadow(0 0 9px rgba(0,229,255,0.5)); transition: filter 0.25s ease; }
+      .nav-brand:hover svg { filter: drop-shadow(0 0 15px rgba(0,229,255,0.9)); }
       .nav-links { position: relative; display: flex; align-items: center; gap: 4px; height: 40px; }
       .nav-indicator {
         position: absolute; top: 0; bottom: 0; left: 0; border-radius: 999px;
         background: linear-gradient(90deg, var(--cyan), var(--mint)); z-index: 0;
+        box-shadow: 0 4px 18px -4px rgba(0,229,255,0.7), 0 0 0 1px rgba(0,229,255,0.3);
         transition: transform 0.35s cubic-bezier(.22,1,.36,1), width 0.35s cubic-bezier(.22,1,.36,1), opacity 0.3s ease;
       }
       .nav-link {
@@ -125,7 +135,17 @@
         padding: 8px 14px; border-radius: 999px;
         transition: color 0.25s ease;
       }
-      .nav-link:hover { color: var(--text); }
+      .nav-link {
+        background: transparent;
+      }
+      .nav-link:hover {
+        color: var(--text);
+        background: rgba(0,229,255,0.09);
+        box-shadow: inset 0 0 0 1px rgba(0,229,255,0.16);
+      }
+      .nav-link { transition: color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease; }
+      /* the active one already sits on the indicator, so it must not double up */
+      .nav-link-active:hover { background: transparent; box-shadow: none; }
       .nav-link-active { color: var(--bg); }
       .nav-toggle { display: none; background: none; border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 10px; }
       .nav-mobile { display: none; }
@@ -142,7 +162,7 @@
         transition: color 0.2s ease, background 0.2s ease;
       }
       .lang-btn:hover { color: var(--text); }
-      .lang-btn-active { background: rgba(0,229,255,0.14); color: var(--cyan); }
+      .lang-btn-active { background: rgba(0,229,255,0.16); color: var(--cyan); box-shadow: 0 0 14px -4px rgba(0,229,255,0.8), inset 0 0 0 1px rgba(0,229,255,0.25); }
       /* CV download — the one thing a recruiter has to be able to take away */
       .nav-right { display: flex; align-items: center; gap: 14px; }
       .nav-cv {
@@ -156,7 +176,7 @@
       }
       .nav-cv:hover {
         background: rgba(0,229,255,0.14); border-color: var(--cyan);
-        box-shadow: 0 6px 20px rgba(0,229,255,0.18); transform: translateY(-1px);
+        box-shadow: 0 8px 26px -6px rgba(0,229,255,0.65), 0 0 0 1px rgba(0,229,255,0.3); transform: translateY(-1px);
       }
       .nav-cv-short { display: none; }
       .nav-mobile-cv {
