@@ -22,7 +22,11 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return bad(res, 405, "Method not allowed");
 
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  const accessKey = process.env.WEB3FORMS_KEY || process.env.VITE_WEB3FORMS_KEY;
+  // Trimmed on the way in. The value stored on Vercel carries a stray
+  // whitespace character — pasted in with the key long ago — and Web3Forms
+  // reject it as not a valid UUID. The browser code has trimmed it since the
+  // day it was found; this function was passing it raw.
+  const accessKey = (process.env.WEB3FORMS_KEY || process.env.VITE_WEB3FORMS_KEY || "").trim();
   if (!accessKey) return bad(res, 500, "The form is not configured on the server.");
 
   const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
@@ -78,7 +82,7 @@ export default async function handler(req, res) {
     });
     const result = await sent.json().catch(() => ({}));
     if (!sent.ok || !result.success) {
-      return bad(res, 502, result.message || "The mail service refused the message.");
+      return bad(res, 502, result.message || `The mail service refused the message (HTTP ${sent.status}).`);
     }
     return res.status(200).json({ success: true });
   } catch (err) {
