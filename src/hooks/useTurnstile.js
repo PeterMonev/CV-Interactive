@@ -32,6 +32,7 @@ export function useTurnstile(active) {
 
     let cancelled = false;
     let failTimer = null;
+    let answerTimer = null;
 
     const render = () => {
       if (cancelled || !containerRef.current || widgetIdRef.current !== null) return;
@@ -45,6 +46,7 @@ export function useTurnstile(active) {
           size: "normal",
           callback: (value) => {
             if (cancelled) return;
+            if (answerTimer) clearTimeout(answerTimer);
             setToken(value);
             setState("ready");
           },
@@ -60,6 +62,16 @@ export function useTurnstile(active) {
           },
         });
         setState("waiting");
+        // A widget can render and then never answer — a hostname missing from
+        // the Cloudflare list, a blocked iframe, a network that swallows the
+        // challenge. Without this the send button stays disabled for good and
+        // the visitor has no way to write at all, which is a far worse outcome
+        // than letting a spammer through.
+        if (answerTimer) clearTimeout(answerTimer);
+        answerTimer = setTimeout(() => {
+          if (cancelled) return;
+          setState((current) => (current === "waiting" ? "failed" : current));
+        }, 12000);
       } catch (err) {
         setState("failed");
       }
@@ -88,6 +100,7 @@ export function useTurnstile(active) {
     return () => {
       cancelled = true;
       if (failTimer) clearTimeout(failTimer);
+      if (answerTimer) clearTimeout(answerTimer);
       if (widgetIdRef.current !== null && window.turnstile) {
         try {
           window.turnstile.remove(widgetIdRef.current);
