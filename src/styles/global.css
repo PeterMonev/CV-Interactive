@@ -416,8 +416,14 @@
       .cform .cform-invalid { border-color: #ff6b6b; }
       .cform-error { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #ff8585; margin-top: 6px; }
       /* No height of its own: with the check switched off the container is
-         empty and must take up nothing at all. */
-      .cform-turnstile:not(:empty) { margin: 4px 0 2px; min-height: 65px; }
+         empty and must take up nothing at all. Scaled down when it is there:
+         Cloudflare draws at a fixed 300x65 and offers no smaller option, so the
+         only way further down is a transform. */
+      .cform-turnstile:not(:empty) {
+        margin: 2px 0; height: 52px;
+        transform: scale(0.8); transform-origin: left center;
+        width: 125%;
+      }
 
       .cform-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
       .cform-error-send { margin-top: 0; }

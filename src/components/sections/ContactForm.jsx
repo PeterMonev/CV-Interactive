@@ -25,6 +25,9 @@ export function ContactForm() {
   const [values, setValues] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
+  // Whatever Web3Forms says when it refuses, shown as-is. A generic "that did
+  // not go through" turns every failure into guesswork.
+  const [apiMessage, setApiMessage] = useState("");
   const [botField, setBotField] = useState("");
   const { t } = useLang();
   // The widget builds itself only once the form is on the page, and never
@@ -92,11 +95,13 @@ export function ContactForm() {
         track(EVENTS.CONTACT_SENT, { via: "form" });
       } else {
         setStatus("error");
+        setApiMessage(data && data.message ? String(data.message) : "");
         // a Turnstile token is single use, so a retry needs a fresh one
         turnstile.reset();
       }
     } catch (err) {
       setStatus("error");
+      setApiMessage(String(err && err.message ? err.message : err));
     }
   }
 
@@ -186,6 +191,7 @@ export function ContactForm() {
         {status === "error" && (
           <span className="cform-error cform-error-send">
             <AlertCircle size={14} /> {t("contact.form.errSend")}
+            {apiMessage ? ` — ${apiMessage}` : ""}
           </span>
         )}
       </div>

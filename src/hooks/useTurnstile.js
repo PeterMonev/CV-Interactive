@@ -40,7 +40,9 @@ export function useTurnstile(active) {
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: TURNSTILE.siteKey,
           theme: "dark",
-          size: "flexible",
+          // flexible stretches to the form width, which is far more presence
+          // than a spam check has earned next to the send button
+          size: "normal",
           callback: (value) => {
             if (cancelled) return;
             setToken(value);
