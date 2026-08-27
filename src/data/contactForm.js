@@ -30,8 +30,17 @@ export const isFormConfigured = () => CONTACT_FORM.accessKey.length > 0;
 // With no site key set the form behaves exactly as it does today. That is
 // deliberate: a challenge that fails to load must not be able to lock the one
 // way a recruiter has to reach him.
+// Web3Forms answers a request carrying a Turnstile token with "You are trying
+// to use a Pro feature" on the free plan, which means sending one breaks the
+// form outright. Until the token has somewhere that can actually verify it,
+// the widget stays off — a challenge nobody checks is theatre, and one that
+// blocks real mail is worse than none.
+const TURNSTILE_VERIFIER_READY = false;
+
 export const TURNSTILE = {
-  siteKey: (import.meta.env.VITE_TURNSTILE_SITE_KEY || "").trim(),
+  siteKey: TURNSTILE_VERIFIER_READY
+    ? (import.meta.env.VITE_TURNSTILE_SITE_KEY || "").trim()
+    : "",
   script: "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit",
 };
 
