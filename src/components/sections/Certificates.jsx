@@ -51,7 +51,15 @@ function CertificateList({ srOnly = false }) {
 }
 
 export function Certificates() {
-  const [certView, setCertView] = useState("3d");
+  // The orbit opens by default on a screen with room for it, the list on one
+  // without. Measured on a 402px phone: the cluster is 11.5 units wide against
+  // a 307px box, so the camera pulls back to 15 and each badge lands 47 pixels
+  // across — about six pixels of letter height. Sixteen credentials cannot be
+  // read at that size no matter how they are lit, and the list view is the
+  // form that was built for it. The toggle still offers the orbit.
+  const [certView, setCertView] = useState(() =>
+    typeof window !== "undefined" && window.innerWidth < 700 ? "list" : "3d"
+  );
   const { t } = useLang();
   const cloudRef = useParallax({ from: 46, to: -46 });
 
