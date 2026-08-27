@@ -22,7 +22,14 @@ const bad = (res, status, message) => res.status(status).json({ success: false, 
 export default async function handler(req, res) {
   if (req.method !== "POST") return bad(res, 405, "Method not allowed");
 
-  const secret = process.env.TURNSTILE_SECRET_KEY;
+  // Trimmed, and stripped of quotes. A value pasted into a dashboard picks up
+  // a trailing newline or a pair of quotes more often than anyone expects, and
+  // Cloudflare answers a secret like that with invalid-input-secret — which
+  // reads as a wrong key rather than as a dirty one.
+  const secret = (process.env.TURNSTILE_SECRET_KEY || "")
+    .trim()
+    .replace(/^["']|["']$/g, "")
+    .trim();
   // Trimmed on the way in. The value stored on Vercel carries a stray
   // whitespace character — pasted in with the key long ago — and Web3Forms
   // reject it as not a valid UUID. The browser code has trimmed it since the
