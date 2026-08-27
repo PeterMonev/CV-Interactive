@@ -75,19 +75,36 @@ export function ContactForm() {
 
     setStatus("sending");
     try {
-      const res = await fetch(CONTACT_FORM.endpoint, {
+      // Our own function, which checks the Turnstile token and then forwards.
+      let res = await fetch(CONTACT_FORM.endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
-          access_key: CONTACT_FORM.accessKey,
-          subject: CONTACT_FORM.subject,
-          from_name: values.name,
           name: values.name,
           email: values.email,
           message: values.message,
-          ...(turnstile.token ? { "cf-turnstile-response": turnstile.token } : {}),
+          token: turnstile.token,
         }),
       });
+
+      // Under vite dev there is no function to answer, so the request comes
+      // back as the index page or a 404. Falling back keeps the form working
+      // locally; the token is dropped because Web3Forms reject it on the free
+      // plan, which is the whole reason the function exists.
+      if (res.status === 404 || res.status === 405) {
+        res = await fetch(CONTACT_FORM.fallbackEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            access_key: CONTACT_FORM.accessKey,
+            subject: CONTACT_FORM.subject,
+            from_name: values.name,
+            name: values.name,
+            email: values.email,
+            message: values.message,
+          }),
+        });
+      }
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.success) {
         setStatus("sent");
