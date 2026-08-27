@@ -58,7 +58,18 @@ export default async function handler(req, res) {
       });
       const outcome = await verify.json();
       if (!outcome.success) {
-        return bad(res, 400, "The anti-spam check did not pass. Please try again.");
+        // Cloudflare names the reason, and the names matter: an expired or
+        // reused token is the visitor sitting on the page too long, which is
+        // not their fault and needs different wording from a real refusal.
+        const codes = Array.isArray(outcome["error-codes"]) ? outcome["error-codes"] : [];
+        const stale = codes.includes("timeout-or-duplicate");
+        return bad(
+          res,
+          400,
+          stale
+            ? "The anti-spam check expired. Please tick it again and resend."
+            : `The anti-spam check did not pass${codes.length ? " (" + codes.join(", ") + ")" : ""}.`
+        );
       }
     } catch (err) {
       // Cloudflare being unreachable is not the sender's fault, and a portfolio
