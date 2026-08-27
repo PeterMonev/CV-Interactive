@@ -15,6 +15,7 @@
 
 const SITEVERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const WEB3FORMS = "https://api.web3forms.com/submit";
+const SITE_ORIGIN = "https://peter-monev-cv-interactive.vercel.app";
 
 const bad = (res, status, message) => res.status(status).json({ success: false, message });
 
@@ -70,7 +71,16 @@ export default async function handler(req, res) {
   try {
     const sent = await fetch(WEB3FORMS, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        // Web3Forms sit behind Cloudflare, which answers 403 to a request that
+        // arrives without the headers a browser would send. From the page these
+        // came for free; from a function they have to be set by hand.
+        "User-Agent": "peter-monev-cv/1.0 (+https://peter-monev-cv-interactive.vercel.app)",
+        Origin: SITE_ORIGIN,
+        Referer: SITE_ORIGIN + "/",
+      },
       body: JSON.stringify({
         access_key: accessKey,
         subject: "New message from peter-monev-cv-interactive.vercel.app",
@@ -80,9 +90,18 @@ export default async function handler(req, res) {
         message,
       }),
     });
-    const result = await sent.json().catch(() => ({}));
+    // Their refusals are not always JSON — a Cloudflare block page is HTML —
+    // so the body is read as text first and only then parsed.
+    const raw = await sent.text();
+    let result = {};
+    try {
+      result = JSON.parse(raw);
+    } catch (err) {
+      result = {};
+    }
     if (!sent.ok || !result.success) {
-      return bad(res, 502, result.message || `The mail service refused the message (HTTP ${sent.status}).`);
+      const detail = result.message || raw.replace(/<[^>]+>/g, " ").replace(/s+/g, " ").trim().slice(0, 90);
+      return bad(res, 502, `Mail service HTTP ${sent.status}${detail ? ": " + detail : ""}`);
     }
     return res.status(200).json({ success: true });
   } catch (err) {
