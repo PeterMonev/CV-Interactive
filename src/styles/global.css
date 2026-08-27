@@ -1344,6 +1344,17 @@
         opacity: 0.6; letter-spacing: 0.05em;
       }
 
+      /* Between a phone and a laptop the project grid was forced to a single
+         column, which turned a card designed portrait into a 719px landscape
+         slab. Two columns fit comfortably here. */
+      @media (min-width: 641px) and (max-width: 900px) {
+        /* Scoped through .cv-root on purpose: the single-column rule for phones
+           lives in a later block with the same specificity, and a later rule
+           wins. One extra class settles it without moving either block. */
+        .cv-root .flip-grid { grid-template-columns: repeat(2, 1fr); }
+        .cv-root .flip-card { height: 420px; }
+      }
+
       @media (max-width: 900px) {
         .hero-grid { grid-template-columns: 1fr; }
         .about-grid { grid-template-columns: 1fr; }
@@ -1351,7 +1362,7 @@
         .photo-frame { max-width: 200px; margin: 0 auto; }
         .drag-hint { display: none; }
         .galaxy-wrap { grid-template-columns: 1fr; }
-        .galaxy-3d { aspect-ratio: auto; height: 360px; }
+        .galaxy-3d { aspect-ratio: auto; height: 440px; }
         .galaxy-info { border-left: none; border-top: 1px solid var(--border); }
         .cert-3d { aspect-ratio: auto; height: 360px; }
         .cmdk-backdrop { padding: 8vh 14px 14px; }
