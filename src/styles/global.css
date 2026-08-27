@@ -978,7 +978,13 @@
         margin-top: 30px; border: 1px solid var(--border); border-radius: 18px; padding: 14px;
         background: radial-gradient(ellipse at center, rgba(0,229,255,0.09), transparent 65%), var(--panel);
       }
-      .hologram-viewer { position: relative; width: 100%; height: 540px; border-radius: 14px; overflow: hidden; touch-action: none; }
+      /* pan-y rather than none: the rig only reads horizontal drag, so
+         claiming the vertical axis bought nothing and cost the page its
+         scroll. On a phone this box is half the screen, and a thumb landing
+         in it while scrolling used to stop the page dead. The browser keeps
+         vertical panning now and sends pointercancel, which is already
+         wired to the same handler as pointerup. */
+      .hologram-viewer { position: relative; width: 100%; height: 540px; border-radius: 14px; overflow: hidden; touch-action: pan-y; }
       .hologram-viewer canvas { display: block; width: 100% !important; height: 100% !important; }
       .hologram-info { margin-top: 20px; text-align: center; }
       .hologram-info h3 { font-family: 'Space Grotesk', sans-serif; font-size: 20px; margin: 0 0 8px; }
@@ -1419,6 +1425,19 @@
         .section { padding: 72px 6vw; }
         .scroll-starfield { opacity: 0.5; }
         .cursor-3d-wrap { display: none; }
+      }
+
+      /* phones only. The block above is shared with tablets, where 420px is
+         the right height.
+
+         The camera frames the projection by its width, so a narrow box makes
+         it pull back, and pulling back adds vertical span the scene has
+         nothing to fill. Measured at 402px wide: 98px of the 420px box was
+         empty sky above the projection. Taking the height from the width
+         holds the framing steady instead, and the cap leaves the widest
+         phones exactly as they are. */
+      @media (max-width: 640px) {
+        .hologram-viewer { height: auto; aspect-ratio: 1.1 / 1; max-height: 420px; }
       }
 
       /* print
