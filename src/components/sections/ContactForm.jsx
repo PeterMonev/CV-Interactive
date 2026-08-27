@@ -75,36 +75,42 @@ export function ContactForm() {
 
     setStatus("sending");
     try {
-      // Our own function, which checks the Turnstile token and then forwards.
-      let res = await fetch(CONTACT_FORM.endpoint, {
+      // Two steps, and the order matters. Our function checks the token first,
+      // because it is the only place the secret key exists. Then the page sends
+      // the message itself — Web3Forms sit behind Cloudflare bot protection and
+      // refuse anything coming from a datacentre, which a serverless function
+      // is. From a visitor browser they have never had a problem.
+      if (turnstile.token) {
+        const check = await fetch(CONTACT_FORM.verifyEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ token: turnstile.token }),
+        });
+        // A 404 means there is no function at all, which is what vite dev looks
+        // like. That is not a failed check, so it does not stop the send.
+        if (check.status !== 404) {
+          const verdict = await check.json().catch(() => ({}));
+          if (!verdict.ok) {
+            setStatus("error");
+            setApiMessage(verdict.message || "The anti-spam check did not pass.");
+            turnstile.reset();
+            return;
+          }
+        }
+      }
+
+      const res = await fetch(CONTACT_FORM.endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
+          access_key: CONTACT_FORM.accessKey,
+          subject: CONTACT_FORM.subject,
+          from_name: values.name,
           name: values.name,
           email: values.email,
           message: values.message,
-          token: turnstile.token,
         }),
       });
-
-      // Under vite dev there is no function to answer, so the request comes
-      // back as the index page or a 404. Falling back keeps the form working
-      // locally; the token is dropped because Web3Forms reject it on the free
-      // plan, which is the whole reason the function exists.
-      if (res.status === 404 || res.status === 405) {
-        res = await fetch(CONTACT_FORM.fallbackEndpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({
-            access_key: CONTACT_FORM.accessKey,
-            subject: CONTACT_FORM.subject,
-            from_name: values.name,
-            name: values.name,
-            email: values.email,
-            message: values.message,
-          }),
-        });
-      }
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.success) {
         setStatus("sent");

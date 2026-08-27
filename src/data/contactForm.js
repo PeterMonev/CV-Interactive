@@ -13,10 +13,12 @@
 // With no key set the form stays visible and submits through the visitor's
 // mail client instead, so it is never a dead end.
 export const CONTACT_FORM = {
-  // our own function first; it falls back to Web3Forms directly when there is
-  // none, which is what happens under vite dev
-  endpoint: "/api/contact",
-  fallbackEndpoint: "https://api.web3forms.com/submit",
+  // The page sends to Web3Forms itself. A serverless function cannot: their
+  // endpoint sits behind Cloudflare bot protection, which answers a datacentre
+  // request with a challenge page whatever headers it carries.
+  endpoint: "https://api.web3forms.com/submit",
+  // Ours, and it only checks the Turnstile token.
+  verifyEndpoint: "/api/contact",
   accessKey: (import.meta.env.VITE_WEB3FORMS_KEY || "").trim(),
   toEmail: "monevpeter@gmail.com",
   subject: "New message from peter-monev-cv-interactive.vercel.app",
