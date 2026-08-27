@@ -415,6 +415,10 @@
       .cform input:focus, .cform textarea:focus { outline: none; border-color: var(--cyan); background: rgba(0,229,255,0.05); }
       .cform .cform-invalid { border-color: #ff6b6b; }
       .cform-error { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #ff8585; margin-top: 6px; }
+      /* No height of its own: with the check switched off the container is
+         empty and must take up nothing at all. */
+      .cform-turnstile:not(:empty) { margin: 4px 0 2px; min-height: 65px; }
+
       .cform-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
       .cform-error-send { margin-top: 0; }
       .cform button[disabled] { opacity: 0.7; cursor: default; }

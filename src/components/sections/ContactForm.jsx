@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Send, Check, AlertCircle, Loader2 } from "lucide-react";
 import { CONTACT_FORM, isFormConfigured } from "../../data/contactForm.js";
+import { useTurnstile } from "../../hooks/useTurnstile.js";
 import { track, EVENTS } from "../../utils/analytics.js";
 import { useLang } from "../../i18n/index.jsx";
 import { setContactState, chargeOf } from "../../utils/contactSignal.js";
@@ -26,6 +27,9 @@ export function ContactForm() {
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
   const [botField, setBotField] = useState("");
   const { t } = useLang();
+  // The widget builds itself only once the form is on the page, and never
+  // blocks the send if it failed to load — see the hook for why.
+  const turnstile = useTurnstile(true);
 
   // The orb behind this form watches the same two facts the visitor can see:
   // how far the message has got, and whether it went out. Reported rather than
@@ -78,6 +82,7 @@ export function ContactForm() {
           name: values.name,
           email: values.email,
           message: values.message,
+          ...(turnstile.token ? { "cf-turnstile-response": turnstile.token } : {}),
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -87,6 +92,8 @@ export function ContactForm() {
         track(EVENTS.CONTACT_SENT, { via: "form" });
       } else {
         setStatus("error");
+        // a Turnstile token is single use, so a retry needs a fresh one
+        turnstile.reset();
       }
     } catch (err) {
       setStatus("error");
@@ -156,8 +163,16 @@ export function ContactForm() {
         aria-hidden="true"
       />
 
+      {/* Empty and invisible until the widget renders, so the form does not
+          reserve a gap on a page where the check is switched off. */}
+      <div ref={turnstile.containerRef} className="cform-turnstile" />
+
       <div className="cform-actions">
-        <button type="submit" className="btn btn-primary" disabled={status === "sending"}>
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={status === "sending" || turnstile.blocking}
+        >
           {status === "sending" ? (
             <>
               <Loader2 size={16} className="cform-spin" /> {t("contact.form.sending")}

@@ -20,3 +20,19 @@ export const CONTACT_FORM = {
 };
 
 export const isFormConfigured = () => CONTACT_FORM.accessKey.length > 0;
+
+// Cloudflare Turnstile — the anti-spam half the comment above says is the real
+// tool here. The site key is public by design: it identifies the widget, and
+// the token it produces is verified server-side by Web3Forms against the
+// secret key, which is entered in the Web3Forms dashboard and never touches
+// this repository or the bundle.
+//
+// With no site key set the form behaves exactly as it does today. That is
+// deliberate: a challenge that fails to load must not be able to lock the one
+// way a recruiter has to reach him.
+export const TURNSTILE = {
+  siteKey: (import.meta.env.VITE_TURNSTILE_SITE_KEY || "").trim(),
+  script: "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit",
+};
+
+export const isTurnstileConfigured = () => TURNSTILE.siteKey.length > 0;
