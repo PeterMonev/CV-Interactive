@@ -1056,7 +1056,22 @@
         overflow: hidden; display: flex; flex-direction: column;
         background: var(--panel);
         box-shadow: 0 20px 40px -24px rgba(0,0,0,0.6);
+        /* backface-visibility alone is not enough. Firefox and WebKit stop
+           honouring it once a face inside a preserve-3d parent also clips its
+           own overflow, and the result is both faces drawn at once — the back
+           readable and the front mirrored through it. Reported on an iPhone
+           and on desktop Firefox; Chrome never showed it.
+
+           So the face that is turning away is switched off outright, with no
+           fade, at the half way point of the 0.5s rotation — the moment it is
+           edge on and invisible anyway. That holds whatever the engine does
+           with backface-visibility. */
+        transition: opacity 0s linear 0.25s;
       }
+      .flip-card-front { opacity: 1; }
+      .flip-card-back { opacity: 0; }
+      .flip-card-inner.is-flipped .flip-card-front { opacity: 0; }
+      .flip-card-inner.is-flipped .flip-card-back { opacity: 1; }
       /* The lit edge is a layer under the face rather than a border on it:
          a border would be clipped by the same overflow that keeps the photos
          inside, and it can carry a gradient this way. */
