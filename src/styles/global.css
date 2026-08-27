@@ -635,22 +635,65 @@
         .btn:hover::before { animation: none; }
       }
 
+      /* The most memorable object on the site — a recruiter watches their own
+         name being typed here — and the last one still dressed like a plain
+         bordered box while every card on the page had learned to glow. */
       .hero-term {
-        background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
-        border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
-        backdrop-filter: blur(10px); box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+        position: relative;
+        background:
+          radial-gradient(120% 90% at 0% 0%, rgba(0,229,255,0.09), transparent 58%),
+          linear-gradient(160deg, rgba(255,255,255,0.055), rgba(255,255,255,0.015));
+        border: 1px solid rgba(0,229,255,0.16); border-radius: 16px; overflow: hidden;
+        backdrop-filter: blur(10px);
+        box-shadow:
+          0 30px 60px -20px rgba(0,0,0,0.6),
+          inset 0 1px 0 rgba(255,255,255,0.07),
+          0 0 40px -22px rgba(0,229,255,0.9);
         cursor: text;
+        transition: border-color 0.35s ease, box-shadow 0.35s ease;
       }
-      .term-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
-      .term-path { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
-      .term-hint { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); opacity: 0.7; }
+      /* Brightens while it is being typed in, which is the only cue that the
+         thing accepts input at all. */
+      .hero-term:hover, .hero-term:focus-within {
+        border-color: rgba(0,229,255,0.34);
+        box-shadow:
+          0 30px 60px -20px rgba(0,0,0,0.6),
+          inset 0 1px 0 rgba(255,255,255,0.1),
+          0 0 60px -18px rgba(0,229,255,1);
+      }
+      /* the lit hairline the header and footer already carry */
+      .hero-term::before {
+        content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; z-index: 2;
+        background: linear-gradient(90deg, transparent, var(--cyan) 28%, var(--violet) 62%, transparent);
+        opacity: 0.65; pointer-events: none;
+      }
+      .term-bar {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 18px; border-bottom: 1px solid var(--border);
+        background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012));
+      }
+      .term-path {
+        display: inline-flex; align-items: center; gap: 7px;
+        font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--mint);
+      }
+      /* a live dot on the path, the same one the hero label carries */
+      .term-path::before {
+        content: ""; width: 7px; height: 7px; border-radius: 50%; flex: none;
+        background: var(--mint); box-shadow: 0 0 9px var(--mint);
+      }
+      .term-hint {
+        font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+        color: var(--cyan); opacity: 0.85;
+        border: 1px solid rgba(0,229,255,0.2); border-radius: 999px; padding: 3px 10px;
+        background: rgba(0,229,255,0.07);
+      }
       .term-body { padding: 22px 20px 24px; font-family: 'JetBrains Mono', monospace; font-size: 13.5px; line-height: 1.85; min-height: 230px; max-height: 360px; overflow-y: auto; }
       .intro-pre { margin: 0; white-space: pre-wrap; }
       .term-log { margin-top: 4px; }
       .term-line { white-space: pre-wrap; margin-top: 6px; display: flex; align-items: center; flex-wrap: wrap; }
       .term-in { color: var(--text); }
       .term-out { color: var(--muted); }
-      .term-prompt-sym { color: var(--cyan); margin-right: 4px; flex-shrink: 0; }
+      .term-prompt-sym { color: var(--cyan); margin-right: 6px; flex-shrink: 0; text-shadow: 0 0 10px rgba(0,229,255,0.7); }
       .term-input { background: none; border: none; outline: none; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13.5px; flex: 1; min-width: 60px; caret-color: var(--cyan); }
       .tok-kw { color: var(--magenta); }
       .tok-var { color: var(--text); }
@@ -658,7 +701,7 @@
       .tok-str { color: var(--mint); }
       .tok-bool { color: var(--amber); }
       .tok-pl { color: var(--muted); }
-      .caret { color: var(--cyan); animation: blink 1s step-end infinite; }
+      .caret { color: var(--cyan); text-shadow: 0 0 12px rgba(0,229,255,0.85); animation: blink 1s step-end infinite; }
       @keyframes blink { 50% { opacity: 0; } }
 
       /* equalizer */
