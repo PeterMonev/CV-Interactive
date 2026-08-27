@@ -30,6 +30,17 @@ const COMMANDS = [
   "whoami",
 ];
 
+// Four of the sixteen commands, offered as buttons under the prompt.
+//
+// The terminal was a hidden feature: a line of small grey text said "type
+// help" and everything else depended on the visitor guessing that a panel on
+// a CV site takes keyboard input. On a phone it was unreachable in practice —
+// nobody types commands with a thumb.
+//
+// These run the same runCommand the keyboard does, so there is no second path
+// to keep in step.
+const SUGGESTED = ["about", "projects", "skills", "cv"];
+
 export function HeroTerminal({ onHireMe, scrollTo }) {
   const total = useMemo(
     () => CODE_TOKENS.reduce((sum, tok) => sum + tok.t.length, 0),
@@ -322,6 +333,24 @@ export function HeroTerminal({ onHireMe, scrollTo }) {
                 {line.text}
               </div>
             ))}
+            {history.length === 0 && (
+              <div className="term-suggest">
+                <span className="term-suggest-label">try</span>
+                {SUGGESTED.map((cmd) => (
+                  <button
+                    key={cmd}
+                    type="button"
+                    className="term-suggest-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      runCommand(cmd);
+                    }}
+                  >
+                    {cmd}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="term-line term-in">
               <span className="term-prompt-sym">$ </span>
               <input
