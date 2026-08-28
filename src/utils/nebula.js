@@ -15,16 +15,22 @@ import { makeNebulaTexture } from "./canvasTextures.js";
 // And each band is stretched wide and shallow and laid at its own angle, so
 // three of them never line up into a single smear.
 
-const DEFAULT_COLORS = [0x8b5cf6, 0x00e5ff, 0xff3ec9];
+// The site's violet and cyclamen, pushed to a deeper saturation for this one
+// use. Measured as (max-min)/max on the rendered pixels, the violet sat at
+// 0.63 and the cyclamen at 0.76, and the violet is the one lying over most
+// of the frame — so the wash took its colour from the palest of the three.
+// Hue is unchanged on both; only the darkest channel moves. The cyan was
+// already at 1.0 and stays as it is.
+const DEFAULT_COLORS = [0x6525f6, 0x00e5ff, 0xff1fc0];
 
 // Sized against the camera distance, so a scene viewed from 6 units away and one
 // viewed from 11 get clouds that fill a comparable part of the frame.
 export function createNebulae(scene, { distance = 9, strength = 1, colors = DEFAULT_COLORS } = {}) {
   const unit = distance / 9.6;
   const specs = [
-    { color: colors[0], pos: [-1.7 * unit, 0.9 * unit, -6.6 * unit], w: 48, h: 15, tilt: 0.42, opacity: 0.55, drift: 0.09 },
-    { color: colors[1], pos: [4.2 * unit, -2.0 * unit, -7.6 * unit], w: 38, h: 12, tilt: -0.3, opacity: 0.42, drift: 0.07 },
-    { color: colors[2], pos: [-2.9 * unit, 2.7 * unit, -8.6 * unit], w: 31, h: 10, tilt: 0.95, opacity: 0.34, drift: 0.12 },
+    { color: colors[0], pos: [-1.7 * unit, 0.9 * unit, -6.6 * unit], w: 62, h: 19.5, tilt: 0.42, opacity: 0.55, drift: 0.09 },
+    { color: colors[1], pos: [4.2 * unit, -2.0 * unit, -7.6 * unit], w: 49, h: 15.5, tilt: -0.3, opacity: 0.42, drift: 0.07 },
+    { color: colors[2], pos: [-2.9 * unit, 2.7 * unit, -8.6 * unit], w: 40, h: 13, tilt: 0.95, opacity: 0.34, drift: 0.12 },
   ];
 
   const textures = [makeNebulaTexture(7), makeNebulaTexture(23), makeNebulaTexture(41)];
