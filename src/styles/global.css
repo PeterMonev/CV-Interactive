@@ -51,6 +51,22 @@
 
       /* The focus ring is the same idea for anyone moving by keyboard: visible
          on any background rather than a hairline that vanishes over a canvas. */
+      /* Thirteen chrome controls stand between the top of the page and the
+         first word of content — the brand, nine nav links, two language
+         buttons and the CV button — and a keyboard user met all of them on
+         every visit. This is the standard way past, invisible until it is
+         focused. Scoped through .cv-root because a bare .skip-link loses to
+         .cv-root a { color: inherit } and would render in body text. */
+      .cv-root .skip-link {
+        position: fixed; left: 14px; top: -64px; z-index: 200;
+        background: var(--cyan); color: var(--bg);
+        padding: 11px 20px; border-radius: 0 0 12px 12px;
+        font-size: 14px; font-weight: 700; text-decoration: none;
+        box-shadow: 0 10px 30px -10px rgba(0,229,255,0.8);
+        transition: top 0.18s ease;
+      }
+      .cv-root .skip-link:focus { top: 0; }
+
       .cv-root :focus-visible {
         outline: 2px solid var(--cyan);
         outline-offset: 3px;
@@ -1145,12 +1161,18 @@
            fade, at the half way point of the 0.5s rotation — the moment it is
            edge on and invisible anyway. That holds whatever the engine does
            with backface-visibility. */
-        transition: opacity 0s linear 0.25s;
+        transition: opacity 0s linear 0.25s, visibility 0s linear 0.25s;
       }
-      .flip-card-front { opacity: 1; }
-      .flip-card-back { opacity: 0; }
-      .flip-card-inner.is-flipped .flip-card-front { opacity: 0; }
-      .flip-card-inner.is-flipped .flip-card-back { opacity: 1; }
+      /* visibility switches on the same delay as the opacity, so there is
+         nothing new to see. What it changes is the tab order: an opacity-0
+         face keeps its links focusable, so Tab landed on the View live
+         link on the back of a card that was still showing its front — and
+         the focus ring was drawn at opacity 0 as well, so focus simply
+         disappeared. Five cards, five places for it to vanish. */
+      .flip-card-front { opacity: 1; visibility: visible; }
+      .flip-card-back { opacity: 0; visibility: hidden; }
+      .flip-card-inner.is-flipped .flip-card-front { opacity: 0; visibility: hidden; }
+      .flip-card-inner.is-flipped .flip-card-back { opacity: 1; visibility: visible; }
       /* The lit edge is a layer under the face rather than a border on it:
          a border would be clipped by the same overflow that keeps the photos
          inside, and it can carry a gradient this way. */
