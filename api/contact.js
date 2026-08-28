@@ -52,6 +52,26 @@ export default async function handler(req, res) {
     if (outcome.success) return res.status(200).json({ ok: true, checked: true });
 
     const codes = Array.isArray(outcome["error-codes"]) ? outcome["error-codes"] : [];
+
+    // Cloudflare refuses for two different reasons and only one of them is
+    // the sender's. A bad or missing secret, a malformed request, an outage
+    // on their side — those are this server being wrong, and the person
+    // typing the message did nothing but fill in a form. Blocking them for
+    // it means a misconfigured key silently eats every message the site is
+    // there to receive, which is exactly what happened in production while
+    // the same form worked locally, where there is no function to get it
+    // wrong. Same call as an unreachable Cloudflare: log it, let it through.
+    const OURS = [
+      "missing-input-secret",
+      "invalid-input-secret",
+      "bad-request",
+      "internal-error",
+    ];
+    if (codes.some((c) => OURS.includes(c))) {
+      console.error("turnstile misconfigured, letting the message through:", codes);
+      return res.status(200).json({ ok: true, checked: false });
+    }
+
     return res.status(400).json({
       ok: false,
       message: codes.includes("timeout-or-duplicate")
