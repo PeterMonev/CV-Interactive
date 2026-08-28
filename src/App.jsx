@@ -6,7 +6,7 @@ import {
   useCallback,
 } from "react";
 import { Analytics } from "@vercel/analytics/react";
-import { LanguageProvider, useLang } from "./i18n/index.jsx";
+import { LanguageProvider } from "./i18n/index.jsx";
 import "./styles/global.css";
 
 import { prefersReducedMotion } from "./utils/motion.js";
@@ -43,7 +43,6 @@ export default function App() {
 }
 
 function AppShell() {
-  const { t } = useLang();
   const [booted, setBooted] = useState(() => prefersReducedMotion());
   const [active, setActive] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -115,26 +114,6 @@ function AppShell() {
 
   return (
     <div className="cv-root">
-      {/* First stop in the tab order, and the only one a mouse never sees.
-          The target takes tabindex -1 so focus actually moves with the
-          scroll: without it the browser scrolls and leaves focus at the top,
-          and the next Tab drops you back into the navigation you just
-          skipped. */}
-      <a
-        className="skip-link"
-        href="#home"
-        onClick={(e) => {
-          e.preventDefault();
-          const el = document.getElementById("home");
-          if (!el) return;
-          el.setAttribute("tabindex", "-1");
-          el.focus({ preventScroll: true });
-          scrollTo("home");
-        }}
-      >
-        {t("nav.skip")}
-      </a>
-
       {!booted && <BootLoader onDone={() => setBooted(true)} />}
 
       {/* The bar already knows how far down the page you are; naming the section

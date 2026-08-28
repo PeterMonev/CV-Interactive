@@ -1,7 +1,4 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-
-const FOCUSABLE =
-  'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
 import {
   Search,
   CornerDownLeft,
@@ -51,7 +48,6 @@ export function CommandPalette({ scrollTo }) {
   const [active, setActive] = useState(0);
   const inputRef = useRef(null);
   const listRef = useRef(null);
-  const dialogRef = useRef(null);
   const restoreFocusRef = useRef(null);
   const { t } = useLang();
   const tx = useTx();
@@ -201,39 +197,6 @@ export function CommandPalette({ scrollTo }) {
     };
   }, [open]);
 
-  // Escape and Tab belong to the window while the palette is open, not to
-  // the search field. Focus starts in the field but does not stay there:
-  // once it moved to a row, Escape stopped closing the palette, and Tab off
-  // the last row walked out of an aria-modal dialog onto the page behind a
-  // backdrop that could not be scrolled or dismissed. That is a keyboard
-  // trap with no way out but the mouse.
-  useEffect(() => {
-    if (!open) return undefined;
-    function onKey(e) {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        close();
-        return;
-      }
-      if (e.key !== "Tab" || !dialogRef.current) return;
-      const stops = [...dialogRef.current.querySelectorAll(FOCUSABLE)].filter(
-        (el) => !el.disabled && el.getBoundingClientRect().width > 0
-      );
-      if (!stops.length) return;
-      const first = stops[0];
-      const last = stops[stops.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, close]);
-
   useEffect(() => {
     setActive(0);
   }, [query]);
@@ -245,6 +208,11 @@ export function CommandPalette({ scrollTo }) {
   }, [active]);
 
   function onInputKeyDown(e) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      close();
+      return;
+    }
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setActive((a) => (results.length ? (a + 1) % results.length : 0));
@@ -272,7 +240,6 @@ export function CommandPalette({ scrollTo }) {
   return (
     <div className="cmdk-backdrop" onMouseDown={close}>
       <div
-        ref={dialogRef}
         className="cmdk"
         role="dialog"
         aria-modal="true"
