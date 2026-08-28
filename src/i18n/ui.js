@@ -21,6 +21,7 @@ export const UI = {
       contact: "Contact",
       cv: "Download CV",
       language: "Language",
+      skip: "Skip to content",
     },
     hero: {
       eyebrow: "Junior Full-Stack Web Developer",
@@ -167,6 +168,7 @@ export const UI = {
       contact: "Контакти",
       cv: "Свали CV",
       language: "Език",
+      skip: "Към съдържанието",
     },
     hero: {
       eyebrow: "Junior Full-Stack Web Developer",
