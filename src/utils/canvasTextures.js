@@ -91,6 +91,37 @@ export function makeNebulaTexture(seed = 1) {
     ctx.fillRect(0, 0, W, H);
   }
 
+  // Two things had to be cleaned off this before it stopped showing its own
+  // outline on a dark panel.
+  //
+  // The blob scatter runs past every edge of the canvas, so the corner and
+  // edge pixels were left holding an alpha of up to 10. That is nothing on a
+  // lit page, but these are drawn additively onto near-black, where a straight
+  // line of alpha 10 is a visible rectangle around the cloud.
+  //
+  // And the gradients are so shallow — a peak alpha near 100 spread over 500
+  // pixels — that eight-bit steps land as contour lines through the middle of
+  // the cloud. Chrome shows them plainly; Firefox dithers enough to hide them.
+  // A few levels of noise breaks the plateaus apart so neither engine can draw
+  // a line where the gradient has no edge.
+  const img = ctx.getImageData(0, 0, W, H);
+  const px = img.data;
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const i = (y * W + x) * 4 + 3;
+      const a = px[i];
+      if (a === 0) continue;
+      // ellipse in the canvas's own proportions, full strength until 0.75 of
+      // the way out and squared so it leaves without an edge of its own
+      const nx = (x / W - 0.5) * 2;
+      const ny = (y / H - 0.5) * 2;
+      const r = Math.sqrt(nx * nx + ny * ny);
+      const fall = r <= 0.75 ? 1 : Math.max(0, 1 - (r - 0.75) / 0.25);
+      px[i] = Math.max(0, Math.min(255, (a + (rand() - 0.5) * 5) * fall * fall));
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+
   return tuneTexture(new THREE.CanvasTexture(canvas));
 }
 
