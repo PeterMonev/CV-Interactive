@@ -60,8 +60,13 @@ export function makeGlowSpriteTexture() {
 // The randomness is seeded. A cloud that reshuffles itself every time the scene
 // is rebuilt — a language switch, a recovered context — would visibly flicker.
 export function makeNebulaTexture(seed = 1) {
-  const W = 512;
-  const H = 256;
+  // Stretched across a sprite wider than the frame, a 512 texel band is
+  // magnified about eight times, and every step in the alpha becomes a
+  // staircase the width of a finger. Twice the texels puts those steps back
+  // under the size of a pixel.
+  const W = 1024;
+  const H = 512;
+  const DETAIL = W / 512;
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
@@ -81,7 +86,7 @@ export function makeNebulaTexture(seed = 1) {
     const x = W * (0.5 + (t - 0.5) * (0.55 + rand() * 0.85));
     const y = H * (0.5 + (rand() - 0.5) * 0.42);
     const spread = 1 - Math.abs(x / W - 0.5) * 1.6;
-    const radius = (26 + rand() * 92) * Math.max(0.25, spread);
+    const radius = (26 + rand() * 92) * DETAIL * Math.max(0.25, spread);
     const alpha = (0.05 + rand() * 0.1) * Math.max(0.2, spread);
     const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
     grad.addColorStop(0, `rgba(255,255,255,${alpha})`);

@@ -29,20 +29,47 @@ export function createNebulae(scene, { distance = 9, strength = 1, colors = DEFA
 
   const textures = [makeNebulaTexture(7), makeNebulaTexture(23), makeNebulaTexture(41)];
 
+  // Noise painted into the texture is averaged away by the same
+  // magnification that causes the banding — bilinear filtering smooths it
+  // out long before it reaches a pixel. Dithering has to happen at the size
+  // the bands appear at, which is the screen, so it goes in the fragment
+  // shader and is scaled by the fragment's own alpha: the additive result
+  // then carries about one level of noise wherever it lands.
+  const ditherFragment = (shader) => {
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "void main() {",
+        [
+          "float nebDither(vec2 p) {",
+          "  return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);",
+          "}",
+          "void main() {",
+        ].join(String.fromCharCode(10))
+      )
+      .replace(
+        "#include <opaque_fragment>",
+        [
+          "#include <opaque_fragment>",
+          "gl_FragColor.rgb += (nebDither(gl_FragCoord.xy) - 0.5) * (2.5 / 255.0) / max(gl_FragColor.a, 0.02);",
+        ].join(String.fromCharCode(10))
+      );
+  };
+
   const clouds = specs.map((spec, i) => {
-    const sprite = new THREE.Sprite(
-      new THREE.SpriteMaterial({
-        map: textures[i],
-        color: spec.color,
-        transparent: true,
-        opacity: spec.opacity * strength,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        // behind everything without competing for depth against the scene
-        depthTest: false,
-        rotation: spec.tilt,
-      })
-    );
+    const material = new THREE.SpriteMaterial({
+      map: textures[i],
+      color: spec.color,
+      transparent: true,
+      opacity: spec.opacity * strength,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      // behind everything without competing for depth against the scene
+      depthTest: false,
+      rotation: spec.tilt,
+    });
+    material.onBeforeCompile = ditherFragment;
+    material.customProgramCacheKey = () => "nebula-dither";
+    const sprite = new THREE.Sprite(material);
     sprite.position.set(spec.pos[0], spec.pos[1], spec.pos[2]);
     sprite.scale.set(spec.w * unit, spec.h * unit, 1);
     sprite.renderOrder = -10 + i;
