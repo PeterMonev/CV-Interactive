@@ -441,7 +441,10 @@
         width: 125%;
       }
 
-      .cform-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+      /* 16px to match the gap between the fields above. At 4px the send
+         button sat 9px under the Turnstile box and its glow closed even
+         that, so the two read as one stuck-together control. */
+      .cform-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 16px; }
       .cform-error-send { margin-top: 0; }
       .cform button[disabled] { opacity: 0.7; cursor: default; }
       .cform-spin { animation: cformSpin 0.9s linear infinite; }
