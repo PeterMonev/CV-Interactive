@@ -14,15 +14,6 @@ import { makeNebulaTexture } from "./canvasTextures.js";
 // a circle and the eye reads a circle as a point of light however large it is.
 // And each band is stretched wide and shallow and laid at its own angle, so
 // three of them never line up into a single smear.
-//
-// Size is the thing that decides whether any of that is visible. A cloud
-// wider and taller than the frame is not a cloud, it is a tint over the
-// whole panel: no ends, no edge, nothing dark to sit against. These were
-// 2.2 to 2.6 frame-widths across and slightly taller than the frame in every
-// scene, three of them stacked, which is why they read as flat. The numbers
-// below are chosen as fractions of the visible frame — the widest band runs
-// across it but stands about four tenths of its height, so there is sky
-// above and below to see it against.
 
 const DEFAULT_COLORS = [0x8b5cf6, 0x00e5ff, 0xff3ec9];
 
@@ -31,9 +22,9 @@ const DEFAULT_COLORS = [0x8b5cf6, 0x00e5ff, 0xff3ec9];
 export function createNebulae(scene, { distance = 9, strength = 1, colors = DEFAULT_COLORS } = {}) {
   const unit = distance / 9.6;
   const specs = [
-    { color: colors[0], pos: [-1.7 * unit, 0.9 * unit, -6.6 * unit], w: 24, h: 6.3, tilt: 0.42, opacity: 0.55, drift: 0.09 },
-    { color: colors[1], pos: [4.2 * unit, -2.0 * unit, -7.6 * unit], w: 19, h: 5, tilt: -0.3, opacity: 0.42, drift: 0.07 },
-    { color: colors[2], pos: [-2.9 * unit, 2.7 * unit, -8.6 * unit], w: 15.5, h: 4.2, tilt: 0.95, opacity: 0.34, drift: 0.12 },
+    { color: colors[0], pos: [-1.7 * unit, 0.9 * unit, -6.6 * unit], w: 48, h: 15, tilt: 0.42, opacity: 0.55, drift: 0.09 },
+    { color: colors[1], pos: [4.2 * unit, -2.0 * unit, -7.6 * unit], w: 38, h: 12, tilt: -0.3, opacity: 0.42, drift: 0.07 },
+    { color: colors[2], pos: [-2.9 * unit, 2.7 * unit, -8.6 * unit], w: 31, h: 10, tilt: 0.95, opacity: 0.34, drift: 0.12 },
   ];
 
   const textures = [makeNebulaTexture(7), makeNebulaTexture(23), makeNebulaTexture(41)];
