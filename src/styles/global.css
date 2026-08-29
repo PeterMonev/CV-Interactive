@@ -99,7 +99,7 @@
       /* starfield + orbs + cursor */
       .scroll-starfield { position: fixed; inset: 0; z-index: 0; opacity: 0.85; pointer-events: none; }
       .scroll-starfield canvas { display: block; width: 100% !important; height: 100% !important; }
-      /* Twelve of these make the trail, so the gradient is deliberately faint:
+      /* Fourteen of these make the trail, so the gradient is deliberately faint:
          what you see is the stack, and at rest they sit on top of one another.
          A violet middle rather than one flat cyan wash, the same two colours
          the nebulae are built from, so the light belongs to the same sky.
@@ -108,7 +108,7 @@
          drives the position on an animation frame. */
       .cursor-spotlight {
         position: fixed; top: 0; left: 0; border-radius: 50%;
-        background: radial-gradient(circle, rgba(0,229,255,0.055), rgba(139,92,246,0.027) 45%, transparent 72%);
+        background: radial-gradient(circle, rgba(0,229,255,0.048), rgba(139,92,246,0.024) 45%, transparent 72%);
         pointer-events: none; z-index: 1; opacity: 0; transition: opacity 0.4s ease;
         mix-blend-mode: screen; will-change: transform;
       }

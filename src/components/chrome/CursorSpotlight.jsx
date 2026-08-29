@@ -3,30 +3,27 @@ import { prefersReducedMotion } from "../../utils/motion.js";
 
 // A trail of light dragged along behind the pointer.
 //
-// One lagging circle only ever reads as a circle that is late. What makes a
-// streak is a chain: the first light chases the pointer, and every one after it
-// chases the light in front, so each is a little further behind than the last.
-// Standing still they stack into a single pool; moving, they pull apart into a
-// tapering line pointing back the way the hand came.
+// This was a chain of lights each easing towards the one in front, which has
+// two faults that get worse the longer you make it. A light easing towards a
+// moving target cuts the corner instead of going round it, so a curved sweep
+// came out as a straight smear. And length and settling time are the same
+// number there: the only way to stretch the tail was to slow every link down,
+// which left it hanging around for seconds after the pointer had stopped.
 //
-// Each is dimmer and smaller than the one ahead of it, and the gradient itself
-// is faint precisely because twelve of them add up — the brightness you see is
-// the stack, not any one circle.
+// So it remembers instead. Every frame the pointer's position goes into a ring
+// buffer, and each light is placed at a fixed number of frames into the past.
+// The tail is then the path the pointer actually took, curves and all, and it
+// retracts in exactly as many frames as it is deep however long it looks.
 
-// Twelve rather than seven, and each chasing more slowly. Seven links at a
-// quarter of the gap per frame sat only 40px apart while each was 440px
-// wide — a tenth of their own size, so they simply piled up and the whole
-// thing read as one blob that was late. Length has to be large next to the
-// size of the lights for a chain of them to look like a chain.
-const TRAIL = 12;
-// per frame, per link. Larger snaps the chain tight; smaller lets it string
-// out further behind and take longer to gather back up. At 0.18 the trail
-// runs about 730px behind an ordinary sweep of the hand and takes a little
-// over two seconds to pool back together once the pointer stops.
-const EASE = 0.18;
+const TRAIL = 14;
+// frames between one light and the next. This is the whole length control:
+// the tail reaches back TRAIL * STEP frames, which at an ordinary sweep of the
+// hand is most of a screen width, and takes the same span to gather back up.
+const STEP = 7;
+const DEPTH = TRAIL * STEP;
 
 const HEAD = 420;
-const TAPER = 26; // px smaller per link
+const TAPER = 23; // px smaller per light
 
 const sizes = Array.from({ length: TRAIL }, (_, i) => HEAD - i * TAPER);
 const fade = Array.from({ length: TRAIL }, (_, i) => 1 - i / TRAIL);
@@ -42,7 +39,8 @@ export function CursorSpotlight() {
     const nodes = refs.current.filter(Boolean);
     if (nodes.length !== TRAIL) return undefined;
 
-    const pts = Array.from({ length: TRAIL }, () => ({ x: 0, y: 0 }));
+    const hist = new Float32Array(DEPTH * 2);
+    let head = 0;
     let pointerX = 0;
     let pointerY = 0;
     let placed = false;
@@ -51,13 +49,13 @@ export function CursorSpotlight() {
     const handle = (e) => {
       pointerX = e.clientX;
       pointerY = e.clientY;
-      // the first move drops the whole chain on the pointer, rather than
-      // letting it whip in from the corner of the page
+      // the first move fills the whole history with one point, so the tail
+      // grows out of the pointer rather than whipping in from the corner
       if (!placed) {
-        pts.forEach((p) => {
-          p.x = pointerX;
-          p.y = pointerY;
-        });
+        for (let i = 0; i < DEPTH; i++) {
+          hist[i * 2] = pointerX;
+          hist[i * 2 + 1] = pointerY;
+        }
         nodes.forEach((n, i) => {
           n.style.opacity = String(fade[i]);
         });
@@ -66,17 +64,16 @@ export function CursorSpotlight() {
     };
 
     const tick = () => {
-      let leadX = pointerX;
-      let leadY = pointerY;
+      head = (head + 1) % DEPTH;
+      hist[head * 2] = pointerX;
+      hist[head * 2 + 1] = pointerY;
+
       for (let i = 0; i < TRAIL; i++) {
-        const p = pts[i];
-        p.x += (leadX - p.x) * EASE;
-        p.y += (leadY - p.y) * EASE;
+        // i * STEP is always below DEPTH, so one wrap is enough to stay positive
+        const at = (head - i * STEP + DEPTH) % DEPTH;
         const r = sizes[i] / 2;
-        nodes[i].style.transform = `translate(${p.x - r}px, ${p.y - r}px)`;
-        // the next link aims at where this one just landed, not at the pointer
-        leadX = p.x;
-        leadY = p.y;
+        nodes[i].style.transform =
+          `translate(${hist[at * 2] - r}px, ${hist[at * 2 + 1] - r}px)`;
       }
       raf = requestAnimationFrame(tick);
     };
