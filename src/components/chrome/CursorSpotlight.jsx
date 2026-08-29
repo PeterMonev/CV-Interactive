@@ -1,55 +1,76 @@
 import { useEffect, useRef } from "react";
 import { prefersReducedMotion } from "../../utils/motion.js";
 
-// A pool of light that follows the pointer around the page.
+// A trail of light dragged along behind the pointer.
 //
-// It used to be written straight to the element on every mousemove, which put
-// it exactly under the pointer at all times — and something pinned exactly to
-// the mouse reads as a decal stuck to the screen, not as light. Light has to
-// arrive. So the position is chased on an animation frame instead, catching up
-// by a fraction of the remaining distance each time, which leaves it trailing
-// behind fast movement and settling a moment after the pointer stops.
+// One lagging circle only ever reads as a circle that is late. What makes a
+// streak is a chain: the first light chases the pointer, and every one after it
+// chases the light in front, so each is a little further behind than the last.
+// Standing still they stack into a single pool; moving, they pull apart into a
+// tapering line pointing back the way the hand came.
+//
+// Each is dimmer and smaller than the one ahead of it, and the gradient itself
+// is faint precisely because seven of them add up — the brightness you see is
+// the stack, not any one circle.
+
+const TRAIL = 7;
+// per frame, per link. Larger snaps the chain tight; smaller lets it string
+// out further behind and take longer to gather back up.
+const EASE = 0.25;
+
+const HEAD = 440;
+const TAPER = 40; // px smaller per link
+
+const sizes = Array.from({ length: TRAIL }, (_, i) => HEAD - i * TAPER);
+const fade = Array.from({ length: TRAIL }, (_, i) => 1 - i / TRAIL);
+
 export function CursorSpotlight() {
-  const ref = useRef(null);
+  const refs = useRef([]);
 
   useEffect(() => {
     const fine =
       window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     if (!fine || prefersReducedMotion()) return undefined;
 
-    const el = ref.current;
-    if (!el) return undefined;
+    const nodes = refs.current.filter(Boolean);
+    if (nodes.length !== TRAIL) return undefined;
 
-    const RADIUS = 220;
-    // per frame, so the light lands roughly a fifth of a second after the
-    // pointer: far enough behind to be seen doing it, not so far that it feels
-    // detached from the hand moving it
-    const EASE = 0.075;
-
-    let targetX = 0;
-    let targetY = 0;
-    let x = 0;
-    let y = 0;
+    const pts = Array.from({ length: TRAIL }, () => ({ x: 0, y: 0 }));
+    let pointerX = 0;
+    let pointerY = 0;
     let placed = false;
     let raf = null;
 
     const handle = (e) => {
-      targetX = e.clientX;
-      targetY = e.clientY;
-      // the first move puts it under the pointer rather than letting it fly in
-      // from the top left corner of the page
+      pointerX = e.clientX;
+      pointerY = e.clientY;
+      // the first move drops the whole chain on the pointer, rather than
+      // letting it whip in from the corner of the page
       if (!placed) {
-        x = targetX;
-        y = targetY;
+        pts.forEach((p) => {
+          p.x = pointerX;
+          p.y = pointerY;
+        });
+        nodes.forEach((n, i) => {
+          n.style.opacity = String(fade[i]);
+        });
         placed = true;
-        el.style.opacity = "1";
       }
     };
 
     const tick = () => {
-      x += (targetX - x) * EASE;
-      y += (targetY - y) * EASE;
-      el.style.transform = `translate(${x - RADIUS}px, ${y - RADIUS}px)`;
+      let leadX = pointerX;
+      let leadY = pointerY;
+      for (let i = 0; i < TRAIL; i++) {
+        const p = pts[i];
+        p.x += (leadX - p.x) * EASE;
+        p.y += (leadY - p.y) * EASE;
+        const r = sizes[i] / 2;
+        nodes[i].style.transform = `translate(${p.x - r}px, ${p.y - r}px)`;
+        // the next link aims at where this one just landed, not at the pointer
+        leadX = p.x;
+        leadY = p.y;
+      }
       raf = requestAnimationFrame(tick);
     };
 
@@ -62,5 +83,22 @@ export function CursorSpotlight() {
     };
   }, []);
 
-  return <div ref={ref} className="cursor-spotlight" aria-hidden="true" />;
+  // Deliberately siblings and not wrapped in a div: an ancestor with an opacity
+  // below 1 would group them, and mix-blend-mode would then blend inside that
+  // group instead of against the page behind it.
+  return (
+    <>
+      {sizes.map((size, i) => (
+        <div
+          key={i}
+          ref={(el) => {
+            refs.current[i] = el;
+          }}
+          className="cursor-spotlight"
+          style={{ width: size, height: size }}
+          aria-hidden="true"
+        />
+      ))}
+    </>
+  );
 }
