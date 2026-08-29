@@ -112,7 +112,7 @@ export function Hero3D() {
 
     // Returns null on phones and for reduced-motion visitors, in which case the
     // scene falls back to a plain render below.
-    const post = createBloomComposer(renderer, scene, camera, { strength: 0.62, radius: 0.55, threshold: 0.5 });
+    const post = createBloomComposer(renderer, scene, camera, { strength: 0.75, radius: 0.55, threshold: 0.4 });
 
     function resize() {
       const w = container.clientWidth;

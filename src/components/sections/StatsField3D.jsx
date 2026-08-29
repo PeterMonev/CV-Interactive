@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { bloomSupported, createBloomComposer } from "../../utils/bloom.js";
 import { createNebulae } from "../../utils/nebula.js";
 import { createSpawn } from "../../utils/spawn.js";
 import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
@@ -33,7 +34,8 @@ export function StatsField3D({ stats }) {
     camera.position.set(0, 0, CAM_Z);
     camera.lookAt(0, 0, 0);
 
-    const renderer = createRenderer({ antialias: true, alpha: true });
+    const useBloom = bloomSupported();
+    const renderer = createRenderer({ antialias: true, alpha: true }, { toneMap: useBloom });
     if (!renderer) return retryScene(rebuildScene, { attempt: generation });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
@@ -41,6 +43,11 @@ export function StatsField3D({ stats }) {
     }
     container.appendChild(renderer.domElement);
     const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
+
+
+    // the label sprites are the brightest thing here, so the threshold sits above them
+
+    const post = createBloomComposer(renderer, scene, camera, { strength: 0.7, radius: 0.45, threshold: 0.4 });
 
     const nebulae = createNebulae(scene, { distance: 6.4 });
 
@@ -184,6 +191,8 @@ export function StatsField3D({ stats }) {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+
+      if (post) post.setSize(w, h);
       const halfH = Math.tan((FOV / 2) * (Math.PI / 180)) * CAM_Z;
       const halfW = halfH * camera.aspect;
       const widestLabel = markers.reduce((m, k) => Math.max(m, k.labelWidth), 0);
@@ -350,14 +359,18 @@ export function StatsField3D({ stats }) {
         coreGlow.material.opacity = 0.4 + Math.sin(t * 1.6) * 0.12;
         placeMarkers(t);
       }
-      renderer.render(scene, camera);
+      if (post) post.render();
+
+      else renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
     }
 
     let io = null;
     if (reduced) {
       placeMarkers(0);
-      renderer.render(scene, camera);
+      if (post) post.render();
+
+      else renderer.render(scene, camera);
     } else {
       io = new IntersectionObserver(
         (entries) => {
@@ -395,6 +408,8 @@ export function StatsField3D({ stats }) {
           obj.material.dispose();
         }
       });
+      if (post) post.dispose();
+
       renderer.dispose();
       if (renderer.domElement && renderer.domElement.parentNode) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);

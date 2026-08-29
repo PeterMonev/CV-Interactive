@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { bloomSupported, createBloomComposer } from "../../utils/bloom.js";
 import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
 import { makeGlowSpriteTexture } from "../../utils/canvasTextures.js";
@@ -32,7 +33,8 @@ export function Timeline3D({ count }) {
     camera.position.set(0, 0, camDist);
     camera.lookAt(0, 0, 0);
 
-    const renderer = createRenderer({ antialias: true, alpha: true });
+    const useBloom = bloomSupported();
+    const renderer = createRenderer({ antialias: true, alpha: true }, { toneMap: useBloom });
     if (!renderer) return retryScene(rebuildScene, { attempt: generation });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
@@ -40,6 +42,11 @@ export function Timeline3D({ count }) {
     }
     container.appendChild(renderer.domElement);
     const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
+
+
+    // the charge running along the tube is the point, and it should bleed
+
+    const post = createBloomComposer(renderer, scene, camera, { strength: 0.8, radius: 0.5, threshold: 0.4 });
 
     scene.add(new THREE.AmbientLight(0x40446a, 0.7));
     const point = new THREE.PointLight(0xffffff, 1.6, 12);
@@ -205,6 +212,8 @@ export function Timeline3D({ count }) {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+
+      if (post) post.setSize(w, h);
       const halfWidth = (TUBE_SPAN / 2) * camera.aspect;
       flowRadius = Math.max(0.05, halfWidth * 0.55);
     }
@@ -283,7 +292,10 @@ export function Timeline3D({ count }) {
       headSprite.position.copy(tmp);
       headSprite.material.opacity = fill > 0.004 && fill < 0.996 ? 0.85 : 0;
 
-      renderer.render(scene, camera);
+      if (post) post.render();
+
+
+      else renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
     }
 
@@ -293,7 +305,9 @@ export function Timeline3D({ count }) {
         node.core.material.emissiveIntensity = 1.4;
         node.halo.material.opacity = 0.6;
       });
-      renderer.render(scene, camera);
+      if (post) post.render();
+
+      else renderer.render(scene, camera);
     } else {
       io = new IntersectionObserver(
         (entries) => {
@@ -329,6 +343,8 @@ export function Timeline3D({ count }) {
         node.core.material.dispose();
         node.halo.material.dispose();
       });
+      if (post) post.dispose();
+
       renderer.dispose();
       if (renderer.domElement && renderer.domElement.parentNode) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);

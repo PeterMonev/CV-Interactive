@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { bloomSupported, createBloomComposer } from "../../utils/bloom.js";
 import { createNebulae } from "../../utils/nebula.js";
 import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
@@ -25,7 +26,8 @@ export function ContactOrb3D() {
     const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 50);
     camera.position.z = 6;
 
-    const renderer = createRenderer({ antialias: true, alpha: true });
+    const useBloom = bloomSupported();
+    const renderer = createRenderer({ antialias: true, alpha: true }, { toneMap: useBloom });
     if (!renderer) return retryScene(rebuildScene, { attempt: generation });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
@@ -33,6 +35,11 @@ export function ContactOrb3D() {
     }
     container.appendChild(renderer.domElement);
     const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
+
+
+    // the knot is wireframe on black, which is exactly what bloom is for
+
+    const post = createBloomComposer(renderer, scene, camera, { strength: 0.85, radius: 0.5, threshold: 0.4 });
 
     const nebulae = createNebulae(scene, { distance: 6 });
 
@@ -128,6 +135,8 @@ export function ContactOrb3D() {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+
+      if (post) post.setSize(w, h);
     }
     resize();
     window.addEventListener("resize", resize);
@@ -219,13 +228,18 @@ export function ContactOrb3D() {
         }
       }
 
-      renderer.render(scene, camera);
+      if (post) post.render();
+
+
+      else renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
     }
 
     let io = null;
     if (reduced) {
-      renderer.render(scene, camera);
+      if (post) post.render();
+
+      else renderer.render(scene, camera);
     } else {
       io = new IntersectionObserver(
         (entries) => {
@@ -260,6 +274,8 @@ export function ContactOrb3D() {
       burstMat.dispose();
       core.material.dispose();
       glowTexture.dispose();
+      if (post) post.dispose();
+
       renderer.dispose();
       if (renderer.domElement && renderer.domElement.parentNode) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);

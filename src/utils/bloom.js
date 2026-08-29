@@ -48,8 +48,16 @@ const RestoreAlphaShader = {
 };
 
 // Post-processing costs several extra full-screen passes every frame. Worth it
-// on a desktop for the two scenes that carry the page; not worth it on a phone,
-// and not wanted by anyone who asked for reduced motion.
+// on a desktop, where it is what separates light from bright lines on black;
+// not worth it on a phone, and not wanted by anyone who asked for reduced
+// motion.
+//
+// A warning for whoever tunes this next. The threshold is compared against the
+// tone-mapped output, and for this palette the cliff sits at about 0.42 —
+// measured, not guessed. Every scene here was originally set between 0.5 and
+// 0.68, which passes nothing whatsoever: the passes ran, the cost was paid,
+// and the render came out byte for byte identical to no bloom at all. If you
+// raise a threshold past 0.42 you have switched bloom off without removing it.
 export function bloomSupported() {
   if (typeof window === "undefined") return false;
   if (prefersReducedMotion()) return false;

@@ -215,7 +215,7 @@ export function CertificateCloud3D({ certs }) {
 
     // Returns null on phones and for reduced-motion visitors, in which case the
     // scene falls back to a plain render below.
-    const post = createBloomComposer(renderer, scene, camera, { strength: 0.45, radius: 0.45, threshold: 0.68 });
+    const post = createBloomComposer(renderer, scene, camera, { strength: 0.6, radius: 0.45, threshold: 0.4 });
 
     // A fixed camera distance only frames the cluster at the aspect ratio it was
     // chosen for. A wide desktop box shows 22 units across and the cluster needs

@@ -4,6 +4,7 @@ import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { tuneRenderer, tuneTexture, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
+import { bloomSupported, createBloomComposer } from "../../utils/bloom.js";
 import { createNebulae } from "../../utils/nebula.js";
 import { createSpawn } from "../../utils/spawn.js";
 import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
@@ -40,7 +41,8 @@ export function HologramViewer({ projects, activeIndex }) {
     camera.position.set(0, 0.15, 6.1);
     camera.lookAt(0, 0.1, 0);
 
-    const renderer = createRenderer({ antialias: true, alpha: true });
+    const useBloom = bloomSupported();
+    const renderer = createRenderer({ antialias: true, alpha: true }, { toneMap: useBloom });
     if (!renderer) return retryScene(rebuildScene, { attempt: generation });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     while (container.firstChild) {
@@ -48,6 +50,11 @@ export function HologramViewer({ projects, activeIndex }) {
     }
     container.appendChild(renderer.domElement);
     const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
+
+
+    // a high threshold on purpose: the screenshot must stay readable, only the rig around it glows
+
+    const post = createBloomComposer(renderer, scene, camera, { strength: 0.5, radius: 0.5, threshold: 0.4 });
 
     const nebulae = createNebulae(scene, { distance: 6.1, strength: 0.7 });
 
@@ -256,6 +263,8 @@ export function HologramViewer({ projects, activeIndex }) {
       camera.position.z = Math.max(BASE_DISTANCE, fitWidth);
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+
+      if (post) post.setSize(w, h);
       lineMaterials.forEach((m) => m.resolution.set(w, h));
     }
     resize();
@@ -379,13 +388,17 @@ export function HologramViewer({ projects, activeIndex }) {
         motePos.needsUpdate = true;
         moteMat.opacity = 0.45 + Math.sin(t * 1.6) * 0.12;
       }
-      renderer.render(scene, camera);
+      if (post) post.render();
+
+      else renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
     }
 
     let io = null;
     if (reduced) {
-      renderer.render(scene, camera);
+      if (post) post.render();
+
+      else renderer.render(scene, camera);
     } else {
       io = new IntersectionObserver(
         (entries) => {
@@ -423,6 +436,8 @@ export function HologramViewer({ projects, activeIndex }) {
         if (obj.geometry) obj.geometry.dispose();
         if (obj.material) obj.material.dispose();
       });
+      if (post) post.dispose();
+
       renderer.dispose();
       if (renderer.domElement && renderer.domElement.parentNode) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
