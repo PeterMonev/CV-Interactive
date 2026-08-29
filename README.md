@@ -2,7 +2,10 @@
 
 **Live:** https://peter-monev-cv-interactive.vercel.app/
 
-![The site](public/og-image.png)
+![A tour of the site](docs/demo.gif)
+
+<sub>Recorded from the running site — every scene above is WebGL, rendering
+live.</sub>
 
 A CV you can walk around in. Seven WebGL scenes, a working terminal, and a
 command palette — built with React 18, Three.js and Vite, in English and
