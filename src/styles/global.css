@@ -102,13 +102,38 @@
         pointer-events: none; z-index: 60; opacity: 0; transition: opacity 0.3s ease;
         will-change: transform;
       }
+      /* The button was a wireframe ring on nothing. Over the contact section,
+         where a torus knot fills the corner it sits in, it simply disappeared.
+         It now stands on a dark disc, and the halo is a blurred layer behind
+         rather than a fatter shadow — the same construction as the active
+         filter pill — so the glow can be soft without smearing the ring drawn
+         on top of it. The three colours are the ones the nebulae use, turning
+         slowly, which is what makes it read as lit rather than painted on. */
       .scroll-top-btn {
         position: fixed; bottom: 28px; right: 28px; z-index: 70;
         width: 58px; height: 58px; border-radius: 50%;
-        background: none; color: var(--cyan); border: none;
+        color: var(--cyan);
+        border: 1px solid rgba(0,229,255,0.3);
+        background: radial-gradient(circle at 50% 42%, rgba(0,229,255,0.16), rgba(139,92,246,0.12) 58%, rgba(10,14,26,0.9) 100%);
+        backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+        box-shadow: inset 0 0 20px -8px rgba(0,229,255,0.75);
         display: flex; align-items: center; justify-content: center;
         opacity: 0; pointer-events: none; transform: translateY(14px) scale(0.85);
-        transition: opacity 0.3s ease, transform 0.3s ease;
+        transition: opacity 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+      }
+      .scroll-top-btn::after {
+        content: ""; position: absolute; inset: -9px; border-radius: 50%;
+        z-index: -1; pointer-events: none;
+        background: conic-gradient(from 0deg, var(--cyan), var(--violet), var(--magenta), var(--cyan));
+        filter: blur(15px); opacity: 0.5;
+        animation: scrollTopHalo 16s linear infinite;
+        transition: opacity 0.3s ease;
+      }
+      .scroll-top-btn:hover { border-color: rgba(0,229,255,0.6); }
+      .scroll-top-btn:hover::after { opacity: 0.9; }
+      @keyframes scrollTopHalo { to { transform: rotate(1turn); } }
+      @media (prefers-reduced-motion: reduce) {
+        .scroll-top-btn::after { animation: none; }
       }
       .scroll-top-visible { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
       .scroll-top-3d { width: 42px; height: 42px; }
