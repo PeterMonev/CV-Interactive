@@ -4,6 +4,7 @@ import { Reveal } from "../ui/Reveal.jsx";
 import { ScrambleHeading } from "../ui/ScrambleHeading.jsx";
 import { ProjectFlipCard } from "./ProjectFlipCard.jsx";
 import { CaseStudy } from "./CaseStudy.jsx";
+import { CASE_STUDIES } from "../../data/caseStudy.js";
 import { GitHubActivity } from "./GitHubActivity.jsx";
 import { PROJECTS, FILTERS } from "../../data/projects.js";
 import { useLang } from "../../i18n/index.jsx";
@@ -50,9 +51,11 @@ export function Projects() {
         ))}
       </div>
 
-      <Reveal delay={120}>
-        <CaseStudy />
-      </Reveal>
+      {CASE_STUDIES.map((study, i) => (
+        <Reveal delay={120 + i * 60} key={study.project}>
+          <CaseStudy study={study} />
+        </Reveal>
+      ))}
     </section>
   );
 }

@@ -95,8 +95,6 @@ export const UI = {
       today: "today",
     },
     caseStudy: {
-      toggle: "How RehearsalHub is put together",
-      archCaption: "depends on ↓ — the domain at the bottom references nothing",
       tests: "Tests",
       whatIdChange: "What I would change",
       readSource: "Read the source",
@@ -242,8 +240,6 @@ export const UI = {
       today: "днес",
     },
     caseStudy: {
-      toggle: "Как е устроен RehearsalHub",
-      archCaption: "зависи от ↓ — домейнът най-долу не реферира нищо",
       tests: "Тестове",
       whatIdChange: "Какво бих променил",
       readSource: "Виж кода",
