@@ -40,6 +40,14 @@
       }
       .cv-root button { font-family: inherit; cursor: pointer; }
       body.cursor3d-active, body.cursor3d-active * { cursor: none !important; }
+      /* One exception, and it is not decoration. Aiming between two letters
+         needs a caret; a spinning solid cannot do it. More specific than the
+         blanket rule above, so it wins without turning the custom cursor off
+         anywhere else. Cursor3D hides its own shape over these at the same
+         time, so the two never appear together. */
+      body.cursor3d-active input:not([type="button"]):not([type="submit"]),
+      body.cursor3d-active textarea,
+      body.cursor3d-active [contenteditable="true"] { cursor: text !important; }
 
       /* Dragging over the email or the phone number to copy it is a thing a
          recruiter actually does, and until now it painted the browser default

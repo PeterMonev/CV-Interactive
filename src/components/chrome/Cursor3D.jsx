@@ -70,15 +70,40 @@ export function Cursor3D() {
     // cursor showing at all.
     document.body.classList.add("cursor3d-active");
 
+    // Replacing the native cursor threw away the two things it was actually
+    // telling people: this can be clicked, and this can be typed into. A
+    // shape that spins identically over a heading, a button and a text field
+    // is decoration standing where a signal used to be.
+    //
+    // Over anything clickable the octahedron opens and brightens. Over a text
+    // field it gets out of the way entirely and the real caret comes back —
+    // you cannot aim at a word with a spinning solid.
+    const CLICKABLE = 'a[href],button,[role="button"],summary,label[for],select,[tabindex="0"]';
+    const TYPEABLE = 'input:not([type="button"]):not([type="submit"]),textarea,[contenteditable="true"]';
+
+    let pressed = false;
+    let overText = false;
+    let targetScale = 1;
+    let targetOpacity = 0.9;
+
     function handleMove(e) {
       wrap.style.transform = `translate(${e.clientX - size / 2}px, ${e.clientY - size / 2}px)`;
-      wrap.style.opacity = "1";
+
+      const el = e.target instanceof Element ? e.target : null;
+      overText = !!(el && el.closest(TYPEABLE));
+      const clickable = !overText && !!(el && el.closest(CLICKABLE));
+
+      wrap.style.opacity = overText ? "0" : "1";
+      targetScale = (clickable ? 1.55 : 1) * (pressed ? 0.75 : 1);
+      targetOpacity = clickable ? 1 : 0.9;
     }
     function handleDown() {
-      shape.scale.set(0.75, 0.75, 0.75);
+      pressed = true;
+      targetScale *= 0.75;
     }
     function handleUp() {
-      shape.scale.set(1, 1, 1);
+      pressed = false;
+      targetScale /= 0.75;
     }
     window.addEventListener("mousemove", handleMove);
     window.addEventListener("mousedown", handleDown);
@@ -88,6 +113,11 @@ export function Cursor3D() {
     function animate() {
       shape.rotation.x += 0.018;
       shape.rotation.y += 0.024;
+      // eased rather than set: the shape should arrive at the new size, not
+      // jump to it, or crossing a row of links reads as a flicker
+      const s = shape.scale.x + (targetScale - shape.scale.x) * 0.2;
+      shape.scale.set(s, s, s);
+      mat.opacity += (targetOpacity - mat.opacity) * 0.2;
       renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
     }
