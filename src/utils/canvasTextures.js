@@ -96,6 +96,45 @@ export function makeNebulaTexture(seed = 1) {
     ctx.fillRect(0, 0, W, H);
   }
 
+  // A second, finer scatter over the top. Forty-six blobs a hundred texels
+  // across average each other out into one smooth swell — which is why this
+  // read as a smudge rather than a cloud however it was coloured. Structure
+  // needs detail at a scale the big shapes cannot cancel.
+  for (let i = 0; i < 110; i++) {
+    const t = rand();
+    const x = W * (0.5 + (t - 0.5) * (0.5 + rand() * 0.8));
+    const y = H * (0.5 + (rand() - 0.5) * 0.5);
+    const spread = 1 - Math.abs(x / W - 0.5) * 1.7;
+    const radius = (7 + rand() * 26) * DETAIL * Math.max(0.3, spread);
+    const alpha = (0.05 + rand() * 0.12) * Math.max(0.2, spread);
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    grad.addColorStop(0, `rgba(255,255,255,${alpha})`);
+    grad.addColorStop(0.45, `rgba(255,255,255,${alpha * 0.45})`);
+    grad.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // Dust lanes. What makes the Milky Way look like the Milky Way is not the
+  // light, it is the dark cutting across it. These are bitten out of the
+  // alpha, so with additive blending they read as the cloud thinning rather
+  // than as grey paint over it.
+  ctx.globalCompositeOperation = "destination-out";
+  for (let i = 0; i < 3; i++) {
+    ctx.save();
+    ctx.translate(W * (0.25 + rand() * 0.5), H * (0.3 + rand() * 0.4));
+    ctx.rotate((rand() - 0.5) * 0.7);
+    ctx.scale(1, 0.1 + rand() * 0.1);
+    const r = (95 + rand() * 130) * DETAIL;
+    const lane = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+    lane.addColorStop(0, `rgba(0,0,0,${0.45 + rand() * 0.3})`);
+    lane.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = lane;
+    ctx.fillRect(-r, -r, r * 2, r * 2);
+    ctx.restore();
+  }
+  ctx.globalCompositeOperation = "source-over";
+
   // Two things had to be cleaned off this before it stopped showing its own
   // outline on a dark panel.
   //
