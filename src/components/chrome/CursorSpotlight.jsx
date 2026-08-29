@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { prefersReducedMotion } from "../../utils/motion.js";
+import { aimAt, stepAccent } from "../../utils/cursorAccent.js";
 
 // A trail of light dragged along behind the pointer.
 //
@@ -49,6 +50,7 @@ export function CursorSpotlight() {
     const handle = (e) => {
       pointerX = e.clientX;
       pointerY = e.clientY;
+      aimAt(e.target instanceof Element ? e.target : null);
       // the first move fills the whole history with one point, so the tail
       // grows out of the pointer rather than whipping in from the corner
       if (!placed) {
@@ -64,6 +66,7 @@ export function CursorSpotlight() {
     };
 
     const tick = () => {
+      stepAccent();
       head = (head + 1) % DEPTH;
       hist[head * 2] = pointerX;
       hist[head * 2 + 1] = pointerY;

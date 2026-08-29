@@ -108,13 +108,19 @@
          drives the position on an animation frame. */
       .cursor-spotlight {
         position: fixed; top: 0; left: 0; border-radius: 50%;
-        background: radial-gradient(circle, rgba(0,229,255,0.048), rgba(139,92,246,0.024) 45%, transparent 72%);
+        background: radial-gradient(circle, rgba(var(--cursor-accent-rgb, 0, 229, 255), 0.048), rgba(var(--cursor-accent-rgb, 0, 229, 255), 0.024) 45%, transparent 72%);
         pointer-events: none; z-index: 1; opacity: 0; transition: opacity 0.4s ease;
         mix-blend-mode: screen; will-change: transform;
       }
+      /* Above everything, without exception. This stands in for the pointer
+         the operating system would be drawing, and the operating system draws
+         it over every window there is — so anything that paints on top of it
+         is a bug, not a layering choice. At 60 it went under the scroll-top
+         button, the command palette and the boot screen; 400 clears the
+         highest thing on the page with room to spare. */
       .cursor-3d-wrap {
         position: fixed; top: 0; left: 0; width: 46px; height: 46px;
-        pointer-events: none; z-index: 60; opacity: 0; transition: opacity 0.3s ease;
+        pointer-events: none; z-index: 400; opacity: 0; transition: opacity 0.3s ease;
         will-change: transform;
       }
       /* The button was a wireframe ring on nothing. Over the contact section,

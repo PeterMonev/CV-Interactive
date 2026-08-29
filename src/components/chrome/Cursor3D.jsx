@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { tuneRenderer, guardContext, createRenderer, retryScene } from "../../utils/gfx.js";
 import { useSceneGeneration } from "../../hooks/useSceneGeneration.js";
 import { prefersReducedMotion } from "../../utils/motion.js";
+import { currentAccent } from "../../utils/cursorAccent.js";
 
 export function Cursor3D() {
   const wrapRef = useRef(null);
@@ -80,11 +81,24 @@ export function Cursor3D() {
     // you cannot aim at a word with a spinning solid.
     const CLICKABLE = 'a[href],button,[role="button"],summary,label[for],select,[tabindex="0"]';
     const TYPEABLE = 'input:not([type="button"]):not([type="submit"]),textarea,[contenteditable="true"]';
+    // The four scenes that turn when you hold and drag them. Nothing on a
+    // desktop says so except one line of text under some of them, so the
+    // cursor says it instead — by doing the thing itself. Over these it stops
+    // tumbling and turns steadily about the upright axis, which is the exact
+    // motion a drag produces.
+    const SPINNABLE = '.stats-3d,.cert-3d,.hologram-viewer,.galaxy-3d';
+
+    const IDLE_SPIN_X = 0.018;
+    const IDLE_SPIN_Y = 0.024;
 
     let pressed = false;
     let overText = false;
     let targetScale = 1;
     let targetOpacity = 0.9;
+    let spinX = IDLE_SPIN_X;
+    let spinY = IDLE_SPIN_Y;
+    let targetSpinX = IDLE_SPIN_X;
+    let targetSpinY = IDLE_SPIN_Y;
 
     function handleMove(e) {
       wrap.style.transform = `translate(${e.clientX - size / 2}px, ${e.clientY - size / 2}px)`;
@@ -93,9 +107,15 @@ export function Cursor3D() {
       overText = !!(el && el.closest(TYPEABLE));
       const clickable = !overText && !!(el && el.closest(CLICKABLE));
 
+      // clickable wins over spinnable: a real button sitting on top of a
+      // scene should read as a button, not as something to drag
+      const spinnable = !overText && !clickable && !!(el && el.closest(SPINNABLE));
+
       wrap.style.opacity = overText ? "0" : "1";
-      targetScale = (clickable ? 1.55 : 1) * (pressed ? 0.75 : 1);
-      targetOpacity = clickable ? 1 : 0.9;
+      targetScale = (clickable ? 1.55 : spinnable ? 1.3 : 1) * (pressed ? 0.75 : 1);
+      targetOpacity = clickable || spinnable ? 1 : 0.9;
+      targetSpinX = spinnable ? 0.002 : IDLE_SPIN_X;
+      targetSpinY = spinnable ? 0.075 : IDLE_SPIN_Y;
     }
     function handleDown() {
       pressed = true;
@@ -111,13 +131,19 @@ export function Cursor3D() {
 
     let raf = null;
     function animate() {
-      shape.rotation.x += 0.018;
-      shape.rotation.y += 0.024;
+      spinX += (targetSpinX - spinX) * 0.1;
+      spinY += (targetSpinY - spinY) * 0.1;
+      shape.rotation.x += spinX;
+      shape.rotation.y += spinY;
       // eased rather than set: the shape should arrive at the new size, not
       // jump to it, or crossing a row of links reads as a flicker
       const s = shape.scale.x + (targetScale - shape.scale.x) * 0.2;
       shape.scale.set(s, s, s);
       mat.opacity += (targetOpacity - mat.opacity) * 0.2;
+      // sRGB on purpose: the constructor read 0x00e5ff as sRGB, so raw
+      // channels here would land a visibly different colour
+      const [ar, ag, ab] = currentAccent();
+      mat.color.setRGB(ar / 255, ag / 255, ab / 255, THREE.SRGBColorSpace);
       renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
     }
