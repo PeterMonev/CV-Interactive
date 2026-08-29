@@ -46,7 +46,7 @@ export function Timeline3D({ count }) {
 
     // the charge running along the tube is the point, and it should bleed
 
-    const post = createBloomComposer(renderer, scene, camera, { strength: 0.8, radius: 0.5, threshold: 0.4 });
+    const post = createBloomComposer(renderer, scene, camera, { strength: 0.6, radius: 0.5, threshold: 0.4 });
 
     scene.add(new THREE.AmbientLight(0x40446a, 0.7));
     const point = new THREE.PointLight(0xffffff, 1.6, 12);

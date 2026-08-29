@@ -47,7 +47,7 @@ export function StatsField3D({ stats }) {
 
     // the label sprites are the brightest thing here, so the threshold sits above them
 
-    const post = createBloomComposer(renderer, scene, camera, { strength: 0.7, radius: 0.45, threshold: 0.4 });
+    const post = createBloomComposer(renderer, scene, camera, { strength: 0.5, radius: 0.45, threshold: 0.4 });
 
     const nebulae = createNebulae(scene, { distance: 6.4 });
 

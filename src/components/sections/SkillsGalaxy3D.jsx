@@ -50,7 +50,7 @@ export function SkillsGalaxy3D({ onSelect }) {
 
     // the sun is already blinding, so only it and the rims are let through
 
-    const post = createBloomComposer(renderer, scene, camera, { strength: 0.6, radius: 0.5, threshold: 0.4 });
+    const post = createBloomComposer(renderer, scene, camera, { strength: 0.45, radius: 0.5, threshold: 0.4 });
 
     // lighting — the sun core is the actual light source, so the planets
     // pick up real shading instead of looking like flat colored dots

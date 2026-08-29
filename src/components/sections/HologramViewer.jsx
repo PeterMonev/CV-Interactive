@@ -52,9 +52,27 @@ export function HologramViewer({ projects, activeIndex }) {
     const unguardContext = guardContext(renderer, rebuildScene, { attempt: generation });
 
 
-    // a high threshold on purpose: the screenshot must stay readable, only the rig around it glows
+    // No bloom here, deliberately. Every other scene is neon lines on black,
 
-    const post = createBloomComposer(renderer, scene, camera, { strength: 0.5, radius: 0.5, threshold: 0.4 });
+
+
+    // which is what bloom is for. This one projects a photograph — a
+
+
+
+    // screenshot of a real page, mostly white — and bloom cannot tell a
+
+
+
+    // bright subject from a light source. It burned the projection out to a
+
+
+
+    // flat white slab with nothing readable left on it.
+
+
+
+    const post = null;
 
     const nebulae = createNebulae(scene, { distance: 6.1, strength: 0.7 });
 
