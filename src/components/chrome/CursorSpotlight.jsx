@@ -10,16 +10,23 @@ import { prefersReducedMotion } from "../../utils/motion.js";
 // tapering line pointing back the way the hand came.
 //
 // Each is dimmer and smaller than the one ahead of it, and the gradient itself
-// is faint precisely because seven of them add up — the brightness you see is
+// is faint precisely because twelve of them add up — the brightness you see is
 // the stack, not any one circle.
 
-const TRAIL = 7;
+// Twelve rather than seven, and each chasing more slowly. Seven links at a
+// quarter of the gap per frame sat only 40px apart while each was 440px
+// wide — a tenth of their own size, so they simply piled up and the whole
+// thing read as one blob that was late. Length has to be large next to the
+// size of the lights for a chain of them to look like a chain.
+const TRAIL = 12;
 // per frame, per link. Larger snaps the chain tight; smaller lets it string
-// out further behind and take longer to gather back up.
-const EASE = 0.25;
+// out further behind and take longer to gather back up. At 0.18 the trail
+// runs about 730px behind an ordinary sweep of the hand and takes a little
+// over two seconds to pool back together once the pointer stops.
+const EASE = 0.18;
 
-const HEAD = 440;
-const TAPER = 40; // px smaller per link
+const HEAD = 420;
+const TAPER = 26; // px smaller per link
 
 const sizes = Array.from({ length: TRAIL }, (_, i) => HEAD - i * TAPER);
 const fade = Array.from({ length: TRAIL }, (_, i) => 1 - i / TRAIL);
