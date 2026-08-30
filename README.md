@@ -2,10 +2,13 @@
 
 **Live:** https://peter-monev-cv-interactive.vercel.app/
 
+![Peter Monev — Junior Full-Stack Web Developer](public/og-image.png)
+
 ![A tour of the site](docs/demo.gif)
 
-<sub>Recorded from the running site — every scene above is WebGL, rendering
-live.</sub>
+<sub>The tour was recorded from the running site. Every scene in it is WebGL,
+rendering live — the banding is the GIF format, which holds 256 colours, not
+the page.</sub>
 
 A CV you can walk around in. Seven WebGL scenes, a working terminal, and a
 command palette — built with React 18, Three.js and Vite, in English and
