@@ -9,7 +9,7 @@
 // precise-looking number that is wrong.
 
 const USER = "PeterMonev";
-const CACHE_KEY = "gh-activity-v2";
+const CACHE_KEY = "gh-activity-v3";
 const CACHE_TTL = 30 * 60 * 1000;
 export const ACTIVITY_DAYS = 30;
 
@@ -101,9 +101,61 @@ function summarise(events) {
   };
 }
 
+// The calendar comes through our own function (api/github.js) because
+// github.com sends no CORS headers. It is the source of truth for the count;
+// the events feed is kept only as a fallback for when the function is not
+// there, which is always the case under vite dev.
+async function fromCalendar() {
+  const res = await fetch("/api/github");
+  if (!res.ok) throw new Error(`calendar ${res.status}`);
+  const body = await res.json();
+  if (!body.ok) throw new Error("calendar empty");
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days = [];
+  let total = 0;
+  for (let i = ACTIVITY_DAYS - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = dayKey(d);
+    const n = body.days[key] || 0;
+    days.push({ date: key, pushes: n });
+    total += n;
+  }
+
+  // Repository names and the time of the last push come from the repos list,
+  // which, unlike the events feed, is current to the minute.
+  let repos = [];
+  let lastPush = null;
+  try {
+    const r = await fetch(
+      `https://api.github.com/users/${USER}/repos?sort=pushed&per_page=6`,
+      { headers: { Accept: "application/vnd.github+json" } }
+    );
+    if (r.ok) {
+      const list = (await r.json()).filter((x) => x.name !== USER);
+      repos = list.slice(0, 3).map((x) => x.name);
+      lastPush = list[0]?.pushed_at || null;
+    }
+  } catch (err) {
+    /* the count stands on its own without the names */
+  }
+
+  return { days, pushes: total, lastPush, repos };
+}
+
 export async function fetchActivity() {
   const cached = readCache();
   if (cached) return cached;
+
+  try {
+    const data = await fromCalendar();
+    writeCache(data);
+    return data;
+  } catch (err) {
+    /* fall through to the events feed */
+  }
 
   const res = await fetch(
     `https://api.github.com/users/${USER}/events/public?per_page=100`,

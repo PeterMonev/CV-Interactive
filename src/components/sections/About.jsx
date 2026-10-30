@@ -6,6 +6,7 @@ import { MatrixRain } from "../chrome/MatrixRain.jsx";
 import { StatsField3D } from "../ui/lazy3d.js";
 import { PHOTO_SRC } from "../../data/photo.js";
 import { STATS_3D_DATA } from "../../data/stats3d.js";
+import { COUNTS } from "../../data/counts.js";
 import { useLang } from "../../i18n/index.jsx";
 import { useParallax } from "../../hooks/useScrollFx.js";
 
@@ -43,10 +44,10 @@ export function About() {
 
           <div className="stats">
             {[
-              { to: 5, label: t("about.stats.projects") },
-              { to: 3, label: t("about.stats.languages") },
-              { to: 5, label: t("about.stats.databases") },
-              { to: 16, label: t("about.stats.certificates") },
+              { to: COUNTS.projects, label: t("about.stats.projects") },
+              { to: COUNTS.languages, label: t("about.stats.languages") },
+              { to: COUNTS.databases, label: t("about.stats.databases") },
+              { to: COUNTS.certificates, label: t("about.stats.certificates") },
             ].map((s, i) => (
               <Reveal delay={i * 80} key={s.label}>
                 <div
