@@ -12,7 +12,7 @@ export const CODE_TOKENS = [
   { t: ",\n", c: "pl" },
   { t: "  stack", c: "key" },
   { t: ": ", c: "pl" },
-  { t: "['JavaScript', 'C#', 'PHP']", c: "str" },
+  { t: "['JavaScript', 'TypeScript', 'C#', 'PHP']", c: "str" },
   { t: ",\n", c: "pl" },
   { t: "  base", c: "key" },
   { t: ": ", c: "pl" },

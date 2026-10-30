@@ -45,6 +45,19 @@ function dayKey(date) {
   return `${y}-${m}-${d}`;
 }
 
+// Pushes alone undercount badly. Work that goes through pull requests and
+// issues never shows up as a PushEvent — a month of it read as 9 pushes
+// against 62 events in the feed. These are the event types that are work;
+// forks and stars are left out because they are not.
+const WORK = new Set([
+  "PushEvent",
+  "PullRequestEvent",
+  "PullRequestReviewEvent",
+  "IssuesEvent",
+  "IssueCommentEvent",
+  "CreateEvent",
+]);
+
 function summarise(events) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -65,7 +78,7 @@ function summarise(events) {
   let latest = null;
 
   for (const e of events) {
-    if (e.type !== "PushEvent") continue;
+    if (!WORK.has(e.type)) continue;
     const when = new Date(e.created_at);
     if (!latest || when > latest) latest = when;
     const cell = index.get(dayKey(when));

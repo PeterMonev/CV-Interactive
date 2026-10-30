@@ -87,9 +87,9 @@ export const UI = {
     },
     github: {
       title: "Recent GitHub activity",
-      pushes: "pushes",
+      pushes: "contributions",
       inDays: "in the last {n} days",
-      last: "last push",
+      last: "last activity",
       recently: "Recently:",
       daysAgo: "{n} days ago",
       today: "today",
@@ -232,7 +232,7 @@ export const UI = {
     },
     github: {
       title: "Скорошна активност в GitHub",
-      pushes: "качвания",
+      pushes: "приноса",
       inDays: "за последните {n} дни",
       last: "последно",
       recently: "Наскоро:",
