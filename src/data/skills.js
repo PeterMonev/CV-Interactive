@@ -1,5 +1,5 @@
 export const SKILLS = [
-  { group: "Languages", items: ["JavaScript", "PHP", "C#"] },
+  { group: "Languages", items: ["JavaScript", "TypeScript", "PHP", "C#"] },
   {
     group: "Frameworks & Libraries",
     items: ["React", "Express.js", "Laravel", "Bootstrap", "ASP.NET Core"],
@@ -13,7 +13,10 @@ export const SKILLS = [
     group: "Databases",
     items: ["MySQL", "MariaDB", "MongoDB", "MSSQL", "PostgreSQL"],
   },
-  { group: "Tools", items: ["Git", "GitHub", "Selenium"] },
+  {
+    group: "Tools",
+    items: ["Git", "GitHub", "Selenium", "GitHub Actions", "Jenkins", "CI/CD"],
+  },
 ];
 
 // Domain-based regrouping for the 3D galaxy view: the "Chips" view mirrors the
@@ -23,7 +26,7 @@ export const SKILLS = [
 // more fairly than the resume's original "Frameworks & Libraries" bucket.
 
 export const RADAR_DOMAINS = [
-  { category: "Languages", color: "#8b5cf6", items: ["JavaScript", "PHP", "C#"] },
+  { category: "Languages", color: "#8b5cf6", items: ["JavaScript", "TypeScript", "PHP", "C#"] },
   {
     category: "Frontend",
     color: "#00e5ff",
@@ -39,6 +42,10 @@ export const RADAR_DOMAINS = [
     color: "#5eead4",
     items: ["MySQL", "MariaDB", "MongoDB", "MSSQL", "PostgreSQL"],
   },
-  { category: "Tools", color: "#fbbf24", items: ["Git", "GitHub", "Selenium"] },
+  {
+    category: "Tools",
+    color: "#fbbf24",
+    items: ["Git", "GitHub", "Selenium", "GitHub Actions", "Jenkins", "CI/CD"],
+  },
 ];
 

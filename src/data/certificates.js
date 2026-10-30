@@ -8,6 +8,10 @@
 // no room for. C#/.NET track first, then the JavaScript track, newest first.
 export const CERT_DATA = [
   {
+    name: "Software Engineering and DevOps",
+    url: "https://softuni.bg/certificates/details/266665/6e758699",
+  },
+  {
     name: "Back-End Software Engineer with C# — Diploma",
     url: "https://softuni.bg/certificates/details/264915/b96c2ed6",
   },

@@ -55,7 +55,7 @@ export const UI = {
     },
     certificates: {
       eyebrow: "Certificates",
-      heading: "Sixteen credentials, one orbit.",
+      heading: "Seventeen credentials, one orbit.",
       lead3d: "Drag to spin the cluster, click or tap a badge to open its SoftUni credential.",
       leadList: "Every credential, verifiable at the source — each card links to its SoftUni page.",
       view3d: "3D Orbit",
@@ -200,7 +200,7 @@ export const UI = {
     },
     certificates: {
       eyebrow: "Сертификати",
-      heading: "Шестнайсет документа, една орбита.",
+      heading: "Седемнайсет документа, една орбита.",
       lead3d: "Завърти облака с мишка или пръст, натисни значка, за да отвориш сертификата в SoftUni.",
       leadList: "Всеки документ е проверим в източника — картите водят към страницата му в SoftUni.",
       view3d: "3D орбита",

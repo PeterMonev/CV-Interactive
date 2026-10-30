@@ -54,7 +54,7 @@ export function Certificates() {
   // The orbit opens by default on a screen with room for it, the list on one
   // without. Measured on a 402px phone a badge lands 47 pixels across, and on
   // an 834px tablet 58 — about seven pixels of letter height either way.
-  // Sixteen credentials cannot be
+  // Seventeen credentials cannot be
   // read at that size no matter how they are lit, and the list view is the
   // form that was built for it. The toggle still offers the orbit.
   const [certView, setCertView] = useState(() =>
