@@ -48,4 +48,20 @@ export const EXPERIENCE = [
       },
     ],
   },
+  {
+    role: { en: "Freelance Web Developer", bg: "Freelance уеб разработчик" },
+    company: { en: "Self-employed", bg: "На свободна практика" },
+    period: { en: "Jan 2026 — Present", bg: "яну 2026 — сега" },
+    location: { en: "Remote", bg: "Дистанционно" },
+    bullets: [
+      {
+        en: "Building websites and web applications for clients end to end, from the first brief to deployment",
+        bg: "Изграждам сайтове и уеб приложения за клиенти от край до край — от първия разговор до пускането им",
+      },
+      {
+        en: "Choosing the stack to fit each project and staying with it after launch for changes and support",
+        bg: "Избирам технологиите според проекта и оставам с него и след пускането — за промени и поддръжка",
+      },
+    ],
+  },
 ];

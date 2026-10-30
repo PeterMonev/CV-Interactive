@@ -9,7 +9,7 @@
 // precise-looking number that is wrong.
 
 const USER = "PeterMonev";
-const CACHE_KEY = "gh-activity";
+const CACHE_KEY = "gh-activity-v2";
 const CACHE_TTL = 30 * 60 * 1000;
 export const ACTIVITY_DAYS = 30;
 
